@@ -2,3 +2,6 @@ numpy==1.26.4
 setuptools
 wandb
 pretty_midi
+miditok
+miditoolkit
+symusic
