@@ -5,3 +5,8 @@ pretty_midi
 miditok
 miditoolkit
 symusic
+mido
+torch
+transformers
+fastprogress
+python-dotenv
