@@ -10,6 +10,9 @@ class MAESTRO(Dataset):
         self.filepaths = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith(".npy")]
         self.sequences = []
 
+        self.filepaths = self.filepaths[:10]  # debugging
+
+        print("Loading", len(self.filepaths), "files")
         for path in self.filepaths:
             ids = np.load(path)
             # Drop short sequences
