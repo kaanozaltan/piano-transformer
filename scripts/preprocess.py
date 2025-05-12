@@ -14,7 +14,7 @@ for midi_path in glob.glob(os.path.join(midi_root, "**", "*.midi"), recursive=Tr
     out_path = os.path.join(token_dir, filename)
     if not os.path.exists(out_path):
         try:
-            tokenize(midi_path, out_path)
+            tokenize(midi_path, out_path)  # Can also be tokenize_remi or tokenize_midilike
             print(f"Tokenized: {filename}")
         except Exception as e:
             print(f"Failed to tokenize {filename}: {e}")

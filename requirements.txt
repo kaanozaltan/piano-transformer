@@ -12,3 +12,5 @@ fastprogress
 python-dotenv
 evaluate
 scikit-learn
+ipykernel
+scipy

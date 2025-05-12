@@ -1,49 +1,85 @@
 import os
+import json
 import numpy as np
-from collections import Counter
-import torch
+from scipy.stats import gaussian_kde
+from scipy.special import rel_entr
 
 
-def load_token_counts_from_dir(directory):
-    counter = Counter()
-    for filename in os.listdir(directory):
-        if filename.endswith(".npy"):
-            ids = np.load(os.path.join(directory, filename))
-            counter.update(ids.tolist())
-    return counter
+# May have to change this for different tokenizers
+def extract_features(directory, features=("pitch", "duration", "velocity")):
+    pitch_vals = []
+    duration_vals = []
+    velocity_vals = []
+
+    for file in os.listdir(directory):
+        if not file.endswith(".json"):
+            continue
+
+        with open(os.path.join(directory, file), "r") as f:
+            tokens = json.load(f)
+
+        for tok in tokens:
+            if "pitch" in features and ("NOTE_ON_" in tok or "Note-On_" in tok):
+                try:
+                    pitch_vals.append(int(tok.split("_")[-1]))
+                except:
+                    continue
+
+            if "duration" in features and ("TIME_SHIFT_" in tok or "Duration_" in tok):
+                try:
+                    dur = int(tok.split("_")[-1].replace(".", ""))
+                    duration_vals.append(dur)
+                except:
+                    continue
+
+            if "velocity" in features and ("SET_VELOCITY_" in tok or "Velocity_" in tok):
+                try:
+                    velocity_vals.append(int(tok.split("_")[-1]))
+                except:
+                    continue
+
+    return {
+        "pitch": pitch_vals,
+        "duration": duration_vals,
+        "velocity": velocity_vals
+    }
 
 
-def normalize_counter(counter, vocab_size):
-    dist = np.zeros(vocab_size, dtype=np.float64)
-    total = sum(counter.values())
-    for idx, count in counter.items():
-        dist[idx] = count / total
-    return dist
+def compute_pdf(values, num_points=1000):
+    values = np.array(values).astype(np.float64)
+    if len(np.unique(values)) < 2:
+        return None  # Cannot build KDE from constant data
+    
+    kde = gaussian_kde(values)
+    x = np.linspace(np.min(values), np.max(values), num_points)
+    pdf = kde.evaluate(x)
+    pdf /= np.sum(pdf)  # Normalize
+    return pdf
 
 
-def kl_divergence(p, q):
-    p = torch.tensor(p, dtype=torch.float32)
-    q = torch.tensor(q, dtype=torch.float32)
-    return torch.nn.functional.kl_div(torch.log(q + 1e-12), p, reduction='sum').item()
+def compute_kld(p, q, epsilon=1e-10):
+    p = np.array(p) + epsilon
+    q = np.array(q) + epsilon
+    p /= np.sum(p)
+    q /= np.sum(q)
+    return np.sum(rel_entr(p, q))
 
 
-def js_divergence(p, q):
-    p = torch.tensor(p, dtype=torch.float32)
-    q = torch.tensor(q, dtype=torch.float32)
-    m = 0.5 * (p + q)
-    kl_pm = torch.nn.functional.kl_div(torch.log(m + 1e-12), p, reduction='sum')
-    kl_qm = torch.nn.functional.kl_div(torch.log(m + 1e-12), q, reduction='sum')
-    return 0.5 * (kl_pm + kl_qm).item()
+def dirs_kld(ref_dir, gen_dir, feature="pitch"):
+    ref_feats = extract_features(ref_dir, features=(feature,))
+    gen_feats = extract_features(gen_dir, features=(feature,))
 
+    ref_vals = ref_feats.get(feature, [])
+    gen_vals = gen_feats.get(feature, [])
 
-def compare_distributions(test_dir, gen_dir, vocab_size):
-    real_counts = load_token_counts_from_dir(test_dir)
-    gen_counts = load_token_counts_from_dir(gen_dir)
+    # Not enough data
+    if len(ref_vals) < 2 or len(gen_vals) < 2:
+        return None
 
-    p_real = normalize_counter(real_counts, vocab_size)
-    p_gen = normalize_counter(gen_counts, vocab_size)
+    ref_pdf = compute_pdf(ref_vals)
+    gen_pdf = compute_pdf(gen_vals)
 
-    kl = kl_divergence(p_real, p_gen)
-    js = js_divergence(p_real, p_gen)
+    if ref_pdf is None or gen_pdf is None or len(ref_pdf) != len(gen_pdf):
+        return None
 
-    return {"kl_divergence": kl, "js_divergence": js}
+    return compute_kld(ref_pdf, gen_pdf)

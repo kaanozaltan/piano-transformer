@@ -3,8 +3,9 @@ import numpy as np
 import json
 import os
 import pickle
+from miditok import REMI, MIDILike
+from miditoolkit import MidiFile
 
-# Define velocity bins (32 levels between 1 and 127)
 VELOCITY_BINS = np.linspace(1, 127, 32, dtype=int)
 
 
@@ -19,9 +20,9 @@ def quantize_time_shift(ms):
     return f"TIME_SHIFT_{steps[idx]}"
 
 
-def tokenize(input_path, output_path):
+def tokenize(input_path, output_path, save=True):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    midi = pretty_midi.PrettyMIDI(str(input_path))  # Cast just in case
+    midi = pretty_midi.PrettyMIDI(str(input_path))
 
     events = []
 
@@ -52,8 +53,35 @@ def tokenize(input_path, output_path):
 
             prev_time = note.start
 
-    with open(output_path, "w") as f:
-        json.dump(events, f)
+    if save:
+        with open(output_path, "w") as f:
+            json.dump(events, f)
+        
+    return events
+
+
+def tokenize_remi(input_path, output_path, save=True):
+    tokenizer = REMI()
+    midi = MidiFile(input_path)
+    tokens = tokenizer(midi)
+    if save:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        with open(output_path, "w") as f:
+            json.dump(tokens[0].tokens, f)
+    else:
+        return tokens[0].tokens
+
+
+def tokenize_midilike(input_path, output_path, save=True):
+    tokenizer = MIDILike()
+    midi = MidiFile(input_path)
+    tokens = tokenizer(midi)
+    if save:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        with open(output_path, "w") as f:
+            json.dump(tokens[0].tokens, f)
+    else:
+        return tokens[0].tokens
 
 
 def build_vocabulary(input_path, output_path):

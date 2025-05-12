@@ -24,7 +24,7 @@ def train():
     }
 
     wandb.init(
-        project="music-transformer",
+        project="piano-transformer",
         name=(
             f"{config['model'].lower()}_"
             f"d{config['dim']}_"
