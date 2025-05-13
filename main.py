@@ -1,5 +1,7 @@
 from utils import metrics
 
 
-kld = metrics.dirs_kld("data/debug_1", "data/debug_2", feature="pitch")
-print("KLD (pitch):", kld)
+kld_val = metrics.compare("data/debug_1", "data/debug_2", metric=metrics.kld, feature="pitch")
+oa_val = metrics.compare("data/debug_1", "data/debug_2", metric=metrics.oa, feature="pitch")
+print("KLD (pitch):", kld_val)
+print("OA (pitch):", oa_val)

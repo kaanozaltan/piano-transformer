@@ -57,7 +57,8 @@ def compute_pdf(values, num_points=1000):
     return pdf
 
 
-def compute_kld(p, q, epsilon=1e-10):
+# Kullback-Leibler Divergence
+def kld(p, q, epsilon=1e-10):
     p = np.array(p) + epsilon
     q = np.array(q) + epsilon
     p /= np.sum(p)
@@ -65,7 +66,16 @@ def compute_kld(p, q, epsilon=1e-10):
     return np.sum(rel_entr(p, q))
 
 
-def dirs_kld(ref_dir, gen_dir, feature="pitch"):
+# Overlapping Area
+def oa(p, q):
+    p = np.asarray(p)
+    q = np.asarray(q)
+    p /= np.sum(p)
+    q /= np.sum(q)
+    return np.sum(np.minimum(p, q))
+
+
+def compare(ref_dir, gen_dir, metric, feature="pitch"):
     ref_feats = extract_features(ref_dir, features=(feature,))
     gen_feats = extract_features(gen_dir, features=(feature,))
 
@@ -82,4 +92,4 @@ def dirs_kld(ref_dir, gen_dir, feature="pitch"):
     if ref_pdf is None or gen_pdf is None or len(ref_pdf) != len(gen_pdf):
         return None
 
-    return compute_kld(ref_pdf, gen_pdf)
+    return metric(ref_pdf, gen_pdf)
