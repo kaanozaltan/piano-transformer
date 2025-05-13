@@ -10,3 +10,5 @@ torch
 transformers
 fastprogress
 python-dotenv
+evaluate
+scikit-learn
