@@ -1,0 +1,17 @@
+[project]
+name = "piano-transformer"
+version = "0.1.0"
+description = "A transformer-based model for piano music generation"
+authors = [{name = "Jonathan Lehmkuhl"}, {name = "Nico Bremes"}, {name = "Kaan Özaltan"}, {name = "Abel Ilyes-Kun"}, {name = "Frederik Muthers"}]
+readme = "README.md"
+requires-python = ">=3.7"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

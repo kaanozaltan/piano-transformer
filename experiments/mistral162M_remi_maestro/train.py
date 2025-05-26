@@ -3,18 +3,13 @@ import os
 import wandb
 from transformers.trainer_utils import set_seed
 
-from piano_transformer.config import *
+from piano_transformer.config import load_config
 from piano_transformer.data.dataset import build_collator, build_datasets
 from piano_transformer.data.preprocessing import split_datasets_into_chunks
 from piano_transformer.model.mistral_model import build_mistral_model
 from piano_transformer.tokenization.tokenizer import create_remi_tokenizer
 from piano_transformer.training.trainer import make_trainer
 from piano_transformer.utils.midi import get_midi_file_lists
-
-## VERSION INFO
-
-# Same as mistral162M_remi_maestro/train.py, but with 62M parameters, 1024 sequence length and 10 overlap bars
-# 62M parameters means the following change: 512*4 instead of 512*8 intermediate size; 8 hidden layers instead of 18
 
 ## SETUP
 
@@ -41,8 +36,8 @@ tokenizer = create_remi_tokenizer(
     midi_lists["train"], cfg.model_base_path / "tokenizer.json"
 )
 
-MAX_SEQ_LEN = 1024
-NUM_OVERLAP_BARS = 10
+MAX_SEQ_LEN = 2048
+NUM_OVERLAP_BARS = 16
 
 chunks_lists = split_datasets_into_chunks(
     midi_lists,
@@ -69,9 +64,9 @@ collator = build_collator(tokenizer)
 ## TRAINING
 
 model_cfg = {
-    "num_hidden_layers": 8,
+    "num_hidden_layers": 18,
     "hidden_size": 512,
-    "intermediate_size": 512 * 4,
+    "intermediate_size": 512 * 8,
     "num_attention_heads": 8,
     "attention_dropout": 0.1,
 }
