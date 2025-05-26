@@ -79,9 +79,7 @@ model_cfg = {
 model = build_mistral_model(model_cfg, tokenizer, MAX_SEQ_LEN)
 
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
-print(
-    f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}"
-)
+print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
@@ -94,7 +92,7 @@ trainer_cfg = {
     "min_lr_rate": 0.1,
     "warmup_ratio": 0.03,
     "logging_steps": 20,
-    "num_train_epochs": 1000,
+    "num_train_epochs": 500,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,

@@ -49,7 +49,7 @@ def make_trainer(
         weight_decay=cfg["weight_decay"],
         max_grad_norm=cfg["max_grad_norm"],
         lr_scheduler_type=cfg["lr_scheduler_type"],
-        lr_scheduler_kwargs={"kwargs": {"min_lr_rate": cfg["min_lr_rate"]}},
+        lr_scheduler_kwargs={"min_lr_rate": cfg["min_lr_rate"]},
         warmup_ratio=cfg["warmup_ratio"],
         log_level="debug",
         logging_strategy="steps",
