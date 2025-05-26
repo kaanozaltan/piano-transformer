@@ -97,7 +97,7 @@ trainer_cfg = {
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
-    "early_stopping_patience": 10,
+    "early_stopping_patience": 20,
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)

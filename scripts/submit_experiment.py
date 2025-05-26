@@ -1,4 +1,3 @@
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -10,7 +9,7 @@ slurm_template = """#!/bin/bash
 #SBATCH --account=lect0148
 #SBATCH --gres=gpu:2
 #SBATCH --time=00:20:00
-#SBATCH --cpus-per-gpu=12
+#SBATCH --cpus-per-gpu=24
 #SBATCH --export=ALL
 #SBATCH --job-name=piano-transformer_{model_name}
 #SBATCH --partition=c23g
@@ -48,13 +47,13 @@ def main():
 
     file_path = Path(__file__).resolve().parent
     slurm_path = file_path / "submit_experiment.sh"
-    experiment_path = file_path.parent / "experiments" / experiment
-    cfg = config.load_config(experiment_path / "config.yaml")
-    script_path = experiment_path / f"{script}.py"
+    model_path = file_path.parent / "models" / experiment
+    cfg = config.load_config(model_path / "config.yaml")
+    script_path = model_path / f"{script}.py"
     log_path = cfg.experiment_path / "log.txt"
 
     print(file_path)
-    print(experiment_path)
+    print(model_path)
     print(script_path)
     print(log_path.resolve())
 
