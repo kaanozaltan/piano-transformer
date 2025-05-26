@@ -38,7 +38,7 @@ for split in ["train", "validation", "test"]:
     print(f"Number of {split} files: {len(midi_lists[split])}")
 
 tokenizer = create_remi_tokenizer(
-    midi_lists["train"], cfg.model_base_path / "tokenizer.json"
+    midi_lists["train"], cfg.experiment_path / "tokenizer.json"
 )
 
 MAX_SEQ_LEN = 1024

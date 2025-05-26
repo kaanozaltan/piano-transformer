@@ -15,6 +15,7 @@ source .venv/bin/activate
 Install dependencies:
 ```bash
 uv pip install -r requirements.txt
+uv pip install -e .
 
 Set environment variables:
 ```bash
