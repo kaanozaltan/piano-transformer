@@ -7,5 +7,7 @@ checkpoints/
 output*
 .envrc
 .env
+
+*.egg-info/
 z.*
 z_*
