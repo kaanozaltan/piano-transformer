@@ -3,11 +3,12 @@ import pickle
 
 import torch
 import wandb
-from datasets.maestro import MAESTRO
-from models.transformer import PT1
 from torch.nn import CrossEntropyLoss
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
+
+from piano_transformer.custom_model.transformer import PT1
+from piano_transformer.datasets.maestro import MAESTRO
 
 
 def train():

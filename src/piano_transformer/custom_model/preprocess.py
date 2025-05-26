@@ -2,7 +2,7 @@ import glob
 import os
 import pickle
 
-from utils.midi import build_vocabulary, encode_tokens, tokenize
+from piano_transformer.utils.midi import build_vocabulary, encode_tokens, tokenize
 
 midi_root = "data/maestro"
 token_dir = "data/tokens"

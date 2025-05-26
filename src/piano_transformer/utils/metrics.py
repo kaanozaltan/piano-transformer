@@ -1,8 +1,9 @@
-import os
 import json
+import os
+
 import numpy as np
-from scipy.stats import gaussian_kde
 from scipy.special import rel_entr
+from scipy.stats import gaussian_kde
 
 
 # May have to change this for different tokenizers
@@ -32,24 +33,22 @@ def extract_features(directory, features=("pitch", "duration", "velocity")):
                 except:
                     continue
 
-            if "velocity" in features and ("SET_VELOCITY_" in tok or "Velocity_" in tok):
+            if "velocity" in features and (
+                "SET_VELOCITY_" in tok or "Velocity_" in tok
+            ):
                 try:
                     velocity_vals.append(int(tok.split("_")[-1]))
                 except:
                     continue
 
-    return {
-        "pitch": pitch_vals,
-        "duration": duration_vals,
-        "velocity": velocity_vals
-    }
+    return {"pitch": pitch_vals, "duration": duration_vals, "velocity": velocity_vals}
 
 
 def compute_pdf(values, num_points=1000):
     values = np.array(values).astype(np.float64)
     if len(np.unique(values)) < 2:
         return None  # Cannot build KDE from constant data
-    
+
     kde = gaussian_kde(values)
     x = np.linspace(np.min(values), np.max(values), num_points)
     pdf = kde.evaluate(x)

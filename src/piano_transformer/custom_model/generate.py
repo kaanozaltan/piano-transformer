@@ -1,6 +1,6 @@
 import torch
 
-from models.transformer import PT1
+from piano_transformer.custom_model.transformer import PT1
 
 
 def generate():
