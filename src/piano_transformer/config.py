@@ -21,7 +21,7 @@ class Config:
     seed: int
 
 
-def load_config(path: str) -> Config:
+def load_config(path: str | Path) -> Config:
     with open(path, "r") as f:
         d = yaml.safe_load(f)
     base_path = Path(d["data"]["base_path"])
