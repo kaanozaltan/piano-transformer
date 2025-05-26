@@ -8,7 +8,7 @@ from piano_transformer import config
 slurm_template = """#!/bin/bash
 #SBATCH --account=lect0148
 #SBATCH --gres=gpu:2
-#SBATCH --time=00:20:00
+#SBATCH --time=20:00:00
 #SBATCH --cpus-per-gpu=24
 #SBATCH --export=ALL
 #SBATCH --job-name=piano-transformer_{model_name}
