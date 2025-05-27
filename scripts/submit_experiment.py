@@ -18,7 +18,7 @@ slurm_template = """#!/bin/bash
 #SBATCH --mail-type=END,FAIL
 
 source .venv/bin/activate
-python3 {script_path}
+torchrun --nproc_per_node=2 {script_path}
 """
 
 
@@ -51,11 +51,6 @@ def main():
     cfg = config.load_config(model_path / "config.yaml")
     script_path = model_path / f"{script}.py"
     log_path = cfg.experiment_path / "log.txt"
-
-    print(file_path)
-    print(model_path)
-    print(script_path)
-    print(log_path.resolve())
 
     submit_experiment(
         slurm_path=slurm_path,

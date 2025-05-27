@@ -1,8 +1,9 @@
 import os
 
-import wandb
+from dotenv import load_dotenv
 from transformers.trainer_utils import set_seed
 
+import wandb
 from piano_transformer.config import *
 from piano_transformer.datasets.dataset import build_collator, build_datasets
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
@@ -22,6 +23,7 @@ cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 
 print(f"Model:\n{cfg.model_name}")
 
+load_dotenv()
 os.environ["WANDB_ENTITY"] = "jonathanlehmkuhl-rwth-aachen-university"
 os.environ["WANDB_PROJECT"] = "piano-transformer"
 wandb.login()
@@ -92,12 +94,12 @@ trainer_cfg = {
     "min_lr_rate": 0.1,
     "warmup_ratio": 0.03,
     "logging_steps": 20,
-    "num_train_epochs": 500,
+    "num_train_epochs": 80,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
-    "early_stopping_patience": 20,
+    "early_stopping_patience": 10,
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
