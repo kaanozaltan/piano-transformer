@@ -1,5 +1,6 @@
 import os
 
+from dotenv import load_dotenv
 import wandb
 from transformers.trainer_utils import set_seed
 
@@ -17,6 +18,7 @@ cfg = load_config("config.yaml")
 
 print(f"Model:\n{cfg.model_name}")
 
+load_dotenv()
 os.environ["WANDB_ENTITY"] = "jonathanlehmkuhl-rwth-aachen-university"
 os.environ["WANDB_PROJECT"] = "piano-transformer"
 wandb.login()
@@ -36,8 +38,8 @@ tokenizer = create_remi_tokenizer(
     midi_lists["train"], cfg.experiment_path / "tokenizer.json"
 )
 
-MAX_SEQ_LEN = 2048
-NUM_OVERLAP_BARS = 16
+MAX_SEQ_LEN = 1024
+NUM_OVERLAP_BARS = 10
 
 chunks_lists = split_datasets_into_chunks(
     midi_lists,
@@ -80,8 +82,8 @@ print(
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
-    "per_device_train_batch_size": 64,
-    "per_device_eval_batch_size": 64,
+    "per_device_train_batch_size": 96,
+    "per_device_eval_batch_size": 96,
     "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
@@ -89,7 +91,7 @@ trainer_cfg = {
     "min_lr_rate": 0.1,
     "warmup_ratio": 0.03,
     "logging_steps": 20,
-    "num_train_epochs": 1000,
+    "num_train_epochs": 150,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
