@@ -85,8 +85,8 @@ print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.re
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
-    "per_device_train_batch_size": 64,
-    "per_device_eval_batch_size": 64,
+    "per_device_train_batch_size": 256,
+    "per_device_eval_batch_size": 256,
     "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
