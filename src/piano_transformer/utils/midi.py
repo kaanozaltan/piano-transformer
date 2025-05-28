@@ -6,7 +6,7 @@ import pandas as pd
 from symusic import Score
 
 
-def get_midi_file_lists(csv_path: Path, midi_dir: Path):
+def get_midi_file_lists(csv_path, midi_dir):
     df = pd.read_csv(csv_path)
     return {
         split: [
@@ -17,7 +17,7 @@ def get_midi_file_lists(csv_path: Path, midi_dir: Path):
     }
 
 
-def scale_tempo(score: Score, tempo_factor: float) -> Score:
+def scale_tempo(score, tempo_factor):
     score_copy = copy.deepcopy(score)
     for track in score_copy.tracks:
         for note in track.notes:
