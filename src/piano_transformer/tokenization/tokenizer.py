@@ -28,3 +28,8 @@ def create_remi_tokenizer(midi_files: list[Path], tokenizer_path: Path, overwrit
     tokenizer.train(vocab_size=30000, files_paths=midi_files)
     tokenizer.save(tokenizer_path)
     return tokenizer
+
+
+def load_remi_tokenizer(tokenizer_path: Path) -> REMI:
+    tokenizer = REMI(params=tokenizer_path)
+    return tokenizer
