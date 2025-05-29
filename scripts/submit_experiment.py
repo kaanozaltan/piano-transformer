@@ -51,7 +51,7 @@ def main():
     model_path = file_path.parent / "models" / experiment
     cfg = config.load_config(model_path / "config.yaml")
     script_path = model_path / f"{script_name}.py"
-    log_path = cfg.experiment_path / f"log_{script}.txt"
+    log_path = cfg.experiment_path / f"log_{script_name}.txt"
 
     submit_experiment(
         slurm_path=slurm_path,
