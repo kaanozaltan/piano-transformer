@@ -14,7 +14,7 @@ from piano_transformer.utils.midi import get_midi_file_lists
 
 ## SETUP
 
-cfg = load_config("config.yaml")
+cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 
 print(f"Model:\n{cfg.model_name}")
 
