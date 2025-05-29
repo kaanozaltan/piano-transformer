@@ -1,8 +1,0 @@
-data:
-  base_path: ../.. # For training on the cluster: /hpcwork/lect0148
-model:
-  transformer_name: mistral-162M
-  tokenizer_name: remi
-  dataset_name: maestro
-  version: 1
-seed: 222
