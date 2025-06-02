@@ -10,7 +10,7 @@ from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_datasets, build_collator
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
 from piano_transformer.tokenizer import load_remi_tokenizer
-from piano_transformer.midi import get_midi_file_lists, convert_midi_to_wav
+from piano_transformer.utils.midi import get_midi_file_lists, midi2wav
 
 ## SETUP
 
@@ -128,4 +128,4 @@ def generate(dataset, output, max_samples=None):
 
 #generate(test_ds, cfg.output_path / "test", 20)
 
-convert_midi_to_wav(cfg.output_path / "test", cfg.output_path / "test_wav", "SalC5Light2.sf2")
+midi2wav(cfg.output_path / "test", cfg.output_path / "test_wav", "SalC5Light2.sf2")
