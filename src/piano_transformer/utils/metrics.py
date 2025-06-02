@@ -1,48 +1,70 @@
 import os
 
 import numpy as np
+import traceback
 from scipy.special import rel_entr
 from scipy.stats import gaussian_kde
 from miditok import REMI
 from frechet_music_distance import FrechetMusicDistance
+from symusic import Score
 
 
-def extract_features(directory, tokenizer_path, features=("pitch", "duration", "velocity")):
+TOKENIZER_PATH = "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v1/tokenizer.json"
+
+
+def extract_features(
+    directory,
+    tokenizer_path=TOKENIZER_PATH,
+    features=("pitch", "duration", "velocity")
+):
     tokenizer = REMI(params=tokenizer_path)
     pitch_vals, duration_vals, velocity_vals = [], [], []
 
-    for file in os.listdir(directory):
-        if not file.endswith(".npy"):
-            continue
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if not file.endswith(".midi"):
+                continue
 
-        token_ids = np.load(os.path.join(directory, file))
-        tokens = [tokenizer.vocab[i] for i in token_ids if i < len(tokenizer.vocab)]
+            midi_path = os.path.join(root, file)
+            try:
+                midi = Score(midi_path)
+                token_ids = tokenizer(midi)
 
-        for tok in tokens:
-            if "pitch" in features and "Pitch_" in tok:
-                try:
-                    pitch_vals.append(int(tok.split("_")[-1]))
-                except:
-                    continue
+                # Take only the piano track
+                if isinstance(token_ids, list):
+                    token_ids = token_ids[0]
 
-            if "duration" in features and "Duration_" in tok:
-                try:
-                    duration_vals.append(int(tok.split("_")[-1]))
-                except:
-                    continue
+                # Convert token IDs to string tokens
+                vocab_inv = {v: k for k, v in tokenizer.vocab.items()}
+                tokens = [vocab_inv[i] for i in token_ids if i in vocab_inv]
 
-            if "velocity" in features and "Velocity_" in tok:
-                try:
-                    velocity_vals.append(int(tok.split("_")[-1]))
-                except:
-                    continue
+            except Exception as e:
+                print(f"Error tokenizing {file}: {type(e).__name__}: {e}")
+                traceback.print_exc()
+                continue
+
+            for tok in tokens:
+                if "pitch" in features and "Pitch_" in tok:
+                    try:
+                        pitch_vals.append(int(tok.split("_")[-1]))
+                    except:
+                        continue
+                if "duration" in features and "Duration_" in tok:
+                    try:
+                        duration_vals.append(int(tok.split("_")[-1]))
+                    except:
+                        continue
+                if "velocity" in features and "Velocity_" in tok:
+                    try:
+                        velocity_vals.append(int(tok.split("_")[-1]))
+                    except:
+                        continue
 
     return {
         "pitch": pitch_vals,
         "duration": duration_vals,
         "velocity": velocity_vals
     }
-
 
 def compute_pdf(values, num_points=1000):
     values = np.array(values).astype(np.float64)
@@ -88,7 +110,7 @@ def fmd(ref_dir, gen_dir):
     )
 
 
-def compare(ref_dir, gen_dir, metric, feature="pitch", tokenizer_path="data/maestro/tokenizer.json"):
+def compare(ref_dir, gen_dir, metric, tokenizer_path=TOKENIZER_PATH, feature="pitch"):
     if metric == fmd:
         print("Using FMD (input feature ignored)")
         return fmd(ref_dir, gen_dir)

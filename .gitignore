@@ -189,7 +189,6 @@ cython_debug/
 
 # Custom
 wandb/
-checkpoints/
 
 /data
 /experiments

@@ -51,6 +51,7 @@ def submit_experiment(slurm_path, model_name, script_name, script_path, log_path
 
 
 def main():
+    # Example: python scripts/submit_experiment.py mistral-162M_remi_maestro_v1 train.py <email>
     experiment = sys.argv[1]
     script_name = sys.argv[2]
     email = sys.argv[3] if len(sys.argv) >= 4 else ""
