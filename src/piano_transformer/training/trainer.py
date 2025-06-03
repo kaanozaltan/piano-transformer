@@ -67,6 +67,9 @@ def make_trainer(
         metric_for_best_model="eval_loss",
         optim=cfg["optim"],
         report_to=["wandb"],
+        dataloader_num_workers=4,
+        dataloader_pin_memory=True,
+        dataloader_persistent_workers=True,
     )
 
     # Instantiate Trainer

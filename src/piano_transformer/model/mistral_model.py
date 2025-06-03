@@ -18,7 +18,7 @@ def build_mistral_model(
             "num_attention_heads"
         ],  # Assuming num_key_value_head is same as num_attention_heads
         sliding_window=max_seq_len,  # Use max_seq_len as sliding window size
-        max_position_embeddings=8192,  # Assuming a fixed max position embeddings
+        max_position_embeddings=cfg["max_position_embeddings"],
         pad_token_id=tokenizer["PAD_None"],
         bos_token_id=tokenizer["BOS_None"],
         eos_token_id=tokenizer["EOS_None"],
