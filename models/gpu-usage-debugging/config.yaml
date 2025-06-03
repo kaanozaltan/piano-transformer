@@ -1,0 +1,8 @@
+data:
+  base_path: ../.. # For training on the cluster: /hpcwork/lect0148
+model:
+  transformer_name: gpu-usage-debugging_mistral
+  tokenizer_name: remi
+  dataset_name: maestro
+  version: 1
+seed: 222

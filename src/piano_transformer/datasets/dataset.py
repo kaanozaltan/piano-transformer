@@ -8,7 +8,7 @@ def build_datasets(
     chunks_lists: list,
     tokenizer: MusicTokenizer,
     max_seq_len: int,
-    aug_cfg: dict,
+    aug_cfg: dict = None,
 ):
     dataset_kwargs = {
         "max_seq_len": max_seq_len,
@@ -18,9 +18,11 @@ def build_datasets(
     }
     augmentation_kwargs = aug_cfg
 
-    train_ds = AugmentedDatasetMIDI(
-        chunks_lists["train"], **augmentation_kwargs, **dataset_kwargs
-    )
+    if aug_cfg is not None:
+        train_ds = AugmentedDatasetMIDI(chunks_lists["train"], **augmentation_kwargs, **dataset_kwargs)
+    else:
+        train_ds = DatasetMIDI(chunks_lists["train"], **dataset_kwargs)
+    # TODO: Pre-tokenize?
     valid_ds = DatasetMIDI(chunks_lists["validation"], **dataset_kwargs)
     test_ds = DatasetMIDI(chunks_lists["test"], **dataset_kwargs)
 
