@@ -53,7 +53,7 @@ def submit_experiment(slurm_path, model_name, script_name, script_path, log_path
 def main():
     experiment = sys.argv[1]
     script_name = sys.argv[2]
-    email = sys.argv[3] if len(sys.argv) >= 3 else ""
+    email = sys.argv[3] if len(sys.argv) >= 4 else ""
 
     file_path = Path(__file__).resolve().parent
     slurm_path = file_path / "submit_experiment.sh"
