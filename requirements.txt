@@ -7,6 +7,7 @@ miditok
 miditoolkit
 mido
 numpy==1.26.4
+pandas
 pretty_midi
 python-dotenv
 scikit-learn
