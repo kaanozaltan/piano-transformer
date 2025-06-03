@@ -1,21 +1,21 @@
 import subprocess
 import sys
+from datetime import datetime
 from pathlib import Path
 
 from piano_transformer import config
 
-
 slurm_template = """#!/bin/bash
 ###SBATCH --account=lect0148
-#SBATCH --gres=gpu:1
-#SBATCH --time=00:20:00
+#SBATCH --gres=gpu:2
+#SBATCH --time=00:15:00
 #SBATCH --cpus-per-gpu=24
 #SBATCH --export=ALL
 #SBATCH --job-name=piano-transformer_{script_name}_{model_name}
 #SBATCH --partition=c23g
 #SBATCH --output={log_path}
 #SBATCH --mail-user={email}
-#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-type=END,FAIL,ALL
 
 source .venv/bin/activate
 torchrun --nproc_per_node=2 {script_path}
@@ -38,7 +38,16 @@ def submit_experiment(slurm_path, model_name, script_name, script_path, log_path
         "sbatch",
         slurm_path,
     ]
-    subprocess.run(cmd)
+    result = subprocess.run(cmd, capture_output=True, check=True)
+    output = result.stdout.decode("utf-8")
+    job_id = output.split(" ")[-1]
+
+    print(output)
+    print()
+    print("Commands:")
+    print(f"- Status: \tsqueue --job {job_id}")
+    print(f"- Details: \tscontrol show job {job_id}")
+    print(f"- Cancel: \tscancel {job_id}")
 
 
 def main():
@@ -51,7 +60,9 @@ def main():
     model_path = file_path.parent / "models" / experiment
     cfg = config.load_config(model_path / "config.yaml")
     script_path = model_path / f"{script_name}.py"
-    log_path = cfg.experiment_path / f"log_{script}.txt"
+    log_path = cfg.experiment_path / "logs" / f"log_{script_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
+
+    (cfg.experiment_path / "logs").mkdir(parents=True, exist_ok=True)
 
     submit_experiment(
         slurm_path=slurm_path,
