@@ -10,7 +10,7 @@ from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_collator, build_datasets
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
 from piano_transformer.tokenization.tokenizer import create_remi_tokenizer
-from piano_transformer.utils.midi import get_midi_file_lists
+from piano_transformer.midi import get_midi_file_lists
 
 cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 

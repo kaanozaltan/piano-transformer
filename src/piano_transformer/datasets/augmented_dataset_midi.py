@@ -7,7 +7,7 @@ from symusic import Score
 from torch import LongTensor
 from tqdm import tqdm
 
-from piano_transformer.utils.midi import scale_tempo
+from piano_transformer.midi import scale_tempo
 
 
 # Pytorch dataset class for augmented MIDI data
