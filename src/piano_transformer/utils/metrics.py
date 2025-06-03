@@ -1,47 +1,47 @@
-import json
 import os
 
 import numpy as np
 from scipy.special import rel_entr
 from scipy.stats import gaussian_kde
+from miditok import REMI
+from frechet_music_distance import FrechetMusicDistance
 
 
-# May have to change this for different tokenizers
-def extract_features(directory, features=("pitch", "duration", "velocity")):
-    pitch_vals = []
-    duration_vals = []
-    velocity_vals = []
+def extract_features(directory, tokenizer_path, features=("pitch", "duration", "velocity")):
+    tokenizer = REMI(params=tokenizer_path)
+    pitch_vals, duration_vals, velocity_vals = [], [], []
 
     for file in os.listdir(directory):
-        if not file.endswith(".json"):
+        if not file.endswith(".npy"):
             continue
 
-        with open(os.path.join(directory, file), "r") as f:
-            tokens = json.load(f)
+        token_ids = np.load(os.path.join(directory, file))
+        tokens = [tokenizer.vocab[i] for i in token_ids if i < len(tokenizer.vocab)]
 
         for tok in tokens:
-            if "pitch" in features and ("NOTE_ON_" in tok or "Note-On_" in tok):
+            if "pitch" in features and "Pitch_" in tok:
                 try:
                     pitch_vals.append(int(tok.split("_")[-1]))
                 except:
                     continue
 
-            if "duration" in features and ("TIME_SHIFT_" in tok or "Duration_" in tok):
+            if "duration" in features and "Duration_" in tok:
                 try:
-                    dur = int(tok.split("_")[-1].replace(".", ""))
-                    duration_vals.append(dur)
+                    duration_vals.append(int(tok.split("_")[-1]))
                 except:
                     continue
 
-            if "velocity" in features and (
-                "SET_VELOCITY_" in tok or "Velocity_" in tok
-            ):
+            if "velocity" in features and "Velocity_" in tok:
                 try:
                     velocity_vals.append(int(tok.split("_")[-1]))
                 except:
                     continue
 
-    return {"pitch": pitch_vals, "duration": duration_vals, "velocity": velocity_vals}
+    return {
+        "pitch": pitch_vals,
+        "duration": duration_vals,
+        "velocity": velocity_vals
+    }
 
 
 def compute_pdf(values, num_points=1000):
@@ -74,14 +74,31 @@ def oa(p, q):
     return np.sum(np.minimum(p, q))
 
 
-def compare(ref_dir, gen_dir, metric, feature="pitch"):
-    ref_feats = extract_features(ref_dir, features=(feature,))
-    gen_feats = extract_features(gen_dir, features=(feature,))
+# Frechet Music Distance
+def fmd(ref_dir, gen_dir):
+    fmd_metric = FrechetMusicDistance(
+        feature_extractor='clamp2',
+        gaussian_estimator='mle', 
+        verbose=True
+    )
+
+    return fmd_metric.score(
+        reference_path=ref_dir,
+        test_path=gen_dir
+    )
+
+
+def compare(ref_dir, gen_dir, metric, feature="pitch", tokenizer_path="data/maestro/tokenizer.json"):
+    if metric == fmd:
+        print("Using FMD (input feature ignored)")
+        return fmd(ref_dir, gen_dir)
+
+    ref_feats = extract_features(ref_dir, tokenizer_path, features=(feature,))
+    gen_feats = extract_features(gen_dir, tokenizer_path, features=(feature,))
 
     ref_vals = ref_feats.get(feature, [])
     gen_vals = gen_feats.get(feature, [])
 
-    # Not enough data
     if len(ref_vals) < 2 or len(gen_vals) < 2:
         return None
 

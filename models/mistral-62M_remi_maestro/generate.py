@@ -9,7 +9,7 @@ from transformers import AutoModelForCausalLM, GenerationConfig
 from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_datasets, build_collator
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
-from piano_transformer.tokenization.tokenizer import load_remi_tokenizer
+from piano_transformer.tokenizer import load_remi_tokenizer
 from piano_transformer.utils.midi import get_midi_file_lists, convert_midi_to_wav
 
 ## SETUP

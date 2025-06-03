@@ -13,6 +13,5 @@ scikit-learn
 scipy
 setuptools
 symusic
-torch
 transformers[torch]
 wandb

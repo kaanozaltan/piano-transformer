@@ -2,19 +2,20 @@ import os
 
 from dotenv import load_dotenv
 import wandb
+from pathlib import Path
 from transformers.trainer_utils import set_seed
 
 from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_collator, build_datasets
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
-from piano_transformer.model.mistral_model import build_mistral_model
-from piano_transformer.tokenization.tokenizer import create_remi_tokenizer
-from piano_transformer.training.trainer import make_trainer
+from piano_transformer.model import build_mistral_model
+from piano_transformer.tokenizer import create_remi_tokenizer
+from piano_transformer.trainer import make_trainer
 from piano_transformer.utils.midi import get_midi_file_lists
 
 ## SETUP
 
-cfg = load_config("config.yaml")
+cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 
 print(f"Model:\n{cfg.model_name}")
 

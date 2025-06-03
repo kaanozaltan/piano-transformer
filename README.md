@@ -14,15 +14,15 @@ source .venv/bin/activate
 
 Install dependencies:
 ```bash
+uv pip install torch --index-url https://download.pytorch.org/whl/cu128
 uv pip install -r requirements.txt
 uv pip install -e .
+```
 
 Set environment variables:
 ```bash
-export TORCH_CUDA_ARCH_LIST="6.1 8.6 8.9"
-module load CUDA/12.3
 export CXX=g++
 export CC=gcc
 export FORCE_CUDA=1
-export PYTHONPATH=$PWD
+export PYTHONPATH=$PWD/src
 ```
