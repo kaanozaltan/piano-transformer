@@ -1,11 +1,31 @@
 from piano_transformer.utils import metrics
 
+import shutil
+
 from pathlib import Path
 from tqdm import tqdm
 import torch
 import wandb
-import json
 from copy import deepcopy
+from transformers import TrainerCallback
+
+
+class EvalCallback(TrainerCallback):
+    def __init__(self, tokenizer, dataset, ref_dir, gen_dir):
+        self.tokenizer = tokenizer
+        self.dataset = dataset
+        self.ref_dir = ref_dir
+        self.gen_dir = gen_dir
+
+    def on_evaluate(self, args, state, control, model=None, **kwargs):
+        if self.gen_dir.exists():
+            shutil.rmtree(self.gen_dir)
+        self.gen_dir.mkdir(parents=True)
+
+        model = model.cuda().eval()
+        generate_and_save(model, self.tokenizer, self.dataset, self.gen_dir, mode="eval")
+        metrics = evaluate(self.ref_dir, self.gen_dir)
+        wandb.log({f"eval/{k}": v for k, v in metrics.items()}, step=state.epoch)
 
 
 def generate_and_save(model, tokenizer, dataset, save_dir, mode="eval"):
@@ -20,7 +40,7 @@ def generate_and_save(model, tokenizer, dataset, save_dir, mode="eval"):
         with torch.no_grad():
             generated_ids = model.generate(
                 input_ids=input_ids,
-                max_length=2048,
+                max_length=1024,
                 do_sample=True,
                 top_k=50,
                 top_p=0.95,

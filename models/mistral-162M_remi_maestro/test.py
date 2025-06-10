@@ -6,12 +6,12 @@ from piano_transformer.utils.evaluation import generate_and_save, evaluate
 
 # Config
 EXPERIMENT_NAME = "mistral-162M_remi_maestro_v1"
-EXPERIMENTS_DIR = Path("/hpcwork/lect0148/experiments") / EXPERIMENT_NAME
+EXPERIMENT_DIR = Path("/hpcwork/lect0148/experiments") / EXPERIMENT_NAME
 
-MODEL_PATH = EXPERIMENTS_DIR / "model"
-TOKENIZER_PATH = EXPERIMENTS_DIR / "tokenizer.json"
-TEST_DATA_DIR = EXPERIMENTS_DIR / "data_processed" / "maestro_test"
-OUTPUT_DIR = EXPERIMENTS_DIR / "outputs" / "test"
+MODEL_PATH = EXPERIMENT_DIR / "model"
+TOKENIZER_PATH = EXPERIMENT_DIR / "tokenizer.json"
+TEST_DATA_DIR = EXPERIMENT_DIR / "data_processed" / "maestro_test"
+OUTPUT_DIR = EXPERIMENT_DIR / "outputs" / "test"
 
 
 # Load model and tokenizer
@@ -24,7 +24,7 @@ midi_files = sorted(TEST_DATA_DIR.glob("**/*.midi"))
 dataset = DatasetMIDI(
     midi_files,
     tokenizer=tokenizer,
-    max_seq_len=2048,
+    max_seq_len=1024,
     bos_token_id=tokenizer["BOS_None"],
     eos_token_id=tokenizer["EOS_None"],
 )

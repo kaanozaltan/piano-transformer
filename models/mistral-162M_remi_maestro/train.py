@@ -12,6 +12,7 @@ from piano_transformer.model import build_mistral_model
 from piano_transformer.tokenizer import create_remi_tokenizer
 from piano_transformer.trainer import make_trainer
 from piano_transformer.utils.midi import get_midi_file_lists
+from piano_transformer.utils.evaluation import EvalCallback
 
 ## SETUP
 
@@ -101,6 +102,14 @@ trainer_cfg = {
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
+
+val_callback = EvalCallback(
+    tokenizer=tokenizer,
+    dataset=valid_ds,
+    ref_dir=cfg.data_processed_path / "maestro_validation",
+    gen_dir=cfg.experiment_path / "outputs" / "validation"
+)
+trainer.add_callback(val_callback)
 
 result = trainer.train()
 trainer.save_model(cfg.model_path)
