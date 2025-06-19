@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling", "hatch-requirements-txt"]
+build-backend = "hatchling.build"
+
+[project]
+name = "moonbeam"
+version = "0.0.1"
+authors = [
+  { name="Zixun Nicolas Guo", email="zixun.guo@qmul.ac.uk" }
+]
+description = "Moonbeam is a transformer-based MIDI foundation pretrained on a large and diverse collection of MIDI data."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+vllm = ["vllm"]
+tests = ["pytest-mock"]
+auditnlg = ["auditnlg"]
+
+[project.urls]
+"Homepage" = "https://github.com/guozixunnicolas/Moonbeam-MIDI-Foundation-Model"
+"Bug Tracker" = "https://github.com/guozixunnicolas/Moonbeam-MIDI-Foundation-Model/issues"
+
+[tool.hatch.build]
+exclude = [
+  "dist/*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/llama_recipes"]
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.pytest.ini_options]
+markers = [
+    "skip_missing_tokenizer: skip tests when we can not access meta-llama/Llama-2-7b-hf on huggingface hub (Log in with `huggingface-cli login` to unskip).",
+]
