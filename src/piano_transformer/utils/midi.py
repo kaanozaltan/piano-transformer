@@ -52,9 +52,11 @@ def midi2wav(input_path, output_path, soundfont, quiet=True):
 
     if input_path.is_dir():
         for midi_file in input_path.iterdir():
-            if midi_file.is_file() and midi_file.suffix.lower() == ".midi":
-                convert_file(midi_file)
-    elif input_path.is_file() and input_path.suffix.lower() == ".midi":
+            if midi_file.is_file() and midi_file.suffix.lower() in [".midi", ".mid"]:
+             convert_file(midi_file)
+    elif input_path.is_file() and input_path.suffix.lower() in [".midi", ".mid"]:
         convert_file(input_path)
     else:
-        raise ValueError("Input path must be a .midi file or a directory containing .midi files")
+        raise ValueError("Input path must be a .midi or .mid file or a directory containing such files")
+
+
