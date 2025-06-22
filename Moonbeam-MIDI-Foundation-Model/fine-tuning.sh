@@ -7,6 +7,8 @@ PRETRAINED_CKPT="checkpoints/pre-trained/moonbeam_839M.pt"
 OUTPUT_DIR="checkpoints/fine-tuned/fine-tuned_3_epoch_839M"
 MODEL_NAME="maestro_839M"
 DATASET_NAME="maestro_839M"
+# Config path: model_config.json for 839M, model_config_small.json for 309M
+MODEL_CONFIG_PATH="src/llama_recipes/configs/model_config.json"
 
 # Run the training script with torchrun
 torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_gen.py \
@@ -30,4 +32,5 @@ torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_
   --context_length 2048 \
   --num_epochs 3 \
   --use_wandb True \
-  --gamma 0.99
+  --gamma 0.99 \
+  --model_config_path "$MODEL_CONFIG_PATH"

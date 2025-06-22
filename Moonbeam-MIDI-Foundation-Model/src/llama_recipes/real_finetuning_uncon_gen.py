@@ -86,9 +86,11 @@ def setup_wandb(train_config, fsdp_config, llama_config, **kwargs):
 
 
 def main(**kwargs):
+    # Extract model config path
+    model_config_path = kwargs.pop("model_config_path", "src/llama_recipes/configs/model_config.json")
     # Update the configuration for the training and sharding process
     train_config, fsdp_config, ddp_config = TRAIN_CONFIG(), FSDP_CONFIG(), DDP_CONFIG()
-    model_config_path = "src/llama_recipes/configs/model_config.json"
+    # model_config_path = "src/llama_recipes/configs/model_config.json"
     update_config((train_config, fsdp_config, ddp_config), **kwargs)
     print("updated training config", train_config)
     # Set the seeds for reproducibility
