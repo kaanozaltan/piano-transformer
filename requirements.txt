@@ -16,3 +16,4 @@ setuptools
 symusic
 transformers[torch]
 wandb
+seaborn
