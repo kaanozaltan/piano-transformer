@@ -2,7 +2,7 @@
 """core.py
 Include feature extractor and musically informed objective measures.
 """
-import pretty_midi
+import piano_transformer.mgeval.pretty_midi as pretty_midi
 import numpy as np
 import sys
 import os
