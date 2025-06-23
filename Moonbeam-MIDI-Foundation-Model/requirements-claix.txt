@@ -1,6 +1,6 @@
 # module load GCCcore/.13.3.0
 # module load Python Python/3.12.3
-# module load CUDA/12.4.0 (or higher if 12.4.0 not available)
+# module load CUDA/12.6.3
 
 accelerate==1.7.0
 aiofiles==24.1.0
@@ -142,7 +142,7 @@ tomlkit==0.13.3
 torch==2.5.1
 tqdm==4.67.1
 traitlets==5.14.3
-transformers @ file:///rwthfs/rz/cluster/home/yh522379/lab/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/transformers_minimal
+transformers>=0.0.0
 triton==3.1.0
 typer==0.16.0
 typing-extensions==4.8.0
