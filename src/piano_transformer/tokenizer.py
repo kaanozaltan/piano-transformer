@@ -6,7 +6,8 @@ from symusic.core import TrackTick
 from typing import Sequence
 
 
-GENRE_TOKENS = [
+# ADL Piano MIDI genres
+ADL_GENRE_TOKENS = [
     "Ambient",
     "Blues", 
     "Children",
@@ -27,32 +28,24 @@ GENRE_TOKENS = [
     "World"
 ]
 
-class AttributeControlGenre(AttributeControl):
+# ARIA MIDI genres
+ARIA_GENRE_TOKENS = [
+    "Ambient",
+    "Atonal",
+    "Blues", 
+    "Classical",
+    "Folk",
+    "Jazz",
+    "Pop",
+    "Ragtime",
+    "Rock",
+    "Soundtrack",
+    "Unknown"
+]
 
-    def __init__(self) -> None:
-        # Create tokens with "GENRE" as type and each genre as value
-        genre_tokens = [f"GENRE_{genre.upper()}" for genre in GENRE_TOKENS]
-        super().__init__(tokens=genre_tokens)
-
-    def compute(
-            self,
-            track: TrackTick,
-            time_division: int,
-            ticks_bars: Sequence[int],
-            ticks_beats: Sequence[int],
-            bars_idx: Sequence[int],
-    ) -> list[Event]:
-        print(f"Computing genre for track: {track.name}")
-
-        for genre in GENRE_TOKENS:
-            if genre.lower() in track.name.lower():
-                print(f"Found genre: {genre}")
-                return [Event("GENRE", genre.upper(), -1)]
+# Choose which genre set to use
+GENRE_TOKENS = ARIA_GENRE_TOKENS  # Switch to ADL_GENRE_TOKENS if needed
         
-        print(f"No genre found in track name: {track.name}")
-        return [Event("GENRE", "UNKNOWN", -1)]
-        
-
 
 
 def create_remi_tokenizer(midi_files: list[Path], tokenizer_path: Path, overwrite: bool = False) -> REMI:
@@ -86,11 +79,37 @@ def load_remi_tokenizer(tokenizer_path: Path) -> REMI:
     tokenizer = REMI(params=tokenizer_path)
     return tokenizer
 
+class AttributeControlGenre(AttributeControl):
+
+    def __init__(self) -> None:
+        # Create tokens with "GENRE" as type and each genre as value
+        genre_tokens = [f"GENRE_{genre.upper()}" for genre in GENRE_TOKENS]
+        super().__init__(tokens=genre_tokens)
+
+    def compute(
+            self,
+            track: TrackTick,
+            time_division: int,
+            ticks_bars: Sequence[int],
+            ticks_beats: Sequence[int],
+            bars_idx: Sequence[int],
+    ) -> list[Event]:
+        print(f"Computing genre for track: {track.name}")
+
+        for genre in GENRE_TOKENS:
+            if genre.lower() in track.name.lower():
+                print(f"Found genre: {genre}")
+                return [Event("GENRE", genre.upper(), -1)]
+        
+        print(f"No genre found in track name: {track.name}")
+        return [Event("GENRE", "UNKNOWN", -1)]
+
 
 if __name__ == "__main__":
-    # Use the processed dataset instead of original
-    file_path = Path("data/maestro")
-    # file_path = Path("adl-piano-midi-processed")
+    # Choose dataset
+    file_path = Path("data/aria-midi-flattened")
+    # file_path = Path("data/maestro")
+    # file_path = Path("data/adl-piano-midi-processed")
 
     midi_files = list(file_path.rglob("*.mid")) + list(file_path.rglob("*.midi"))
     print("MIDI files found:", len(midi_files))
@@ -113,7 +132,11 @@ if __name__ == "__main__":
     tokenizer = REMI(config)
     tokenizer.add_attribute_control(AttributeControlGenre())
 
+    # midi_files = midi_files[:100000]  # Limit to first 100 files for testing
+
     tokenizer.train(vocab_size=30000, files_paths=midi_files)
+
+
 
     # Specify which attribute controls to apply during encoding
     # Format: {track_idx: {attribute_control_idx: track_level_boolean_or_bar_indices}}
@@ -122,6 +145,6 @@ if __name__ == "__main__":
     }
 
     tokSeqs = tokenizer.encode(midi_files[0], attribute_controls_indexes=attribute_controls_indexes)
-    print(tokenizer.vocab)
+    # print(tokenizer.vocab)
     for tokSeq in tokSeqs:
         print(tokSeq.tokens[:10])
