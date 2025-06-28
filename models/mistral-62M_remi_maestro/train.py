@@ -11,7 +11,7 @@ from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
 from piano_transformer.model import build_mistral_model
 from piano_transformer.tokenizer import create_remi_tokenizer
 from piano_transformer.trainer import make_trainer
-from piano_transformer.utils.midi import get_midi_file_lists
+from piano_transformer.utils.midi import get_midi_file_lists_by_csv
 
 ## VERSION INFO
 
@@ -33,7 +33,7 @@ set_seed(cfg.seed)
 
 ## DATASET PREPARATION
 
-midi_lists = get_midi_file_lists(
+midi_lists = get_midi_file_lists_by_csv(
     cfg.data_raw_path / "maestro" / "maestro-v3.0.0.csv", cfg.data_raw_path / "maestro"
 )
 
