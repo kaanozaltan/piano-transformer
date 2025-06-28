@@ -4,8 +4,10 @@ import subprocess
 import pandas as pd
 from pathlib import Path
 
+import numpy as np
 
-def get_midi_file_lists(csv_path, midi_dir):
+
+def get_midi_file_lists_by_csv(csv_path, midi_dir):
     df = pd.read_csv(csv_path)
     return {
         split: [
@@ -13,6 +15,26 @@ def get_midi_file_lists(csv_path, midi_dir):
             for f in df[df["split"] == split]["midi_filename"].tolist()
         ]
         for split in ("train", "validation", "test")
+    }
+
+    
+def get_midi_file_lists_by_random(midi_dir, pattern, seed):
+    all_files = sorted(midi_dir.rglob(pattern))
+    rng = np.random.default_rng(seed)
+    shuffled = rng.permutation(all_files)
+
+    n = len(shuffled)
+    n_train = int(n * 0.8)
+    n_val = int(n * 0.1)
+    
+    train_files = shuffled[:n_train]
+    val_files = shuffled[n_train : n_train + n_val]
+    test_files = shuffled[n_train + n_val :]
+
+    return {
+        "train": [f.resolve() for f in train_files],
+        "validation": [f.resolve() for f in val_files],
+        "test": [f.resolve() for f in test_files],
     }
 
 
