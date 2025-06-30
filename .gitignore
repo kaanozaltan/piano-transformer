@@ -195,7 +195,8 @@ wandb/
 
 output*
 .envrc
-
 z.*
 z_*
-*.7
+core.login*
+graphics*
+submit_experiment.sh
