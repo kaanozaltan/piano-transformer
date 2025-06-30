@@ -13,6 +13,7 @@ from sklearn.model_selection import LeaveOneOut
 import copy
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pandas as pd
 
 TOKENIZER_PATH = "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v1/tokenizer.json" # adapt path for local use
 
@@ -134,6 +135,7 @@ def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, features, 
     
 
 def analyze_dataset_mgeval(dataset_path, features=None, max_samples=None):
+    print("running full function")
     if not features:
         features = ['total_used_pitch', 'total_pitch_class_histogram', 'pitch_class_transition_matrix',
                     'pitch_range', 'avg_pitch_shift', 'total_used_note', 'avg_IOI', 'note_length_hist',
@@ -141,6 +143,7 @@ def analyze_dataset_mgeval(dataset_path, features=None, max_samples=None):
     dataset = glob.glob(os.path.join(dataset_path, '*.midi'))
     if max_samples and len(dataset) > max_samples:
         dataset = dataset[:max_samples]
+        print(dataset)
     num_samples = len(dataset)
     set_eval_init, kwargs_init = get_mgeval_features(num_samples)
     set_eval = {key: set_eval_init[key] for key in features}
@@ -156,11 +159,20 @@ def analyze_dataset_mgeval(dataset_path, features=None, max_samples=None):
         print(metrics_list[i] + ':')
         print('mean: ', np.mean(set_eval[metrics_list[i]], axis=0))
         print('std: ', np.std(set_eval[metrics_list[i]], axis=0))
+
+    # summarize_mgeval_results(set_eval, metrics_list)
+    summarize_and_plot_mgeval_results(set_eval, metrics_list)
+
+    
         
 
 def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, graphics_path, features=None, max_samples=None):
+    print("running full function")
     if not features:
-        features = ['total_used_pitch', 'total_pitch_class_histogram', 'pitch_class_transition_matrix',
+        # features = ['total_used_pitch', 'total_pitch_class_histogram', 'pitch_class_transition_matrix',
+        #             'pitch_range', 'avg_pitch_shift', 'total_used_note', 'avg_IOI', 'note_length_hist',
+        #             'note_length_transition_matrix']
+        features = ['total_used_pitch', 'total_pitch_class_histogram',
                     'pitch_range', 'avg_pitch_shift', 'total_used_note', 'avg_IOI', 'note_length_hist',
                     'note_length_transition_matrix']
     dataset1 = glob.glob(os.path.join(dataset1_path, '*.midi'))
@@ -220,8 +232,95 @@ def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, graphics_p
         print('Overlap area:', utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i]))
     
     
-        
+def summarize_mgeval_results(set_eval, metrics_list):
+    summary = []
 
+    for feature in metrics_list:
+        mean_value = np.mean(set_eval[feature], axis=0)
+        std_value = np.std(set_eval[feature], axis=0)
+
+        if mean_value.ndim == 0 or mean_value.size == 1:
+            mean_scalar = float(mean_value)
+            std_scalar = float(std_value)
+        else:
+            mean_scalar = float(np.mean(mean_value))
+            std_scalar = float(np.mean(std_value))
+
+        summary.append({
+            'Feature': feature,
+            'Mean': mean_scalar,
+            'Std': std_scalar
+        })
+
+    df = pd.DataFrame(summary)
+    print(df.to_string(index=False))
+
+    return df       
+
+
+def summarize_and_plot_mgeval_results(set_eval, metrics_list):
+    summary = []
+
+    for feature in metrics_list:
+        mean_value = np.mean(set_eval[feature], axis=0)
+        std_value = np.std(set_eval[feature], axis=0)
+
+        # Case 1 — Scalar features:
+        if mean_value.ndim == 0 or mean_value.size == 1:
+            mean_scalar = float(mean_value)
+            std_scalar = float(std_value)
+            summary.append({'Feature': feature, 'Mean': mean_scalar, 'Std': std_scalar})
+
+        # Case 2 — Vector features: pitch_class_histogram and note_length_hist
+        elif mean_value.ndim == 1:
+
+            if feature == 'total_pitch_class_histogram':
+                labels = ['C', 'C#', 'D', 'D#', 'E', 'F',
+                          'F#', 'G', 'G#', 'A', 'A#', 'B']
+                plt.figure(figsize=(8, 4))
+                plt.bar(labels, mean_value)
+                plt.title(f'Pitch Class Histogram ({feature})')
+                plt.ylabel('Proportion')
+                plt.show()
+
+            elif feature == 'note_length_hist':
+                labels = [
+                    "Full", "Half", "Quarter", "8th", "16th",
+                    "Dot Half", "Dot Quarter", "Dot 8th", "Dot 16th",
+                    "Half Triplet", "Quarter Triplet", "8th Triplet"
+                ]
+                plt.figure(figsize=(10, 4))
+                plt.bar(labels, mean_value)
+                plt.title(f'Note Length Histogram ({feature})')
+                plt.ylabel('Proportion')
+                plt.xticks(rotation=45)
+                plt.show()
+
+            # Still report simple global mean/std for table:
+            mean_scalar = float(np.mean(mean_value))
+            std_scalar = float(np.mean(std_value))
+            summary.append({'Feature': feature, 'Mean': mean_scalar, 'Std': std_scalar})
+
+        # Case 3 — Matrix features: transition matrices
+        elif mean_value.ndim == 2:
+            plt.figure(figsize=(8, 6))
+            sns.heatmap(mean_value, annot=False, cmap='viridis')
+            plt.title(f'Heatmap ({feature})')
+            plt.show()
+
+            # Again, report mean of all matrix values
+            mean_scalar = float(np.mean(mean_value))
+            std_scalar = float(np.mean(std_value))
+            summary.append({'Feature': feature, 'Mean': mean_scalar, 'Std': std_scalar})
+
+        else:
+            raise ValueError(f"Unhandled feature shape: {feature}")
+
+    # Print global summary table:
+    df = pd.DataFrame(summary)
+    print(df.to_string(index=False))
+
+    return df
     
 
 def extract_features(
