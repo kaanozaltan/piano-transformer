@@ -14,6 +14,8 @@ import copy
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import pretty_midi
+import pickle
 
 TOKENIZER_PATH = "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v1/tokenizer.json" # adapt path for local use
 
@@ -41,110 +43,119 @@ def get_mgeval_features(num_samples):
                    }
     return set_eval_init, kwargs_init
 
-def analyze_dataset_mgeval(dataset_path, features, max_samples=None):
-    dataset = glob.glob(os.path.join(dataset_path, '*.midi'))
-    if max_samples and len(dataset) > max_samples:
-        dataset = dataset[:max_samples]
-    num_samples = len(dataset)
-    set_eval_init = {'total_used_pitch':np.zeros((num_samples,1)),
-                 'total_used_note':np.zeros((num_samples,1)),
-                 'total_pitch_class_histogram':np.zeros((num_samples,12)),
-                 'pitch_range':np.zeros((num_samples,1)),
-                 'avg_pitch_shift':np.zeros((num_samples,1))}
-    set_eval = {key: set_eval_init[key] for key in features}
-    metrics_list = features
-    kwargs_init = {"total_used_pitch": {}, "total_used_note": {"track_num": 0}, "total_pitch_class_histogram": {}, "pitch_range": {}, "pitch_range": {"avg_pitch_shift": 0}}
-    kwargs = [kwargs_init[key] for key in features]
-    for j in range(len(metrics_list)):
-        for i in tqdm(range(0, num_samples), desc=f"Evaluating {metrics_list[j]}"):
-            feature = core.extract_feature(dataset[i])
-            set_eval[metrics_list[j]][i] = getattr(core.metrics(), metrics_list[j])(feature, **kwargs[j])
+
+# def analyze_dataset_mgeval(dataset_path, features, max_samples=None):
+#     dataset = glob.glob(os.path.join(dataset_path, '*.midi'))
+#     if max_samples and len(dataset) > max_samples:
+#         dataset = dataset[:max_samples]
+#     num_samples = len(dataset)
+#     set_eval_init = {'total_used_pitch':np.zeros((num_samples,1)),
+#                  'total_used_note':np.zeros((num_samples,1)),
+#                  'total_pitch_class_histogram':np.zeros((num_samples,12)),
+#                  'pitch_range':np.zeros((num_samples,1)),
+#                  'avg_pitch_shift':np.zeros((num_samples,1))}
+#     set_eval = {key: set_eval_init[key] for key in features}
+#     metrics_list = features
+#     kwargs_init = {"total_used_pitch": {}, "total_used_note": {"track_num": 0}, "total_pitch_class_histogram": {}, "pitch_range": {}, "pitch_range": {"avg_pitch_shift": 0}}
+#     kwargs = [kwargs_init[key] for key in features]
+#     for j in range(len(metrics_list)):
+#         for i in tqdm(range(0, num_samples), desc=f"Evaluating {metrics_list[j]}"):
+#             feature = core.extract_feature(dataset[i])
+#             set_eval[metrics_list[j]][i] = getattr(core.metrics(), metrics_list[j])(feature, **kwargs[j])
             
-    for i in range(0, len(metrics_list)):
-        print('------------------------')
-        print(metrics_list[i] + ':')
-        print('mean: ', np.mean(set_eval[metrics_list[i]], axis=0))
-        print('std: ', np.std(set_eval[metrics_list[i]], axis=0))
+#     for i in range(0, len(metrics_list)):
+#         print('------------------------')
+#         print(metrics_list[i] + ':')
+#         print('mean: ', np.mean(set_eval[metrics_list[i]], axis=0))
+#         print('std: ', np.std(set_eval[metrics_list[i]], axis=0))
         
 
-def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, features, graphics_path, max_samples=None):
-    dataset1 = glob.glob(os.path.join(dataset1_path, '*.midi'))
-    dataset2 = glob.glob(os.path.join(dataset2_path, '*.midi'))
-    if max_samples and len(dataset1) > max_samples:
-        dataset1 = dataset1[:max_samples]
-    if max_samples and len(dataset2) > max_samples:
-        dataset2 = dataset2[:max_samples]
-    num_samples = min(len(dataset1), len(dataset2))
-    metrics_list = features
+# def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, features, graphics_path, max_samples=None):
+#     dataset1 = glob.glob(os.path.join(dataset1_path, '*.midi'))
+#     dataset2 = glob.glob(os.path.join(dataset2_path, '*.midi'))
+#     if max_samples and len(dataset1) > max_samples:
+#         dataset1 = dataset1[:max_samples]
+#     if max_samples and len(dataset2) > max_samples:
+#         dataset2 = dataset2[:max_samples]
+#     num_samples = min(len(dataset1), len(dataset2))
+#     metrics_list = features
     
-    set_eval_init = {'total_used_pitch':np.zeros((num_samples,1)),
-                 'total_used_note':np.zeros((num_samples,1)),
-                 'total_pitch_class_histogram':np.zeros((num_samples,12)),
-                 'pitch_range':np.zeros((num_samples,1)),
-                 'avg_pitch_shift':np.zeros((num_samples,1))}
-    set1_eval = {key: set_eval_init[key] for key in features}
-    set2_eval = copy.deepcopy(set1_eval)
-    metrics_list = features
-    kwargs_init = {"total_used_pitch": {}, "total_used_note": {"track_num": 0}, "total_pitch_class_histogram": {}, "pitch_range": {}, "pitch_range": {"avg_pitch_shift": 0}}
-    kwargs = [kwargs_init[key] for key in features]
-    for j in range(len(metrics_list)):
-        for i in tqdm(range(0, num_samples), desc=f"Evaluating {metrics_list[j]} on dataset1"):
-            feature = core.extract_feature(dataset1[i])
-            set1_eval[metrics_list[j]][i] = getattr(core.metrics(), metrics_list[j])(feature, **kwargs[j])
-    for j in range(len(metrics_list)):
-        for i in tqdm(range(0, num_samples), desc=f"Evaluating {metrics_list[j]} on dataset2"):
-            feature = core.extract_feature(dataset2[i])
-            set2_eval[metrics_list[j]][i] = getattr(core.metrics(), metrics_list[j])(feature, **kwargs[j])
+#     set_eval_init = {'total_used_pitch':np.zeros((num_samples,1)),
+#                  'total_used_note':np.zeros((num_samples,1)),
+#                  'total_pitch_class_histogram':np.zeros((num_samples,12)),
+#                  'pitch_range':np.zeros((num_samples,1)),
+#                  'avg_pitch_shift':np.zeros((num_samples,1))}
+#     set1_eval = {key: set_eval_init[key] for key in features}
+#     set2_eval = copy.deepcopy(set1_eval)
+#     metrics_list = features
+#     kwargs_init = {"total_used_pitch": {}, "total_used_note": {"track_num": 0}, "total_pitch_class_histogram": {}, "pitch_range": {}, "pitch_range": {"avg_pitch_shift": 0}}
+#     kwargs = [kwargs_init[key] for key in features]
+#     for j in range(len(metrics_list)):
+#         for i in tqdm(range(0, num_samples), desc=f"Evaluating {metrics_list[j]} on dataset1"):
+#             feature = core.extract_feature(dataset1[i])
+#             set1_eval[metrics_list[j]][i] = getattr(core.metrics(), metrics_list[j])(feature, **kwargs[j])
+#     for j in range(len(metrics_list)):
+#         for i in tqdm(range(0, num_samples), desc=f"Evaluating {metrics_list[j]} on dataset2"):
+#             feature = core.extract_feature(dataset2[i])
+#             set2_eval[metrics_list[j]][i] = getattr(core.metrics(), metrics_list[j])(feature, **kwargs[j])
             
-    loo = LeaveOneOut()
-    loo.get_n_splits(np.arange(num_samples))
-    set1_intra = np.zeros((num_samples, len(metrics_list), num_samples-1))
-    for i in range(len(metrics_list)):
-        for train_index, test_index in tqdm(loo.split(np.arange(num_samples)), desc=f"Computing intra-set distances for {metrics_list[i]} on dataset1"):
-            set1_intra[test_index[0]][i] = utils.c_dist(set1_eval[metrics_list[i]][test_index], set1_eval[metrics_list[i]][train_index])
+#     loo = LeaveOneOut()
+#     loo.get_n_splits(np.arange(num_samples))
+#     set1_intra = np.zeros((num_samples, len(metrics_list), num_samples-1))
+#     for i in range(len(metrics_list)):
+#         for train_index, test_index in tqdm(loo.split(np.arange(num_samples)), desc=f"Computing intra-set distances for {metrics_list[i]} on dataset1"):
+#             set1_intra[test_index[0]][i] = utils.c_dist(set1_eval[metrics_list[i]][test_index], set1_eval[metrics_list[i]][train_index])
             
-    loo = LeaveOneOut()
-    loo.get_n_splits(np.arange(num_samples))
-    sets_inter = np.zeros((num_samples, len(metrics_list), num_samples))
-    for i in range(len(metrics_list)):
-        for train_index, test_index in tqdm(loo.split(np.arange(num_samples)), desc=f"Computing inter-set distances for {metrics_list[i]} between dataset1 and dataset2"):
-            sets_inter[test_index[0]][i] = utils.c_dist(set1_eval[metrics_list[i]][test_index], set2_eval[metrics_list[i]])
+#     loo = LeaveOneOut()
+#     loo.get_n_splits(np.arange(num_samples))
+#     sets_inter = np.zeros((num_samples, len(metrics_list), num_samples))
+#     for i in range(len(metrics_list)):
+#         for train_index, test_index in tqdm(loo.split(np.arange(num_samples)), desc=f"Computing inter-set distances for {metrics_list[i]} between dataset1 and dataset2"):
+#             sets_inter[test_index[0]][i] = utils.c_dist(set1_eval[metrics_list[i]][test_index], set2_eval[metrics_list[i]])
             
-    plot_set1_intra = np.transpose(set1_intra,(1, 0, 2)).reshape(len(metrics_list), -1)
-    plot_sets_inter = np.transpose(sets_inter,(1, 0, 2)).reshape(len(metrics_list), -1)
-    os.makedirs(graphics_path, exist_ok=True)
-    for i in range(0,len(metrics_list)):
-        sns.kdeplot(plot_set1_intra[i], label='intra_set1')
-        sns.kdeplot(plot_sets_inter[i], label='inter')
-        plt.title(metrics_list[i])
-        plt.xlabel('Euclidean distance')
-        plt.legend()
-        output_path = os.path.join(graphics_path, f"{metrics_list[i]}_distance_plot.png")
-        plt.savefig(output_path)
-        plt.clf()
+#     plot_set1_intra = np.transpose(set1_intra,(1, 0, 2)).reshape(len(metrics_list), -1)
+#     plot_sets_inter = np.transpose(sets_inter,(1, 0, 2)).reshape(len(metrics_list), -1)
+#     os.makedirs(graphics_path, exist_ok=True)
+#     for i in range(0,len(metrics_list)):
+#         sns.kdeplot(plot_set1_intra[i], label='intra_set1')
+#         sns.kdeplot(plot_sets_inter[i], label='inter')
+#         plt.title(metrics_list[i])
+#         plt.xlabel('Euclidean distance')
+#         plt.legend()
+#         output_path = os.path.join(graphics_path, f"{metrics_list[i]}_distance_plot.png")
+#         plt.savefig(output_path)
+#         plt.clf()
         
-    for i in range(0, len(metrics_list)):
-        print('------------------------')
-        print( metrics_list[i] + ':')
-        print('Kullback–Leibler divergence:',utils.kl_dist(plot_set1_intra[i], plot_sets_inter[i]))
-        print('Overlap area:', utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i]))
-    
-    
-        
+#     for i in range(0, len(metrics_list)):
+#         print('------------------------')
+#         print( metrics_list[i] + ':')
+#         print('Kullback–Leibler divergence:',utils.kl_dist(plot_set1_intra[i], plot_sets_inter[i]))
+#         print('Overlap area:', utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i]))
 
-    
 
-def analyze_dataset_mgeval(dataset_path, features=None, max_samples=None):
+def analyze_dataset_mgeval(dataset_path, graphics_path, features=None, max_samples=None):
     print("running full function")
     if not features:
-        features = ['total_used_pitch', 'total_pitch_class_histogram', 'pitch_class_transition_matrix',
+        features = ['total_used_pitch', 'total_pitch_class_histogram',
                     'pitch_range', 'avg_pitch_shift', 'total_used_note', 'avg_IOI', 'note_length_hist',
                     'note_length_transition_matrix']
     dataset = glob.glob(os.path.join(dataset_path, '*.midi'))
     if max_samples and len(dataset) > max_samples:
         dataset = dataset[:max_samples]
-        print(dataset)
+
+    valid_dataset = []
+    for path in dataset:
+        try:
+            midi = pretty_midi.PrettyMIDI(path)
+            if midi.instruments:  # has at least one instrument
+                valid_dataset.append(path)
+        except Exception as e:
+            print(f"Skipping {path} due to error: {e}")
+            continue
+
+    dataset = valid_dataset
     num_samples = len(dataset)
+
     set_eval_init, kwargs_init = get_mgeval_features(num_samples)
     set_eval = {key: set_eval_init[key] for key in features}
     kwargs = [kwargs_init[key] for key in features]
@@ -161,17 +172,12 @@ def analyze_dataset_mgeval(dataset_path, features=None, max_samples=None):
         print('std: ', np.std(set_eval[metrics_list[i]], axis=0))
 
     # summarize_mgeval_results(set_eval, metrics_list)
-    summarize_and_plot_mgeval_results(set_eval, metrics_list)
+    summarize_and_plot_mgeval_results(set_eval, metrics_list, graphics_path)
 
-    
-        
 
 def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, graphics_path, features=None, max_samples=None):
     print("running full function")
     if not features:
-        # features = ['total_used_pitch', 'total_pitch_class_histogram', 'pitch_class_transition_matrix',
-        #             'pitch_range', 'avg_pitch_shift', 'total_used_note', 'avg_IOI', 'note_length_hist',
-        #             'note_length_transition_matrix']
         features = ['total_used_pitch', 'total_pitch_class_histogram',
                     'pitch_range', 'avg_pitch_shift', 'total_used_note', 'avg_IOI', 'note_length_hist',
                     'note_length_transition_matrix']
@@ -181,6 +187,31 @@ def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, graphics_p
         dataset1 = dataset1[:max_samples]
     if max_samples and len(dataset2) > max_samples:
         dataset2 = dataset2[:max_samples]
+
+    # Filter valid MIDI files for dataset1
+    valid_dataset1 = []
+    for path in dataset1:
+        try:
+            midi = pretty_midi.PrettyMIDI(path)
+            if midi.instruments:
+                valid_dataset1.append(path)
+        except Exception as e:
+            print(f"Skipping {path} from dataset1: {e}")
+            continue
+    dataset1 = valid_dataset1
+
+    # Filter valid MIDI files for dataset2
+    valid_dataset2 = []
+    for path in dataset2:
+        try:
+            midi = pretty_midi.PrettyMIDI(path)
+            if midi.instruments:
+                valid_dataset2.append(path)
+        except Exception as e:
+            print(f"Skipping {path} from dataset2: {e}")
+            continue
+    dataset2 = valid_dataset2
+
     num_samples = min(len(dataset1), len(dataset2))
     metrics_list = features
     
@@ -231,6 +262,95 @@ def comparing_pairwise_distances_mgeval(dataset1_path, dataset2_path, graphics_p
         print('Kullback–Leibler divergence:',utils.kl_dist(plot_set1_intra[i], plot_sets_inter[i]))
         print('Overlap area:', utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i]))
     
+
+def evaluate_mgeval_combined(dataset1_path, dataset2_path, graphics_path, features=None, max_samples=None):
+    print("Running combined MGEval evaluation (absolute + relative)...")
+
+    if not features:
+        features = ['total_used_pitch', 'total_pitch_class_histogram',
+                    'pitch_range', 'avg_pitch_shift', 'total_used_note',
+                    'avg_IOI', 'note_length_hist', 'note_length_transition_matrix']
+
+    # load and filter
+    def load_valid_dataset(dataset_path):
+        dataset = glob.glob(os.path.join(dataset_path, '*.midi'))
+        if max_samples and len(dataset) > max_samples:
+            dataset = dataset[:max_samples]
+        valid_dataset = []
+        for path in dataset:
+            try:
+                midi = pretty_midi.PrettyMIDI(path)
+                if midi.instruments:
+                    valid_dataset.append(path)
+            except Exception as e:
+                print(f"Skipping {path}: {e}")
+        return valid_dataset
+
+    dataset1 = load_valid_dataset(dataset1_path)
+    dataset2 = load_valid_dataset(dataset2_path)
+
+    num_samples = min(len(dataset1), len(dataset2))
+    dataset1 = dataset1[:num_samples]
+    dataset2 = dataset2[:num_samples]
+
+    if num_samples == 0:
+        print("No valid MIDI files found in at least one dataset.")
+        return
+
+    # extract features
+    set_eval_init, kwargs_init = get_mgeval_features(num_samples)
+    set1_eval = {key: set_eval_init[key] for key in features}
+    set2_eval = copy.deepcopy(set1_eval)
+    kwargs = [kwargs_init[key] for key in features]
+
+    for j in range(len(features)):
+        print(f"Extracting {features[j]}")
+        for i in tqdm(range(num_samples), desc=f"  Dataset 1"):
+            feature = core.extract_feature(dataset1[i])
+            set1_eval[features[j]][i] = getattr(core.metrics(), features[j])(feature, **kwargs[j])
+        for i in tqdm(range(num_samples), desc=f"  Dataset 2"):
+            feature = core.extract_feature(dataset2[i])
+            set2_eval[features[j]][i] = getattr(core.metrics(), features[j])(feature, **kwargs[j])
+
+    # absolute evaluation
+    print("\nAbsolute Evaluation: Dataset 1")
+    summarize_and_plot_mgeval_results(set1_eval, features, graphics_path)
+    print("\nAbsolute Evaluation: Dataset 2")
+    summarize_and_plot_mgeval_results(set2_eval, features, graphics_path)
+
+    # relative evaluation
+    print("\nRelative Evaluation")
+    loo = LeaveOneOut()
+    loo.get_n_splits(np.arange(num_samples))
+    set1_intra = np.zeros((num_samples, len(features), num_samples - 1))
+    sets_inter = np.zeros((num_samples, len(features), num_samples))
+
+    for i in range(len(features)):
+        for train_index, test_index in tqdm(loo.split(np.arange(num_samples)), desc=f"Intra-set: {features[i]}"):
+            set1_intra[test_index[0]][i] = utils.c_dist(set1_eval[features[i]][test_index], set1_eval[features[i]][train_index])
+        for train_index, test_index in tqdm(loo.split(np.arange(num_samples)), desc=f"Inter-set: {features[i]}"):
+            sets_inter[test_index[0]][i] = utils.c_dist(set1_eval[features[i]][test_index], set2_eval[features[i]])
+
+    plot_set1_intra = np.transpose(set1_intra, (1, 0, 2)).reshape(len(features), -1)
+    plot_sets_inter = np.transpose(sets_inter, (1, 0, 2)).reshape(len(features), -1)
+
+    os.makedirs(graphics_path, exist_ok=True)
+    for i in range(len(features)):
+        sns.kdeplot(plot_set1_intra[i], label='intra')
+        sns.kdeplot(plot_sets_inter[i], label='inter')
+        plt.title(features[i])
+        plt.xlabel('Euclidean Distance')
+        plt.legend()
+        output_path = os.path.join(graphics_path, f"{features[i]}_distance_plot.png")
+        plt.savefig(output_path)
+        plt.clf()
+
+    for i in range(len(features)):
+        print('------------------------')
+        print(f"{features[i]}:")
+        print("Kullback-Leibler divergence:", utils.kl_dist(plot_set1_intra[i], plot_sets_inter[i]))
+        print("Overlap area:", utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i]))
+
     
 def summarize_mgeval_results(set_eval, metrics_list):
     summary = []
@@ -258,21 +378,27 @@ def summarize_mgeval_results(set_eval, metrics_list):
     return df       
 
 
-def summarize_and_plot_mgeval_results(set_eval, metrics_list):
+def summarize_and_plot_mgeval_results(set_eval, metrics_list, graphics_path=None):
     summary = []
+
+    if graphics_path is not None:
+        os.makedirs(graphics_path, exist_ok=True)
 
     for feature in metrics_list:
         mean_value = np.mean(set_eval[feature], axis=0)
         std_value = np.std(set_eval[feature], axis=0)
 
-        # Case 1 — Scalar features:
-        if mean_value.ndim == 0 or mean_value.size == 1:
-            mean_scalar = float(mean_value)
-            std_scalar = float(std_value)
-            summary.append({'Feature': feature, 'Mean': mean_scalar, 'Std': std_scalar})
+        entry = {'Feature': feature}
 
-        # Case 2 — Vector features: pitch_class_histogram and note_length_hist
+        # Scalar
+        if mean_value.ndim == 0 or mean_value.size == 1:
+            entry['Mean'] = float(mean_value)
+            entry['Std'] = float(std_value)
+
+        # Vector
         elif mean_value.ndim == 1:
+            entry['Mean'] = mean_value
+            entry['Std'] = std_value
 
             if feature == 'total_pitch_class_histogram':
                 labels = ['C', 'C#', 'D', 'D#', 'E', 'F',
@@ -281,7 +407,11 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list):
                 plt.bar(labels, mean_value)
                 plt.title(f'Pitch Class Histogram ({feature})')
                 plt.ylabel('Proportion')
-                plt.show()
+                if graphics_path:
+                    plt.savefig(os.path.join(graphics_path, f'{feature}.png'), bbox_inches='tight')
+                    plt.close()
+                else:
+                    plt.show()
 
             elif feature == 'note_length_hist':
                 labels = [
@@ -294,33 +424,50 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list):
                 plt.title(f'Note Length Histogram ({feature})')
                 plt.ylabel('Proportion')
                 plt.xticks(rotation=45)
-                plt.show()
+                if graphics_path:
+                    plt.savefig(os.path.join(graphics_path, f'{feature}.png'), bbox_inches='tight')
+                    plt.close()
+                else:
+                    plt.show()
 
-            # Still report simple global mean/std for table:
-            mean_scalar = float(np.mean(mean_value))
-            std_scalar = float(np.mean(std_value))
-            summary.append({'Feature': feature, 'Mean': mean_scalar, 'Std': std_scalar})
-
-        # Case 3 — Matrix features: transition matrices
+        # Matrix
         elif mean_value.ndim == 2:
+            entry['Mean'] = mean_value
+            entry['Std'] = std_value
+
             plt.figure(figsize=(8, 6))
             sns.heatmap(mean_value, annot=False, cmap='viridis')
             plt.title(f'Heatmap ({feature})')
-            plt.show()
-
-            # Again, report mean of all matrix values
-            mean_scalar = float(np.mean(mean_value))
-            std_scalar = float(np.mean(std_value))
-            summary.append({'Feature': feature, 'Mean': mean_scalar, 'Std': std_scalar})
+            if graphics_path:
+                plt.savefig(os.path.join(graphics_path, f'{feature}.png'), bbox_inches='tight')
+                plt.close()
+            else:
+                plt.show()
 
         else:
             raise ValueError(f"Unhandled feature shape: {feature}")
 
-    # Print global summary table:
-    df = pd.DataFrame(summary)
-    print(df.to_string(index=False))
+        summary.append(entry)
 
-    return df
+    # Print scalar results only
+    print_rows = []
+    for item in summary:
+        if np.isscalar(item['Mean']) or (isinstance(item['Mean'], np.ndarray) and item['Mean'].ndim == 0):
+            print_rows.append({
+                'Feature': item['Feature'],
+                'Mean': item['Mean'],
+                'Std': item['Std'],
+            })
+
+    if print_rows:
+        print(pd.DataFrame(print_rows).to_string(index=False))
+
+    # Save full results to file
+    if graphics_path:
+        output_path = os.path.join(graphics_path, "mgeval_summary.pkl")
+        pd.to_pickle(summary, output_path)
+        print(f"\nSaved full summary to {output_path}")
+    return summary
     
 
 def extract_features(

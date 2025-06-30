@@ -192,6 +192,7 @@ wandb/
 
 /data
 /experiments
+logs/
 
 output*
 .envrc
