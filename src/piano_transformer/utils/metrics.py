@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import pretty_midi
 import pickle
+import shutil
+import hashlib
+import random
 
 TOKENIZER_PATH = "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v1/tokenizer.json" # adapt path for local use
 
@@ -273,7 +276,7 @@ def evaluate_mgeval_combined(dataset1_path, dataset2_path, graphics_path, featur
 
     # load and filter
     def load_valid_dataset(dataset_path):
-        dataset = glob.glob(os.path.join(dataset_path, '*.midi'))
+        dataset = glob.glob(os.path.join(dataset_path, '**', '*.midi'), recursive=True)
         if max_samples and len(dataset) > max_samples:
             dataset = dataset[:max_samples]
         valid_dataset = []
@@ -468,7 +471,40 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list, graphics_path=None
         pd.to_pickle(summary, output_path)
         print(f"\nSaved full summary to {output_path}")
     return summary
-    
+
+
+def create_subset(input_dir, subset_size):
+    parent_dir = os.path.dirname(os.path.abspath(input_dir))
+    base_name = os.path.basename(os.path.normpath(input_dir))
+    output_dir = os.path.join(parent_dir, base_name + '_subset')
+
+    if os.path.exists(output_dir):
+        print(f"Deleting existing subset.")
+        shutil.rmtree(output_dir)
+
+    all_files = sorted(glob.glob(os.path.join(input_dir, '**', '*.midi'), recursive=True), key=os.path.basename)
+
+    if len(all_files) < subset_size:
+        print("Subset size exceeds available files.")
+        return
+
+    # Create seed (if filenames are identical, subset will also be identical)
+    relative_names = sorted([os.path.basename(path) for path in all_files])
+    seed_input = "".join(relative_names)
+    hash_seed = int(hashlib.sha256(seed_input.encode()).hexdigest(), 16) % (10**8)
+    print(f"Seed: {hash_seed}")
+
+    rng = random.Random(hash_seed)
+    subset = rng.sample(all_files, subset_size)
+
+    os.makedirs(output_dir)
+    for src in subset:
+        dst = os.path.join(output_dir, os.path.basename(src))
+        shutil.copy2(src, dst)
+
+    print(f"Created subset at {output_dir}.")
+    return output_dir
+
 
 def extract_features(
     directory,
@@ -523,6 +559,7 @@ def extract_features(
         "duration": duration_vals,
         "velocity": velocity_vals
     }
+
 
 def compute_pdf(values, num_points=1000):
     values = np.array(values).astype(np.float64)
