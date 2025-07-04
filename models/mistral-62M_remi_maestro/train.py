@@ -25,7 +25,7 @@ cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 print(f"Model:\n{cfg.model_name}")
 
 load_dotenv()
-os.environ["WANDB_ENTITY"] = "jonathanlehmkuhl-rwth-aachen-university"
+os.environ["WANDB_ENTITY"] = "freddim-rwth-aachen-university"
 os.environ["WANDB_PROJECT"] = "piano-transformer"
 wandb.login()
 

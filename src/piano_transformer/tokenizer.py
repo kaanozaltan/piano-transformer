@@ -107,9 +107,10 @@ class AttributeControlGenre(AttributeControl):
 
 if __name__ == "__main__":
     # Choose dataset
-    file_path = Path("data/aria-midi-flattened")
+    # file_path = Path("data/aria-midi-flattened")
     # file_path = Path("data/maestro")
     # file_path = Path("data/adl-piano-midi-processed")
+    file_path = Path("data/aria-midi-v1-deduped-ext")
 
     midi_files = list(file_path.rglob("*.mid")) + list(file_path.rglob("*.midi"))
     print("MIDI files found:", len(midi_files))
@@ -130,11 +131,12 @@ if __name__ == "__main__":
         tempo_range=(40, 250),
     )
     tokenizer = REMI(config)
-    tokenizer.add_attribute_control(AttributeControlGenre())
+    # tokenizer.add_attribute_control(AttributeControlGenre())
 
-    # midi_files = midi_files[:100000]  # Limit to first 100 files for testing
+    midi_files = midi_files[:100000]  # Limit to first x files for testing
 
     tokenizer.train(vocab_size=30000, files_paths=midi_files)
+    tokenizer.save("tokenizer.json")
 
 
 
