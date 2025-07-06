@@ -1,10 +1,12 @@
 import time
 from copy import deepcopy
 from pathlib import Path
+import math
 
 from torch.utils.data import DataLoader
 import torch
 from tqdm import tqdm
+import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, GenerationConfig
 
 from piano_transformer.config import load_config
@@ -161,8 +163,45 @@ def generate_from_scratch(output, num_samples):
 
             count += 1
             
-generate(test_ds, cfg.output_path / "test_jonathan_2")
+def compute_perplexity(model, dataset, collator, batch_size=32):
+    model.eval()
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
+    
+    total_loss = 0.0
+    total_tokens = 0
 
-generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
+    with torch.no_grad():
+        for batch in tqdm(dataloader, desc="Evaluating perplexity"):
+            input_ids = batch["input_ids"].to(model.device)       # [B, T]
+            attention_mask = batch["attention_mask"].to(model.device)
+
+            # Shift inputs and targets for teacher forcing
+            inputs = input_ids[:, :-1]
+            targets = input_ids[:, 1:]
+            mask = attention_mask[:, 1:]
+
+            outputs = model(inputs)
+            logits = outputs.logits  # [B, T-1, vocab_size]
+
+            loss = F.cross_entropy(
+                logits.reshape(-1, logits.size(-1)),
+                targets.reshape(-1),
+                reduction='none'
+            )
+
+            # Mask out the padding positions
+            loss = loss * mask.reshape(-1)
+            total_loss += loss.sum().item()
+            total_tokens += mask.sum().item()
+
+    avg_nll = total_loss / total_tokens
+    perplexity = math.exp(avg_nll)
+    return perplexity
+
+# generate(test_ds, cfg.output_path / "test_jonathan_2")
+# generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
+
+# perplexity = compute_perplexity(model, test_ds, collator, batch_size=256)
+# print(f"Perplexity on test set: {perplexity:.2f}")
 
 # midi2wav(cfg.output_path / "test_jonathan", cfg.output_path / "test_jonathan_wav", "SalC5Light2.sf2")
