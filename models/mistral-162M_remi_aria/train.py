@@ -122,6 +122,7 @@ trainer_cfg = {
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
+    "max_steps": "10200",
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
