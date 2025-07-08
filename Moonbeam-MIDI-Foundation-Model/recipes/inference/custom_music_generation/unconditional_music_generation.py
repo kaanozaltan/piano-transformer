@@ -1,4 +1,5 @@
 from typing import List, Optional
+from pathlib import Path
 
 import fire
 import pandas as pd
@@ -60,7 +61,8 @@ def main(
         top_p=top_p,
     )
     
-    save_folder = os.path.join(finetuned_PEFT_weight_path, os.path.basename(ckpt_dir), f"temperature_{temperature}_top_p_{top_p}")
+    # save_folder = os.path.join(finetuned_PEFT_weight_path, os.path.basename(ckpt_dir), f"temperature_{temperature}_top_p_{top_p}")
+    save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, f"temperature_{temperature}_top_p_{top_p}")
     os.makedirs(save_folder, exist_ok=True)
 
     for i, (dialog, result) in enumerate(zip(prompts, results)):
