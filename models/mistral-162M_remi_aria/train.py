@@ -46,9 +46,9 @@ rng = np.random.default_rng(cfg.seed)
 # Use 10.000 files from aria for moderate-scale pre-training
 for split in ["train", "validation", "test"]:
     if split == "train":
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:10000]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:35000]
     else:
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:1250]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:4375]
     print(f"Number of {split} files: {len(midi_lists[split])}")
 
 # TOKENIZATION
@@ -110,7 +110,7 @@ trainer_cfg = {
     "gradient_accumulation_steps": 1,
     "per_device_train_batch_size": 64,
     "per_device_eval_batch_size": 64,
-    "learning_rate": 4e-4,
+    "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
     "lr_scheduler_type": "cosine_with_min_lr",
