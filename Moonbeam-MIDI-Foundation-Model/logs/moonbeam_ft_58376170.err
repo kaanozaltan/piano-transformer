@@ -1,0 +1,54 @@
+[INFO] Module zlib/1.3.1 loaded.
+[INFO] Module binutils/2.42 loaded.
+[INFO] Module GCCcore/13.3.0 loaded.
+[INFO] Module zlib/1.3.1 loaded.
+[INFO] Module binutils/2.42 loaded.
+[INFO] Module Python/3.12.3 loaded.
+[INFO] Module CUDA/12.6.3 loaded.
+W0625 08:45:58.205000 343465 torch/distributed/run.py:793] 
+W0625 08:45:58.205000 343465 torch/distributed/run.py:793] *****************************************
+W0625 08:45:58.205000 343465 torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0625 08:45:58.205000 343465 torch/distributed/run.py:793] *****************************************
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/model_checkpointing/checkpoint_handler.py:17: DeprecationWarning: `torch.distributed._shard.checkpoint` will be deprecated, use `torch.distributed.checkpoint` instead
+  from torch.distributed._shard.checkpoint import (
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/model_checkpointing/checkpoint_handler.py:17: DeprecationWarning: `torch.distributed._shard.checkpoint` will be deprecated, use `torch.distributed.checkpoint` instead
+  from torch.distributed._shard.checkpoint import (
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py:9: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py:9: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging
+W0625 08:46:48.600000 343465 torch/distributed/elastic/multiprocessing/api.py:897] Sending process 343498 closing signal SIGTERM
+E0625 08:46:49.010000 343465 torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: -9) local_rank: 1 (pid: 343499) of binary: /rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/bin/python3
+Traceback (most recent call last):
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/bin/torchrun", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/run.py", line 919, in main
+    run(args)
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+=======================================================
+recipes/finetuning/real_finetuning_uncon_gen.py FAILED
+-------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+-------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-06-25_08:46:48
+  host      : n23g0008.hpc.itc.rwth-aachen.de
+  rank      : 1 (local_rank: 1)
+  exitcode  : -9 (pid: 343499)
+  error_file: <N/A>
+  traceback : Signal 9 (SIGKILL) received by PID 343499
+=======================================================
+slurmstepd: error: Detected 1 oom-kill event(s) in StepId=58376170.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

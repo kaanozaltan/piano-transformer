@@ -85,6 +85,16 @@ def setup_wandb(train_config, fsdp_config, llama_config, **kwargs):
     return run
 
 
+def print_mem(stage):
+    if torch.cuda.is_available():
+        print(f"\n[DEBUG][{stage}] CUDA memory summary:")
+        print(torch.cuda.memory_summary())
+    elif hasattr(torch, "xpu") and torch.xpu.is_available():
+        print(f"\n[DEBUG][{stage}] XPU memory summary:")
+        print(torch.xpu.memory_summary())
+    else:
+        print(f"\n[DEBUG][{stage}] No GPU available.")
+
 def main(**kwargs):
     # Extract model config path
     model_config_path = kwargs.pop("model_config_path", "src/llama_recipes/configs/model_config.json")
@@ -145,9 +155,10 @@ def main(**kwargs):
         print(f"model_config:{llama_config}")
         model = LlamaForCausalLM(llama_config)
 
-        model_checkpoint = torch.load(train_config.trained_checkpoint_path)
-        
+        model_checkpoint = torch.load(train_config.trained_checkpoint_path)    
         checkpoint = model_checkpoint['model_state_dict']
+        # checkpoint = torch.load(train_config.trained_checkpoint_path, weights_only=True)
+
         new_state_dict = {}
         for k, v in checkpoint.items():
             if k.startswith('module.'): # Check if the keys have 'module.' prefix and remove it if necessary
@@ -165,6 +176,7 @@ def main(**kwargs):
 
     # Load the tokenizer and add special tokens
     tokenizer = MusicTokenizer(timeshift_vocab_size = llama_config.onset_vocab_size, dur_vocab_size = llama_config.dur_vocab_size, octave_vocab_size = llama_config.octave_vocab_size, pitch_class_vocab_size = llama_config.pitch_class_vocab_size, instrument_vocab_size = llama_config.instrument_vocab_size, velocity_vocab_size = llama_config.velocity_vocab_size, sos_token = llama_config.sos_token, eos_token = llama_config.eos_token, pad_token = llama_config.pad_token)
+    print_mem("After tokenizer load")
 
     dataset_config = generate_dataset_config(train_config, kwargs)
 
@@ -245,6 +257,7 @@ def main(**kwargs):
         dataset_config,
         split="train",
     )
+    print_mem("After train dataset load")
 
     if not train_config.enable_fsdp or rank == 0:
         print(f"--> Training Set Length = {len(dataset_train)}")
@@ -254,6 +267,7 @@ def main(**kwargs):
         dataset_config,
         split="validation",
     )
+    print_mem("After val dataset load")
     if train_config.batching_strategy == "packing":
         dataset_train = ConcatDataset_hybrid_padding_concatenating(dataset_train, chunk_size=train_config.context_length, split="train",data_dir = dataset_config.data_dir)
 
@@ -266,6 +280,7 @@ def main(**kwargs):
         pin_memory=True,
         **train_dl_kwargs,
     )
+    print_mem("After train DataLoader creation")
 
     eval_dataloader = None
     if train_config.run_validation:
@@ -280,6 +295,7 @@ def main(**kwargs):
             pin_memory=True,
             **val_dl_kwargs,
         )
+        print_mem("After val DataLoader creation")
 
     # Initialize the optimizer and learning rate scheduler
     if fsdp_config.pure_bf16 and fsdp_config.optimizer == "anyprecision":
@@ -297,6 +313,7 @@ def main(**kwargs):
             lr=train_config.lr,
             weight_decay=train_config.weight_decay,
         )
+    print_mem("After optimizer creation")
 
     starting_epoch, starting_step = 0, 0
 
@@ -328,6 +345,7 @@ def main(**kwargs):
         rank if (train_config.enable_fsdp or train_config.enable_ddp) else None,
         wandb_run,
     )
+    print_mem("After training loop")
     if not train_config.enable_fsdp or rank==0:
         [print(f'Key: {k}, Value: {v}') for k, v in results.items()]
         if train_config.use_wandb:

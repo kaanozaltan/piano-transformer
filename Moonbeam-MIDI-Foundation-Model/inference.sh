@@ -5,16 +5,16 @@ export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 # Define variables
 CSV_FILE="preprocessed/839M/train_test_split.csv"
 TOP_P=0.95
-TEMPERATURE=0.9
+TEMPERATURE=1.2
 MODEL_CONFIG="src/llama_recipes/configs/model_config.json"
-CKPT_DIR="checkpoints/pre-trained/moonbeam_839.pt"
+CKPT_DIR="checkpoints/pre-trained/moonbeam_839M.pt"
 PEFT_WEIGHT="checkpoints/fine-tuned/fine-tuned_3_epoch_839M/0-370/"
 TOKENIZER_PATH="tokenizer.model"
-MAX_SEQ_LEN=512
-MAX_GEN_LEN=512
+MAX_SEQ_LEN=1024
+MAX_GEN_LEN=1024
 MAX_BATCH_SIZE=6
-NUM_TEST_DATA=30
-PROMPT_LEN=100
+NUM_TEST_DATA=20
+PROMPT_LEN=200
 
 # Run the inference script
 torchrun --nproc_per_node=1 recipes/inference/custom_music_generation/unconditional_music_generation.py \
