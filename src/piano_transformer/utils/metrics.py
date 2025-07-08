@@ -389,7 +389,7 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list, dataset_name, outp
 def create_subset(input_dir, subset_size):
     parent_dir = os.path.dirname(os.path.abspath(input_dir))
     base_name = os.path.basename(os.path.normpath(input_dir))
-    output_dir = os.path.join(parent_dir, base_name + '_subset')
+    output_dir = os.path.join(parent_dir, base_name + '_subset_' + str(subset_size))
 
     if os.path.exists(output_dir):
         # print(f"Deleting existing subset.")
