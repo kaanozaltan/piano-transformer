@@ -79,11 +79,6 @@ def make_trainer(
         data_collator=data_collator,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        callbacks=[
-            EarlyStoppingCallback(
-                early_stopping_patience=cfg["early_stopping_patience"],
-            )
-        ],
         # preprocess_logits_for_metrics=preprocess_logits,
         # compute_metrics=compute_metrics,
     )
