@@ -1,0 +1,235 @@
+[INFO] Module zlib/1.3.1 loaded.
+[INFO] Module binutils/2.42 loaded.
+[INFO] Module GCCcore/13.3.0 loaded.
+[INFO] Module zlib/1.3.1 loaded.
+[INFO] Module binutils/2.42 loaded.
+[INFO] Module Python/3.12.3 loaded.
+[INFO] Module CUDA/12.6.3 loaded.
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/model_checkpointing/checkpoint_handler.py:17: DeprecationWarning: `torch.distributed._shard.checkpoint` will be deprecated, use `torch.distributed.checkpoint` instead
+  from torch.distributed._shard.checkpoint import (
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py:9: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/real_finetuning_uncon_gen.py:158: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  model_checkpoint = torch.load(train_config.trained_checkpoint_path)
+wandb: Currently logged in as: ikunabel (optuna) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.20.1
+wandb: Run data is saved locally in /rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/wandb/run-20250708_185827-3vqw4drt
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run clean-aardvark-29
+wandb: ⭐️ View project at https://wandb.ai/optuna/Unconditional_Generation
+wandb: 🚀 View run at https://wandb.ai/optuna/Unconditional_Generation/runs/3vqw4drt
+[rank0]:[W708 18:59:17.499950548 Utils.hpp:110] Warning: Environment variable NCCL_ASYNC_ERROR_HANDLING is deprecated; use TORCH_NCCL_ASYNC_ERROR_HANDLING instead (function operator())
+Preprocessing dataset:   0%|          | 0/750 [00:00<?, ?it/s]Preprocessing dataset:   0%|          | 3/750 [00:00<00:30, 24.83it/s]Preprocessing dataset:   1%|          | 6/750 [00:00<00:29, 24.81it/s]Preprocessing dataset:   1%|          | 9/750 [00:00<00:28, 26.19it/s]Preprocessing dataset:   2%|▏         | 12/750 [00:00<00:42, 17.31it/s]Preprocessing dataset:   2%|▏         | 15/750 [00:00<00:37, 19.46it/s]Preprocessing dataset:   2%|▏         | 18/750 [00:01<00:48, 15.25it/s]Preprocessing dataset:   3%|▎         | 21/750 [00:01<00:41, 17.43it/s]Preprocessing dataset:   3%|▎         | 26/750 [00:01<00:30, 23.97it/s]Preprocessing dataset:   4%|▍         | 32/750 [00:01<00:22, 31.35it/s]Preprocessing dataset:   5%|▍         | 36/750 [00:01<00:21, 32.53it/s]Preprocessing dataset:   5%|▌         | 40/750 [00:01<00:30, 23.45it/s]Preprocessing dataset:   6%|▌         | 45/750 [00:01<00:26, 27.08it/s]Preprocessing dataset:   7%|▋         | 52/750 [00:01<00:20, 34.77it/s]Preprocessing dataset:   8%|▊         | 58/750 [00:02<00:17, 39.55it/s]Preprocessing dataset:   9%|▊         | 64/750 [00:02<00:15, 43.97it/s]Preprocessing dataset:   9%|▉         | 69/750 [00:02<00:22, 29.83it/s]Preprocessing dataset:  10%|▉         | 73/750 [00:02<00:23, 28.92it/s]Preprocessing dataset:  10%|█         | 77/750 [00:02<00:25, 26.14it/s]Preprocessing dataset:  11%|█         | 81/750 [00:03<00:35, 19.03it/s]Preprocessing dataset:  11%|█         | 84/750 [00:03<00:33, 19.63it/s]Preprocessing dataset:  12%|█▏        | 87/750 [00:03<00:31, 21.22it/s]Preprocessing dataset:  12%|█▏        | 90/750 [00:03<00:38, 16.94it/s]Preprocessing dataset:  13%|█▎        | 94/750 [00:03<00:34, 19.27it/s]Preprocessing dataset:  13%|█▎        | 97/750 [00:04<00:32, 20.18it/s]Preprocessing dataset:  13%|█▎        | 100/750 [00:04<00:32, 20.23it/s]Preprocessing dataset:  14%|█▍        | 105/750 [00:04<00:25, 25.21it/s]Preprocessing dataset:  14%|█▍        | 108/750 [00:04<00:37, 17.27it/s]Preprocessing dataset:  15%|█▍        | 111/750 [00:04<00:36, 17.60it/s]Preprocessing dataset:  15%|█▌        | 116/750 [00:04<00:28, 22.52it/s]Preprocessing dataset:  16%|█▌        | 119/750 [00:05<00:35, 17.99it/s]Preprocessing dataset:  16%|█▋        | 122/750 [00:05<00:31, 19.85it/s]Preprocessing dataset:  17%|█▋        | 125/750 [00:05<00:30, 20.24it/s]Preprocessing dataset:  17%|█▋        | 129/750 [00:05<00:25, 24.17it/s]Preprocessing dataset:  18%|█▊        | 132/750 [00:05<00:41, 15.01it/s]Preprocessing dataset:  18%|█▊        | 135/750 [00:06<00:39, 15.62it/s]Preprocessing dataset:  18%|█▊        | 138/750 [00:06<00:51, 11.82it/s]Preprocessing dataset:  19%|█▉        | 141/750 [00:06<00:43, 14.10it/s]Preprocessing dataset:  19%|█▉        | 144/750 [00:06<00:40, 14.98it/s]Preprocessing dataset:  19%|█▉        | 146/750 [00:06<00:40, 14.74it/s]Preprocessing dataset:  20%|█▉        | 148/750 [00:07<00:53, 11.27it/s]Preprocessing dataset:  20%|██        | 151/750 [00:07<00:44, 13.52it/s]Preprocessing dataset:  21%|██        | 155/750 [00:07<00:34, 17.09it/s]Preprocessing dataset:  21%|██        | 159/750 [00:07<00:27, 21.22it/s]Preprocessing dataset:  22%|██▏       | 163/750 [00:07<00:24, 24.09it/s]Preprocessing dataset:  22%|██▏       | 166/750 [00:08<00:34, 16.86it/s]Preprocessing dataset:  23%|██▎       | 170/750 [00:08<00:28, 20.54it/s]Preprocessing dataset:  23%|██▎       | 174/750 [00:08<00:25, 22.92it/s]Preprocessing dataset:  24%|██▎       | 177/750 [00:08<00:23, 24.27it/s]Preprocessing dataset:  24%|██▍       | 180/750 [00:08<00:22, 25.51it/s]Preprocessing dataset:  24%|██▍       | 183/750 [00:08<00:21, 26.56it/s]Preprocessing dataset:  25%|██▍       | 186/750 [00:08<00:31, 17.67it/s]Preprocessing dataset:  25%|██▌       | 189/750 [00:09<00:28, 19.70it/s]Preprocessing dataset:  26%|██▌       | 193/750 [00:09<00:24, 22.36it/s]Preprocessing dataset:  26%|██▌       | 196/750 [00:09<00:23, 23.98it/s]Preprocessing dataset:  27%|██▋       | 202/750 [00:09<00:17, 30.98it/s]Preprocessing dataset:  28%|██▊       | 208/750 [00:09<00:14, 37.88it/s]Preprocessing dataset:  29%|██▊       | 214/750 [00:09<00:12, 42.70it/s]Preprocessing dataset:  29%|██▉       | 219/750 [00:09<00:14, 36.81it/s]Preprocessing dataset:  30%|██▉       | 224/750 [00:10<00:22, 22.92it/s]Preprocessing dataset:  30%|███       | 228/750 [00:10<00:20, 25.11it/s]Preprocessing dataset:  31%|███       | 233/750 [00:10<00:18, 27.57it/s]Preprocessing dataset:  32%|███▏      | 237/750 [00:10<00:17, 28.75it/s]Preprocessing dataset:  32%|███▏      | 241/750 [00:10<00:16, 31.08it/s]Preprocessing dataset:  33%|███▎      | 246/750 [00:10<00:14, 35.12it/s]Preprocessing dataset:  33%|███▎      | 250/750 [00:11<00:22, 22.39it/s]Preprocessing dataset:  34%|███▍      | 254/750 [00:11<00:19, 25.45it/s]Preprocessing dataset:  34%|███▍      | 258/750 [00:11<00:18, 27.30it/s]Preprocessing dataset:  35%|███▌      | 263/750 [00:11<00:16, 30.33it/s]Preprocessing dataset:  36%|███▌      | 269/750 [00:11<00:13, 35.43it/s]Preprocessing dataset:  36%|███▋      | 273/750 [00:11<00:14, 33.81it/s]Preprocessing dataset:  37%|███▋      | 277/750 [00:11<00:14, 31.85it/s]Preprocessing dataset:  38%|███▊      | 282/750 [00:12<00:13, 33.82it/s]Preprocessing dataset:  38%|███▊      | 286/750 [00:12<00:21, 21.42it/s]Preprocessing dataset:  39%|███▊      | 290/750 [00:12<00:19, 23.76it/s]Preprocessing dataset:  39%|███▉      | 295/750 [00:12<00:16, 26.83it/s]Preprocessing dataset:  40%|███▉      | 299/750 [00:12<00:16, 27.46it/s]Preprocessing dataset:  40%|████      | 303/750 [00:12<00:15, 28.73it/s]Preprocessing dataset:  41%|████      | 308/750 [00:13<00:13, 32.45it/s]Preprocessing dataset:  42%|████▏     | 312/750 [00:13<00:15, 28.39it/s]Preprocessing dataset:  42%|████▏     | 316/750 [00:13<00:24, 17.45it/s]Preprocessing dataset:  43%|████▎     | 319/750 [00:13<00:23, 18.41it/s]Preprocessing dataset:  43%|████▎     | 322/750 [00:13<00:21, 20.36it/s]Preprocessing dataset:  43%|████▎     | 326/750 [00:14<00:17, 23.59it/s]Preprocessing dataset:  44%|████▍     | 330/750 [00:14<00:15, 26.42it/s]Preprocessing dataset:  45%|████▍     | 334/750 [00:14<00:14, 28.25it/s]Preprocessing dataset:  45%|████▌     | 338/750 [00:14<00:13, 29.47it/s]Preprocessing dataset:  46%|████▌     | 342/750 [00:14<00:13, 30.75it/s]Preprocessing dataset:  46%|████▌     | 346/750 [00:14<00:12, 32.55it/s]Preprocessing dataset:  47%|████▋     | 350/750 [00:14<00:12, 32.70it/s]Preprocessing dataset:  47%|████▋     | 356/750 [00:14<00:10, 39.31it/s]Preprocessing dataset:  48%|████▊     | 361/750 [00:14<00:09, 39.22it/s]Preprocessing dataset:  49%|████▉     | 366/750 [00:15<00:15, 24.53it/s]Preprocessing dataset:  50%|████▉     | 373/750 [00:15<00:11, 31.74it/s]Preprocessing dataset:  51%|█████     | 380/750 [00:15<00:09, 37.98it/s]Preprocessing dataset:  51%|█████▏    | 385/750 [00:15<00:09, 39.45it/s]Preprocessing dataset:  52%|█████▏    | 390/750 [00:15<00:09, 38.78it/s]Preprocessing dataset:  53%|█████▎    | 397/750 [00:15<00:08, 42.32it/s]Preprocessing dataset:  54%|█████▎    | 402/750 [00:16<00:08, 42.72it/s]Preprocessing dataset:  55%|█████▍    | 409/750 [00:16<00:07, 46.36it/s]Preprocessing dataset:  55%|█████▌    | 414/750 [00:16<00:08, 40.05it/s]Preprocessing dataset:  56%|█████▌    | 419/750 [00:16<00:08, 37.61it/s]Preprocessing dataset:  56%|█████▋    | 423/750 [00:16<00:09, 35.93it/s]Preprocessing dataset:  57%|█████▋    | 427/750 [00:17<00:15, 20.54it/s]Preprocessing dataset:  57%|█████▋    | 431/750 [00:17<00:14, 22.58it/s]Preprocessing dataset:  58%|█████▊    | 435/750 [00:17<00:12, 25.29it/s]Preprocessing dataset:  59%|█████▊    | 440/750 [00:17<00:10, 28.91it/s]Preprocessing dataset:  59%|█████▉    | 444/750 [00:17<00:10, 30.50it/s]Preprocessing dataset:  60%|█████▉    | 448/750 [00:17<00:09, 30.99it/s]Preprocessing dataset:  60%|██████    | 453/750 [00:17<00:08, 35.12it/s]Preprocessing dataset:  61%|██████    | 457/750 [00:17<00:08, 34.46it/s]Preprocessing dataset:  61%|██████▏   | 461/750 [00:18<00:09, 31.37it/s]Preprocessing dataset:  62%|██████▏   | 465/750 [00:18<00:08, 32.98it/s]Preprocessing dataset:  63%|██████▎   | 470/750 [00:18<00:07, 35.30it/s]Preprocessing dataset:  64%|██████▎   | 477/750 [00:18<00:06, 42.85it/s]Preprocessing dataset:  64%|██████▍   | 483/750 [00:18<00:05, 45.56it/s]Preprocessing dataset:  65%|██████▌   | 489/750 [00:18<00:05, 47.84it/s]Preprocessing dataset:  66%|██████▌   | 494/750 [00:19<00:10, 25.55it/s]Preprocessing dataset:  67%|██████▋   | 500/750 [00:19<00:08, 31.23it/s]Preprocessing dataset:  68%|██████▊   | 507/750 [00:19<00:06, 37.69it/s]Preprocessing dataset:  69%|██████▊   | 514/750 [00:19<00:05, 44.46it/s]Preprocessing dataset:  69%|██████▉   | 521/750 [00:19<00:04, 49.83it/s]Preprocessing dataset:  70%|███████   | 527/750 [00:19<00:04, 51.00it/s]Preprocessing dataset:  71%|███████   | 533/750 [00:19<00:04, 48.17it/s]Preprocessing dataset:  72%|███████▏  | 539/750 [00:19<00:04, 44.36it/s]Preprocessing dataset:  73%|███████▎  | 545/750 [00:20<00:04, 47.55it/s]Preprocessing dataset:  73%|███████▎  | 551/750 [00:20<00:04, 42.73it/s]Preprocessing dataset:  74%|███████▍  | 556/750 [00:20<00:05, 36.28it/s]Preprocessing dataset:  75%|███████▍  | 560/750 [00:20<00:06, 28.94it/s]Preprocessing dataset:  75%|███████▌  | 564/750 [00:21<00:11, 15.92it/s]Preprocessing dataset:  76%|███████▌  | 570/750 [00:21<00:08, 20.96it/s]Preprocessing dataset:  77%|███████▋  | 574/750 [00:21<00:07, 23.25it/s]Preprocessing dataset:  77%|███████▋  | 580/750 [00:21<00:05, 28.96it/s]Preprocessing dataset:  78%|███████▊  | 585/750 [00:21<00:05, 31.23it/s]Preprocessing dataset:  79%|███████▊  | 590/750 [00:21<00:04, 32.41it/s]Preprocessing dataset:  79%|███████▉  | 594/750 [00:21<00:04, 31.87it/s]Preprocessing dataset:  80%|███████▉  | 598/750 [00:22<00:04, 30.72it/s]Preprocessing dataset:  80%|████████  | 602/750 [00:22<00:05, 28.22it/s]Preprocessing dataset:  81%|████████  | 606/750 [00:22<00:05, 28.31it/s]Preprocessing dataset:  81%|████████  | 609/750 [00:22<00:05, 26.49it/s]Preprocessing dataset:  82%|████████▏ | 613/750 [00:22<00:05, 27.14it/s]Preprocessing dataset:  82%|████████▏ | 616/750 [00:23<00:09, 14.76it/s]Preprocessing dataset:  83%|████████▎ | 621/750 [00:23<00:06, 19.46it/s]Preprocessing dataset:  83%|████████▎ | 626/750 [00:23<00:05, 23.68it/s]Preprocessing dataset:  84%|████████▍ | 631/750 [00:23<00:04, 28.60it/s]Preprocessing dataset:  85%|████████▍ | 635/750 [00:23<00:03, 29.32it/s]Preprocessing dataset:  85%|████████▌ | 639/750 [00:23<00:03, 29.71it/s]Preprocessing dataset:  86%|████████▌ | 643/750 [00:23<00:03, 28.34it/s]Preprocessing dataset:  86%|████████▋ | 647/750 [00:24<00:03, 27.03it/s]Preprocessing dataset:  87%|████████▋ | 650/750 [00:24<00:03, 26.59it/s]Preprocessing dataset:  87%|████████▋ | 653/750 [00:24<00:03, 27.06it/s]Preprocessing dataset:  87%|████████▋ | 656/750 [00:24<00:03, 27.00it/s]Preprocessing dataset:  88%|████████▊ | 659/750 [00:24<00:03, 24.30it/s]Preprocessing dataset:  88%|████████▊ | 662/750 [00:24<00:03, 24.68it/s]Preprocessing dataset:  89%|████████▊ | 665/750 [00:24<00:03, 25.14it/s]Preprocessing dataset:  89%|████████▉ | 668/750 [00:25<00:06, 12.59it/s]Preprocessing dataset:  90%|████████▉ | 673/750 [00:25<00:04, 17.35it/s]Preprocessing dataset:  90%|█████████ | 678/750 [00:25<00:03, 21.92it/s]Preprocessing dataset:  91%|█████████ | 681/750 [00:25<00:03, 22.82it/s]Preprocessing dataset:  91%|█████████▏| 686/750 [00:25<00:02, 27.13it/s]Preprocessing dataset:  92%|█████████▏| 690/750 [00:25<00:02, 27.24it/s]Preprocessing dataset:  93%|█████████▎| 695/750 [00:26<00:01, 30.12it/s]Preprocessing dataset:  93%|█████████▎| 699/750 [00:26<00:01, 29.65it/s]Preprocessing dataset:  94%|█████████▎| 703/750 [00:26<00:02, 19.54it/s]Preprocessing dataset:  94%|█████████▍| 706/750 [00:26<00:02, 19.74it/s]Preprocessing dataset:  95%|█████████▍| 709/750 [00:27<00:02, 16.74it/s]Preprocessing dataset:  95%|█████████▍| 712/750 [00:27<00:03, 11.01it/s]Preprocessing dataset:  95%|█████████▌| 716/750 [00:27<00:02, 14.31it/s]Preprocessing dataset:  96%|█████████▌| 721/750 [00:27<00:01, 18.59it/s]Preprocessing dataset:  97%|█████████▋| 728/750 [00:27<00:00, 26.18it/s]Preprocessing dataset:  98%|█████████▊| 732/750 [00:28<00:00, 27.69it/s]Preprocessing dataset:  98%|█████████▊| 736/750 [00:28<00:00, 29.06it/s]Preprocessing dataset:  99%|█████████▉| 741/750 [00:28<00:00, 32.77it/s]Preprocessing dataset:  99%|█████████▉| 745/750 [00:28<00:00, 33.72it/s]Preprocessing dataset: 100%|██████████| 750/750 [00:28<00:00, 26.32it/s]
+Preprocessing dataset:   0%|          | 0/151 [00:00<?, ?it/s]Preprocessing dataset:   3%|▎         | 5/151 [00:00<00:03, 46.86it/s]Preprocessing dataset:   7%|▋         | 10/151 [00:00<00:03, 46.59it/s]Preprocessing dataset:  12%|█▏        | 18/151 [00:00<00:02, 60.95it/s]Preprocessing dataset:  17%|█▋        | 25/151 [00:00<00:02, 47.35it/s]Preprocessing dataset:  21%|██        | 31/151 [00:00<00:03, 33.27it/s]Preprocessing dataset:  24%|██▍       | 36/151 [00:00<00:03, 34.91it/s]Preprocessing dataset:  27%|██▋       | 41/151 [00:01<00:03, 34.37it/s]Preprocessing dataset:  30%|███       | 46/151 [00:01<00:02, 36.96it/s]Preprocessing dataset:  34%|███▍      | 52/151 [00:01<00:02, 40.81it/s]Preprocessing dataset:  38%|███▊      | 57/151 [00:01<00:02, 38.36it/s]Preprocessing dataset:  41%|████      | 62/151 [00:01<00:02, 34.65it/s]Preprocessing dataset:  45%|████▌     | 68/151 [00:02<00:04, 19.79it/s]Preprocessing dataset:  48%|████▊     | 73/151 [00:02<00:03, 23.08it/s]Preprocessing dataset:  51%|█████     | 77/151 [00:02<00:03, 24.41it/s]Preprocessing dataset:  54%|█████▎    | 81/151 [00:02<00:02, 25.13it/s]Preprocessing dataset:  58%|█████▊    | 88/151 [00:02<00:01, 32.88it/s]Preprocessing dataset:  63%|██████▎   | 95/151 [00:02<00:01, 40.52it/s]Preprocessing dataset:  67%|██████▋   | 101/151 [00:02<00:01, 44.11it/s]Preprocessing dataset:  71%|███████   | 107/151 [00:03<00:01, 42.64it/s]Preprocessing dataset:  75%|███████▍  | 113/151 [00:03<00:00, 45.04it/s]Preprocessing dataset:  78%|███████▊  | 118/151 [00:03<00:00, 42.36it/s]Preprocessing dataset:  81%|████████▏ | 123/151 [00:03<00:00, 37.38it/s]Preprocessing dataset:  85%|████████▍ | 128/151 [00:03<00:00, 36.99it/s]Preprocessing dataset:  87%|████████▋ | 132/151 [00:03<00:00, 35.13it/s]Preprocessing dataset:  91%|█████████▏| 138/151 [00:03<00:00, 40.24it/s]Preprocessing dataset:  95%|█████████▍| 143/151 [00:04<00:00, 40.28it/s]Preprocessing dataset:  99%|█████████▊| 149/151 [00:04<00:00, 43.73it/s]Preprocessing dataset: 100%|██████████| 151/151 [00:04<00:00, 36.27it/s]
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/cuda/memory.py:365: FutureWarning: torch.cuda.reset_max_memory_allocated now calls torch.cuda.reset_peak_memory_stats, which resets /all/ peak memory stats.
+  warnings.warn(
+Training Epoch: 0:   0%|[34m          [0m| 0/11 [00:00<?, ?it/s]Traceback (most recent call last):
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/recipes/finetuning/real_finetuning_uncon_gen.py", line 8, in <module>
+    fire.Fire(main)
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+                                ^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/real_finetuning_uncon_gen.py", line 331, in main
+    results = train_con_gen(
+              ^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py", line 710, in train_con_gen
+    loss = model(**batch).loss
+           ^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/parallel/distributed.py", line 1643, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/parallel/distributed.py", line 1459, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/peft/peft_model.py", line 1129, in forward
+    return self.base_model(
+           ^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/peft/tuners/tuners_utils.py", line 161, in forward
+    return self.model.forward(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 1754, in forward
+    outputs = self.model(
+              ^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 1548, in forward
+    layer_outputs = decoder_layer(
+                    ^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 1162, in forward
+    hidden_states = self.mlp(hidden_states)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 225, in forward
+    down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+                                                                ^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.31 GiB. GPU 0 has a total capacity of 93.10 GiB of which 971.88 MiB is free. Including non-PyTorch memory, this process has 92.14 GiB memory in use. Of the allocated memory 89.89 GiB is allocated by PyTorch, and 1.18 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[rank0]: Traceback (most recent call last):
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/recipes/finetuning/real_finetuning_uncon_gen.py", line 8, in <module>
+[rank0]:     fire.Fire(main)
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+[rank0]:     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+[rank0]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+[rank0]:     component, remaining_args = _CallAndUpdateTrace(
+[rank0]:                                 ^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+[rank0]:     component = fn(*varargs, **kwargs)
+[rank0]:                 ^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/real_finetuning_uncon_gen.py", line 331, in main
+[rank0]:     results = train_con_gen(
+[rank0]:               ^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py", line 710, in train_con_gen
+[rank0]:     loss = model(**batch).loss
+[rank0]:            ^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/parallel/distributed.py", line 1643, in forward
+[rank0]:     else self._run_ddp_forward(*inputs, **kwargs)
+[rank0]:          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/parallel/distributed.py", line 1459, in _run_ddp_forward
+[rank0]:     return self.module(*inputs, **kwargs)  # type: ignore[index]
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/peft/peft_model.py", line 1129, in forward
+[rank0]:     return self.base_model(
+[rank0]:            ^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/peft/tuners/tuners_utils.py", line 161, in forward
+[rank0]:     return self.model.forward(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 1754, in forward
+[rank0]:     outputs = self.model(
+[rank0]:               ^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 1548, in forward
+[rank0]:     layer_outputs = decoder_layer(
+[rank0]:                     ^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 1162, in forward
+[rank0]:     hidden_states = self.mlp(hidden_states)
+[rank0]:                     ^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/transformers/models/llama/modeling_llama.py", line 225, in forward
+[rank0]:     down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+[rank0]:                                                                 ^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+[rank0]:     return self._call_impl(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+[rank0]:     return forward_call(*args, **kwargs)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 125, in forward
+[rank0]:     return F.linear(input, self.weight, self.bias)
+[rank0]:            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank0]: torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.31 GiB. GPU 0 has a total capacity of 93.10 GiB of which 971.88 MiB is free. Including non-PyTorch memory, this process has 92.14 GiB memory in use. Of the allocated memory 89.89 GiB is allocated by PyTorch, and 1.18 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+E0708 19:00:05.297000 188381 torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 0 (pid: 188449) of binary: /rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/bin/python3
+Traceback (most recent call last):
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/bin/torchrun", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/run.py", line 919, in main
+    run(args)
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+recipes/finetuning/real_finetuning_uncon_gen.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-07-08_19:00:05
+  host      : n23g0013.hpc.itc.rwth-aachen.de
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 188449)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

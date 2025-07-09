@@ -1,0 +1,75 @@
+[INFO] Module zlib/1.3.1 loaded.
+[INFO] Module binutils/2.42 loaded.
+[INFO] Module GCCcore/13.3.0 loaded.
+[INFO] Module zlib/1.3.1 loaded.
+[INFO] Module binutils/2.42 loaded.
+[INFO] Module Python/3.12.3 loaded.
+[INFO] Module CUDA/12.6.3 loaded.
+W0708 18:37:34.250000 138332 torch/distributed/run.py:793] 
+W0708 18:37:34.250000 138332 torch/distributed/run.py:793] *****************************************
+W0708 18:37:34.250000 138332 torch/distributed/run.py:793] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W0708 18:37:34.250000 138332 torch/distributed/run.py:793] *****************************************
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/model_checkpointing/checkpoint_handler.py:17: DeprecationWarning: `torch.distributed._shard.checkpoint` will be deprecated, use `torch.distributed.checkpoint` instead
+  from torch.distributed._shard.checkpoint import (
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/model_checkpointing/checkpoint_handler.py:17: DeprecationWarning: `torch.distributed._shard.checkpoint` will be deprecated, use `torch.distributed.checkpoint` instead
+  from torch.distributed._shard.checkpoint import (
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py:9: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging
+/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/utils/train_utils.py:9: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import packaging
+[rank1]: Traceback (most recent call last):
+[rank1]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/recipes/finetuning/real_finetuning_uncon_gen.py", line 8, in <module>
+[rank1]:     fire.Fire(main)
+[rank1]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 135, in Fire
+[rank1]:     component_trace = _Fire(component, args, parsed_flag_args, context, name)
+[rank1]:                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 468, in _Fire
+[rank1]:     component, remaining_args = _CallAndUpdateTrace(
+[rank1]:                                 ^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/fire/core.py", line 684, in _CallAndUpdateTrace
+[rank1]:     component = fn(*varargs, **kwargs)
+[rank1]:                 ^^^^^^^^^^^^^^^^^^^^^^
+[rank1]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/src/llama_recipes/real_finetuning_uncon_gen.py", line 123, in main
+[rank1]:     torch.cuda.set_device(local_rank)
+[rank1]:   File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/cuda/__init__.py", line 478, in set_device
+[rank1]:     torch._C._cuda_setDevice(device)
+[rank1]: RuntimeError: CUDA error: invalid device ordinal
+[rank1]: CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
+[rank1]: For debugging consider passing CUDA_LAUNCH_BLOCKING=1
+[rank1]: Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
+
+[rank1]:[W708 18:39:02.507194947 ProcessGroupNCCL.cpp:1250] Warning: WARNING: process group has NOT been destroyed before we destruct ProcessGroupNCCL. On normal program exit, the application should call destroy_process_group to ensure that any pending NCCL operations have finished in this process. In rare cases this process can exit before this point and block the progress of another member of the process group. This constraint has always been present,  but this warning has only been added since PyTorch 2.4 (function operator())
+W0708 18:39:03.252000 138332 torch/distributed/elastic/multiprocessing/api.py:897] Sending process 138393 closing signal SIGTERM
+E0708 18:39:03.568000 138332 torch/distributed/elastic/multiprocessing/api.py:869] failed (exitcode: 1) local_rank: 1 (pid: 138394) of binary: /rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/bin/python3
+Traceback (most recent call last):
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/bin/torchrun", line 10, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 355, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/run.py", line 919, in main
+    run(args)
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/run.py", line 910, in run
+    elastic_launch(
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 138, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/rwthfs/rz/cluster/home/yh522379/lab/piano-transformer/Moonbeam-MIDI-Foundation-Model/.venv-moonbeam/lib/python3.12/site-packages/torch/distributed/launcher/api.py", line 269, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+recipes/finetuning/real_finetuning_uncon_gen.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-07-08_18:39:03
+  host      : n23g0017.hpc.itc.rwth-aachen.de
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 138394)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

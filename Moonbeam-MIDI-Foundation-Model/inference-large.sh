@@ -5,7 +5,7 @@ export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 # Define variables
 CSV_FILE="preprocessed/839M/train_test_split.csv"
 TOP_P=0.95
-TEMPERATURE=1.2
+TEMPERATURE=0.95
 MODEL_CONFIG="src/llama_recipes/configs/model_config.json"
 CKPT_DIR="checkpoints/pre-trained/moonbeam_839M.pt"
 PEFT_WEIGHT="checkpoints/fine-tuned/fine-tuned_3_epoch_839M/0-370/"
