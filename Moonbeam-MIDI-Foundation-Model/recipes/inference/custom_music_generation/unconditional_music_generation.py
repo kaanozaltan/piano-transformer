@@ -21,9 +21,11 @@ def main(
     max_seq_len: int = 512,
     max_batch_size: int = 4,
     prompt_len: int = 5,
-    num_test_data: int = 50,
+    num_samples: int = 50,
     max_gen_len: Optional[int] = None,
     finetuned_PEFT_weight_path: Optional[str] = None,
+    from_scratch: bool = False,
+    folder: str = "first"
 ):
 
     # Set the random seed for CPU and GPU
@@ -43,16 +45,21 @@ def main(
         max_batch_size=max_batch_size,
         finetuned_PEFT_weight_path = finetuned_PEFT_weight_path) 
     
-    df = pd.read_csv(csv_file)
-    split = "test"
-    test_filenames = df[df['split'] == split]['file_base_name'].tolist()
-    test_files_sampled = random.sample(test_filenames, num_test_data)
     prompts = []
+    
+    if from_scratch: # Only use SOS token as prompt
+        prompts = [[generator.tokenizer.sos_token_compound] for _ in range(num_samples)]
 
-    for filename in test_files_sampled:
-        test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
-        test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
-        prompts.append(test_data_with_sos[:prompt_len])
+    else:
+        df = pd.read_csv(csv_file)
+        split = "test"
+        test_filenames = df[df['split'] == split]['file_base_name'].tolist()
+        test_files_sampled = random.sample(test_filenames, num_samples)
+
+        for filename in test_files_sampled:
+            test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
+            test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
+            prompts.append(test_data_with_sos[:prompt_len])
     
     results = generator.music_completion(
         prompts,
@@ -61,17 +68,23 @@ def main(
         top_p=top_p,
     )
     
-    # save_folder = os.path.join(finetuned_PEFT_weight_path, os.path.basename(ckpt_dir), f"temperature_{temperature}_top_p_{top_p}")
-    save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, f"temperature_{temperature}_top_p_{top_p}")
+    if from_scratch:
+        save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, "from_scratch", folder, f"temperature_{temperature}_top_p_{top_p}")
+    else: 
+        save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, "continuation", f"temperature_{temperature}_top_p_{top_p}") 
+
     os.makedirs(save_folder, exist_ok=True)
 
     for i, (dialog, result) in enumerate(zip(prompts, results)):
-        # epoch_step = re.search(r'(\d+-\d+)\.pt$', ckpt_dir).group(1)
         epoch_step = os.path.splitext(os.path.basename(ckpt_dir))[0]
         save_path = f'{save_folder}/{epoch_step}_{str(i)}.mid'
-        result['generation']['content'].save(save_path)
-        result['generation']['prompt'].save(save_path.replace(".mid", "_prompt.mid"))
-        print(f"Midi and prompt saved to {save_path} and {save_path.replace('.mid', '_prompt.mid')}")
+        try:
+            result['generation']['content'].save(save_path)
+            print(f"Midi saved to {save_path}")
+        except Exception as e:
+            print("Error saving MIDI file:", e)
+        if not from_scratch: # Do not save prompt if it only contains SOS token
+            result['generation']['prompt'].save(save_path.replace(".mid", "_prompt.mid"))
         print("\n==================================\n")
 if __name__ == "__main__":
     fire.Fire(main)
