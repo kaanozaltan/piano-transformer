@@ -187,7 +187,7 @@ def evaluate_mgeval_combined(dataset1_path, dataset2_path, output_path, features
 
     # load and filter
     def load_valid_dataset(dataset_path):
-        dataset = glob.glob(os.path.join(dataset_path, '**', '*.midi'), recursive=True)
+        dataset = glob.glob(os.path.join(dataset_path, '**', '*.mid*'), recursive=True)
         if max_samples and len(dataset) > max_samples:
             dataset = dataset[:max_samples]
         valid_dataset = []
@@ -320,10 +320,10 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list, dataset_name, outp
                           'F#', 'G', 'G#', 'A', 'A#', 'B']
                 plt.figure(figsize=(8, 4))
                 plt.bar(labels, mean_value)
-                plt.title(f'Pitch Class Histogram ({feature})')
+                plt.title(f'Pitch Class Histogram ({feature}, {dataset_name})')
                 plt.ylabel('Proportion')
                 if output_path:
-                    plt.savefig(os.path.join(output_path, "graphics", f'{feature}.png'), bbox_inches='tight')
+                    plt.savefig(os.path.join(output_path, "graphics", f'{feature}_{dataset_name}.png'), bbox_inches='tight')
                     plt.close()
                 else:
                     plt.show()
@@ -336,11 +336,11 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list, dataset_name, outp
                 ]
                 plt.figure(figsize=(10, 4))
                 plt.bar(labels, mean_value)
-                plt.title(f'Note Length Histogram ({feature})')
+                plt.title(f'Note Length Histogram ({feature}, {dataset_name})')
                 plt.ylabel('Proportion')
                 plt.xticks(rotation=45)
                 if output_path:
-                    plt.savefig(os.path.join(output_path, "graphics", f'{feature}.png'), bbox_inches='tight')
+                    plt.savefig(os.path.join(output_path, "graphics", f'{feature}_{dataset_name}.png'), bbox_inches='tight')
                     plt.close()
                 else:
                     plt.show()
@@ -352,9 +352,9 @@ def summarize_and_plot_mgeval_results(set_eval, metrics_list, dataset_name, outp
 
             plt.figure(figsize=(8, 6))
             sns.heatmap(mean_value, annot=False, cmap='viridis')
-            plt.title(f'Heatmap ({feature})')
+            plt.title(f'Heatmap ({feature}, {dataset_name})')
             if output_path:
-                plt.savefig(os.path.join(output_path, "graphics", f'{feature}.png'), bbox_inches='tight')
+                plt.savefig(os.path.join(output_path, "graphics", f'{feature}_{dataset_name}.png'), bbox_inches='tight')
                 plt.close()
             else:
                 plt.show()

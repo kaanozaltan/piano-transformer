@@ -2,9 +2,9 @@ from pathlib import Path
 import shutil
 
 src_dir = Path(
-    "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v1/data_processed/maestro_train"
+    "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v3/data_processed/maestro_train"
 )
-dst_dir = Path("/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v1/output/train")
+dst_dir = Path("/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v3/output/train")
 
 dst_dir.mkdir(parents=True, exist_ok=True)
 
