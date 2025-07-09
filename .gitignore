@@ -202,3 +202,4 @@ core.login*
 graphics*
 submit_experiment.sh
 submit_evaluation.sh
+samples/
