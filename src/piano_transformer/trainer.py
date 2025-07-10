@@ -55,6 +55,7 @@ def make_trainer(
         logging_strategy="steps",
         logging_steps=cfg["logging_steps"],
         save_strategy="epoch",
+        save_total_limit=2,
         num_train_epochs=cfg["num_train_epochs"],
         seed=cfg["seed"],
         data_seed=cfg["data_seed"],
