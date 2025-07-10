@@ -13,7 +13,7 @@ from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_datasets, build_collator
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
 from piano_transformer.tokenizer import load_remi_tokenizer
-from piano_transformer.utils.midi import get_midi_file_lists, midi2wav
+from piano_transformer.utils.midi import get_midi_file_lists_by_random, midi2wav
 
 ## SETUP
 
@@ -24,8 +24,8 @@ print(f"Model:\n{cfg.model_name}")
 ## DATASET PREPARATION
 # TODO: most of this is not needed for generate, but right now included for simplicity
 
-midi_lists = get_midi_file_lists(
-    cfg.data_raw_path / "maestro" / "maestro-v3.0.0.csv", cfg.data_raw_path / "maestro"
+midi_lists = get_midi_file_lists_by_random(
+    cfg.data_raw_path / "aria-midi-v1-deduped-ext", "*.mid", cfg.seed
 )
 
 tokenizer = load_remi_tokenizer(cfg.experiment_path / "tokenizer.json")
@@ -37,7 +37,7 @@ chunks_lists = split_datasets_into_chunks(
     midi_lists,
     tokenizer,
     cfg.data_processed_path,
-    "maestro",
+    "aria",
     MAX_SEQ_LEN,
     NUM_OVERLAP_BARS,
 )
@@ -85,7 +85,9 @@ def generate(dataset, output, max_samples=None):
 
     count = 0
     for batch_idx, batch in enumerate(tqdm(dataloader, desc="Generating outputs")):
-        print(f"[INFO] Processing batch {batch_idx} (generated so far: {count}/{max_samples})")
+        print(
+            f"[INFO] Processing batch {batch_idx} (generated so far: {count}/{max_samples})"
+        )
         print(f"[INFO] Batch size: {BATCH_SIZE}")
         res = model.generate(
             inputs=batch["input_ids"].to(model.device),
@@ -132,15 +134,14 @@ def generate_from_scratch(output, num_samples):
     (output_path := Path(output)).mkdir(parents=True, exist_ok=True)
 
     count = 0
-    for batch_start in tqdm(range(0, num_samples, BATCH_SIZE), desc="Generating from scratch"):
+    for batch_start in tqdm(
+        range(0, num_samples, BATCH_SIZE), desc="Generating from scratch"
+    ):
         current_batch_size = min(BATCH_SIZE, num_samples - count)
         # Create empty generation inputs with just the BOS token
         BOS_TOKEN_ID = 1
         input_ids = torch.full(
-            (current_batch_size, 1),
-            BOS_TOKEN_ID,
-            dtype=torch.long,
-            device=model.device
+            (current_batch_size, 1), BOS_TOKEN_ID, dtype=torch.long, device=model.device
         )
 
         # Generate sequence from scratch
@@ -162,17 +163,18 @@ def generate_from_scratch(output, num_samples):
             tokenizer.save_tokens([tokens], output_path / f"{count}.json")
 
             count += 1
-            
+
+
 def compute_perplexity(model, dataset, collator, batch_size=32):
     model.eval()
     dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
-    
+
     total_loss = 0.0
     total_tokens = 0
 
     with torch.no_grad():
         for batch in tqdm(dataloader, desc="Evaluating perplexity"):
-            input_ids = batch["input_ids"].to(model.device)       # [B, T]
+            input_ids = batch["input_ids"].to(model.device)  # [B, T]
             attention_mask = batch["attention_mask"].to(model.device)
 
             # Shift inputs and targets for teacher forcing
@@ -186,7 +188,7 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)),
                 targets.reshape(-1),
-                reduction='none'
+                reduction="none",
             )
 
             # Mask out the padding positions
@@ -198,12 +200,12 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
     perplexity = math.exp(avg_nll)
     return perplexity
 
-            
+
 # generate(test_ds, cfg.output_path / "test_jonathan_2")
 
-# generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
+generate_from_scratch(cfg.output_path / "generations", 1000)
 
-perplexity = compute_perplexity(model, test_ds, collator, batch_size=128)
-print(f"Perplexity on test set: {perplexity:.2f}")
+# perplexity = compute_perplexity(model, test_ds, collator, batch_size=128)
+# print(f"Perplexity on test set: {perplexity:.2f}")
 
 # midi2wav(cfg.output_path / "test_jonathan", cfg.output_path / "test_jonathan_wav", "SalC5Light2.sf2")
