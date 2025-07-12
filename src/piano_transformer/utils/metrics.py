@@ -229,7 +229,6 @@ def evaluate_mgeval_combined(
     output_path=None,
     features=None,
     max_samples=None,
-    compute_kld=True,
 ):
     print("Running combined MGEval evaluation (absolute + relative)...")
 
@@ -360,28 +359,29 @@ def evaluate_mgeval_combined(
     relative_summary = []
 
     for i in range(len(features)):
-        if compute_kld:
+        try:
             kld = utils.kl_dist(plot_set1_intra[i], plot_sets_inter[i])
-        oa = utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i])
-        if compute_kld:
-            relative_summary.append(
-                {
-                    "Feature": features[i],
-                    "KLD": kld,
-                    "OA": oa,
-                }
+        except Exception as e:
+            print(f"[evaluate_mgeval_combined] kl_dist failed at {features[i]}: {e}")
+            kld = np.nan
+        try:
+            oa = utils.overlap_area(plot_set1_intra[i], plot_sets_inter[i])
+        except Exception as e:
+            print(
+                f"[evaluate_mgeval_combined] overlap_area failed at {features[i]}: {e}"
             )
-        else:
-            relative_summary.append(
-                {
-                    "Feature": features[i],
-                    "OA": oa,
-                }
-            )
+            oa = np.nan
+
+        relative_summary.append(
+            {
+                "Feature": features[i],
+                "KLD": kld,
+                "OA": oa,
+            }
+        )
         print("------------------------")
         print(f"{features[i]}:")
-        if compute_kld:
-            print("Kullback-Leibler divergence:", kld)
+        print("Kullback-Leibler divergence:", kld)
         print("Overlap area:", oa)
 
     return absolute_summary, relative_summary

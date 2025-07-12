@@ -53,7 +53,6 @@ class EvalCallback(TrainerCallback):
         absolute_summary, relative_summary = evaluate_mgeval_combined(
             dataset1_path=train_dir_subset,
             dataset2_path=gen_dir_step,
-            compute_kld=False,
         )
 
         for item in absolute_summary:
