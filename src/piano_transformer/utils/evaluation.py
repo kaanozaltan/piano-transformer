@@ -60,15 +60,15 @@ class EvalCallback(TrainerCallback):
             metrics[f"{feature_name}_Rel_Diff_Mean"] = item["Rel_Diff_Mean"]
             metrics[f"{feature_name}_Rel_Diff_Std"] = item["Rel_Diff_Std"]
 
-        # kld_sum = 0
+        kld_sum = 0
         oa_sum = 0
         for item in relative_summary:
             feature_name = item["Feature"]
-            # kld_sum += item["KLD"]
-            # metrics[f"{feature_name}_KLD"] = item["KLD"]
+            kld_sum += item["KLD"]
+            metrics[f"{feature_name}_KLD"] = item["KLD"]
             oa_sum += item["OA"]
             metrics[f"{feature_name}_OA"] = item["OA"]
-        # metrics["KLD_average"] = kld_sum / len(relative_summary)
+        metrics["KLD_average"] = kld_sum / len(relative_summary)
         metrics["OA_average"] = oa_sum / len(relative_summary)
 
         print(f"Evaluation metrics: {metrics}")
