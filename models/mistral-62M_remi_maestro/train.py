@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 from dotenv import load_dotenv
 from transformers.trainer_utils import set_seed
@@ -12,6 +13,7 @@ from piano_transformer.model import build_mistral_model
 from piano_transformer.tokenizer import create_remi_tokenizer
 from piano_transformer.trainer import make_trainer
 from piano_transformer.utils.midi import get_midi_file_lists_by_csv
+from piano_transformer.utils.evaluation import EvalCallback
 
 ## VERSION INFO
 
@@ -25,7 +27,7 @@ cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 print(f"Model:\n{cfg.model_name}")
 
 load_dotenv()
-os.environ["WANDB_ENTITY"] = "freddim-rwth-aachen-university"
+os.environ["WANDB_ENTITY"] = "jonathanlehmkuhl-rwth-aachen-university"
 os.environ["WANDB_PROJECT"] = "piano-transformer"
 wandb.login()
 
@@ -77,15 +79,19 @@ model_cfg = {
     "intermediate_size": 512 * 4,
     "num_attention_heads": 8,
     "attention_dropout": 0.1,
+    "max_position_embeddings": 8192,
 }
 
 model = build_mistral_model(model_cfg, tokenizer, MAX_SEQ_LEN)
 
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
-print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
+print(
+    f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}"
+)
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
+    "gradient_accumulation_steps": 1,
     "per_device_train_batch_size": 128,
     "per_device_eval_batch_size": 128,
     "learning_rate": 1e-4,
@@ -95,15 +101,25 @@ trainer_cfg = {
     "min_lr_rate": 0.1,
     "warmup_ratio": 0.03,
     "logging_steps": 20,
-    "num_train_epochs": 100,
+    "eval_steps": 68,
+    "save_steps": 1020,
+    "num_train_epochs": 150,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
-    "early_stopping_patience": 10,
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
+
+val_callback = EvalCallback(
+    tokenizer=tokenizer,
+    ref_dir=cfg.data_processed_path / "maestro_train",
+    gen_dir=cfg.experiment_path / "output" / "validation",
+    num_samples=200,
+    every_n_steps=1020,
+)
+trainer.add_callback(val_callback)
 
 result = trainer.train()
 trainer.save_model(cfg.model_path)
