@@ -1,9 +1,10 @@
 import os
+import numpy as np
 
 from dotenv import load_dotenv
+from transformers.trainer_utils import set_seed
 import wandb
 from pathlib import Path
-from transformers.trainer_utils import set_seed
 
 from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_collator, build_datasets
@@ -13,6 +14,11 @@ from piano_transformer.tokenizer import create_remi_tokenizer
 from piano_transformer.trainer import make_trainer
 from piano_transformer.utils.midi import get_midi_file_lists_by_csv
 from piano_transformer.utils.evaluation import EvalCallback
+
+## VERSION INFO
+
+# Same as mistral162M_remi_maestro/train.py, but with 62M parameters, 1024 sequence length and 10 overlap bars
+# 62M parameters means the following change: 512*4 instead of 512*8 intermediate size; 8 hidden layers instead of 18
 
 ## SETUP
 
@@ -68,11 +74,8 @@ collator = build_collator(tokenizer)
 ## TRAINING
 
 model_cfg = {
-    "num_hidden_layers": 18,
-    "hidden_size": 512,
-    "intermediate_size": 512 * 8,
-    "num_attention_heads": 8,
-    "attention_dropout": 0.1,
+    "num_hidden_layers": 12,
+    "hidden_size": 768,
 }
 
 model = build_mistral_model(model_cfg, tokenizer, MAX_SEQ_LEN)
@@ -84,8 +87,9 @@ print(
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
-    "per_device_train_batch_size": 96,
-    "per_device_eval_batch_size": 96,
+    "gradient_accumulation_steps": 1,
+    "per_device_train_batch_size": 128,
+    "per_device_eval_batch_size": 128,
     "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
@@ -93,21 +97,23 @@ trainer_cfg = {
     "min_lr_rate": 0.1,
     "warmup_ratio": 0.03,
     "logging_steps": 20,
-    "num_train_epochs": 150,
+    "eval_steps": 68,
+    "save_steps": 1000,
+    "num_train_epochs": 250,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
-    "early_stopping_patience": 10,
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
 
 val_callback = EvalCallback(
     tokenizer=tokenizer,
-    dataset=valid_ds,
-    ref_dir=cfg.data_processed_path / "maestro_validation",
-    gen_dir=cfg.experiment_path / "outputs" / "validation"
+    ref_dir=cfg.data_processed_path / "maestro_train",
+    gen_dir=cfg.experiment_path / "output" / "validation",
+    num_samples=200,
+    every_n_steps=1000,
 )
 trainer.add_callback(val_callback)
 

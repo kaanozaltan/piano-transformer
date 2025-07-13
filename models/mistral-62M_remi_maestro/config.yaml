@@ -4,5 +4,5 @@ model:
   transformer_name: mistral-62M
   tokenizer_name: remi
   dataset_name: maestro
-  version: 5
+  version: 7
 seed: 222

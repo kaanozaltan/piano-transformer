@@ -57,15 +57,14 @@ collator = build_collator(tokenizer)
 
 start = time.time()
 print("[INFO] Loading model...", flush=True)
-model = AutoModelForCausalLM.from_pretrained(cfg.model_path)
+model = AutoModelForCausalLM.from_pretrained(cfg.runs_path / "checkpoint-8160")
 model.to("cuda")
 print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
 
 generation_config = GenerationConfig(
     max_new_tokens=1024,
     do_sample=True,
-    temperature=0.9,
-    top_k=50,
+    temperature=1.2,
     pad_token_id=tokenizer.pad_token_id,
 )
 
@@ -163,17 +162,18 @@ def generate_from_scratch(output, num_samples):
             tokenizer.save_tokens([tokens], output_path / f"{count}.json")
 
             count += 1
-            
+
+
 def compute_perplexity(model, dataset, collator, batch_size=32):
     model.eval()
     dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
-    
+
     total_loss = 0.0
     total_tokens = 0
 
     with torch.no_grad():
         for batch in tqdm(dataloader, desc="Evaluating perplexity"):
-            input_ids = batch["input_ids"].to(model.device)       # [B, T]
+            input_ids = batch["input_ids"].to(model.device)  # [B, T]
             attention_mask = batch["attention_mask"].to(model.device)
 
             # Shift inputs and targets for teacher forcing
@@ -187,7 +187,7 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
             loss = F.cross_entropy(
                 logits.reshape(-1, logits.size(-1)),
                 targets.reshape(-1),
-                reduction='none'
+                reduction="none",
             )
 
             # Mask out the padding positions
@@ -199,14 +199,15 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
     perplexity = math.exp(avg_nll)
     return perplexity
 
+
 # generate(test_ds, cfg.output_path / "test_jonathan_2")
 # generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
 
 # perplexity = compute_perplexity(model, test_ds, collator, batch_size=256)
 # print(f"Perplexity on test set: {perplexity:.2f}")
 
-generate_from_scratch(cfg.output_path / "generations", len(train_ds))
+generate_from_scratch(cfg.output_path / "generations", 30)
 
-generate(test_ds, cfg.output_path / "continuations")
+# generate(test_ds, cfg.output_path / "continuations")
 
 # midi2wav(cfg.output_path / "test_jonathan", cfg.output_path / "test_jonathan_wav", "SalC5Light2.sf2")
