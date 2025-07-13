@@ -14,7 +14,7 @@ def build_mistral_model(
         hidden_size=cfg["hidden_size"],
         intermediate_size=cfg["hidden_size"] * 4,
         num_attention_heads=cfg["hidden_size"] // 64,
-        num_key_value_head=cfg["hidden_size"] // 64,
+        num_key_value_heads=cfg["hidden_size"] // 64,
         sliding_window=max_seq_len,  # Use max_seq_len as sliding window size
         max_position_embeddings=8192,
         pad_token_id=tokenizer["PAD_None"],
