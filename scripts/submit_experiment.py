@@ -8,7 +8,7 @@ from piano_transformer import config
 slurm_template = """#!/bin/bash
 ###SBATCH --account=lect0148
 #SBATCH --gres=gpu:2
-#SBATCH --time=00:15:00
+#SBATCH --time=08:00:00
 #SBATCH --cpus-per-gpu=24
 #SBATCH --export=ALL
 #SBATCH --job-name=piano-transformer_{script_name}_{model_name}
@@ -17,18 +17,21 @@ slurm_template = """#!/bin/bash
 #SBATCH --mail-user={email}
 #SBATCH --mail-type=END,FAIL,ALL
 
+ls -l /hpcwork/lect0148/data/maestro/maestro-v3.0.0.csv
 source .venv/bin/activate
 torchrun --nproc_per_node=2 {script_path}
 """
 
 
-def submit_experiment(slurm_path, model_name, script_name, script_path, log_path, email):
+def submit_experiment(
+    slurm_path, model_name, script_name, script_path, log_path, email
+):
     slurm_content = slurm_template.format(
         model_name=model_name,
         email=email,
         log_path=str(log_path.resolve()),
         script_name=script_name,
-        script_path=str(script_path.resolve())
+        script_path=str(script_path.resolve()),
     )
 
     with open(slurm_path, "w") as slurm_file:
@@ -61,7 +64,11 @@ def main():
     model_path = file_path.parent / "models" / experiment
     cfg = config.load_config(model_path / "config.yaml")
     script_path = model_path / f"{script_name}.py"
-    log_path = cfg.experiment_path / "logs" / f"log_{script_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
+    log_path = (
+        cfg.experiment_path
+        / "logs"
+        / f"log_{script_name}_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.txt"
+    )
 
     (cfg.experiment_path / "logs").mkdir(parents=True, exist_ok=True)
 
