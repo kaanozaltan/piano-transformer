@@ -64,7 +64,7 @@ def submit_experiment(slurm_path, model_name, script_name, script_path, log_path
 
 
 def main():
-    # Example: python scripts/submit_experiment.py mistral-162M_remi_maestro_v1 train.py <email>
+    # Example: python scripts/submit_experiment.py --model mistral-409M_remi_maestro --time 18:00:00
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str)
     parser.add_argument("--script", type=str)
