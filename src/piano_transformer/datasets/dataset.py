@@ -21,10 +21,9 @@ def build_datasets(
     if aug_cfg is not None:
         train_ds = AugmentedDatasetMIDI(chunks_lists["train"], **augmentation_kwargs, **dataset_kwargs)
     else:
-        train_ds = DatasetMIDI(chunks_lists["train"], **dataset_kwargs)
-    # TODO: Pre-tokenize?
-    valid_ds = DatasetMIDI(chunks_lists["validation"], **dataset_kwargs)
-    test_ds = DatasetMIDI(chunks_lists["test"], **dataset_kwargs)
+        train_ds = DatasetMIDI(chunks_lists["train"], pre_tokenize=True, **dataset_kwargs)
+    valid_ds = DatasetMIDI(chunks_lists["validation"], pre_tokenize=True, **dataset_kwargs)
+    test_ds = DatasetMIDI(chunks_lists["test"], pre_tokenize=True, **dataset_kwargs)
 
     return train_ds, valid_ds, test_ds
 

@@ -21,8 +21,6 @@ def build_mistral_model(
         bos_token_id=tokenizer["BOS_None"],
         eos_token_id=tokenizer["EOS_None"],
         attention_dropout=0.1,
-        load_best_model_at_end=True,
-        save_total_limit=2,
     )
     model = AutoModelForCausalLM.from_config(model_config)
     return model

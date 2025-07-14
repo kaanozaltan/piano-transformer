@@ -10,6 +10,7 @@ numpy==1.26.4
 pandas
 pretty_midi
 python-dotenv
+PyYAML
 scikit-learn
 scipy
 setuptools
