@@ -72,7 +72,7 @@ def make_trainer(
         report_to=["wandb"],
         dataloader_num_workers=4,
         dataloader_pin_memory=True,
-        dataloader_persistent_workers=True,
+        dataloader_persistent_workers=False,
         max_steps=cfg["max_steps"] if "max_steps" in cfg else -1,
     )
 
