@@ -1,0 +1,5 @@
+#model:
+script: train
+gpus: 2
+#time:
+#email:
