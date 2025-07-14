@@ -87,9 +87,9 @@ print(
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
-    "gradient_accumulation_steps": 1,
-    "per_device_train_batch_size": 128,
-    "per_device_eval_batch_size": 128,
+    "gradient_accumulation_steps": 2,
+    "per_device_train_batch_size": 32,
+    "per_device_eval_batch_size": 32,
     "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
@@ -98,8 +98,8 @@ trainer_cfg = {
     "warmup_ratio": 0.03,
     "logging_steps": 20,
     "eval_steps": 68,
-    "save_steps": 1000,
-    "num_train_epochs": 250,
+    "save_steps": 1020,
+    "num_train_epochs": 225,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
@@ -113,7 +113,7 @@ val_callback = EvalCallback(
     ref_dir=cfg.data_processed_path / "maestro_train",
     gen_dir=cfg.experiment_path / "output" / "validation",
     num_samples=200,
-    every_n_steps=1000,
+    every_n_steps=1020,
 )
 trainer.add_callback(val_callback)
 
