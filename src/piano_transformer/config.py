@@ -31,7 +31,13 @@ def load_config(path: str | Path) -> Config:
     dataset_name = d["model"]["dataset_name"]
     model_version = str(d["model"]["version"])
     model_name = f"{transformer_name}_{tokenizer_name}_{dataset_name}_v{model_version}"
-    experiment_path = base_path / "experiments" / model_name
+
+    # allow explicity setting the experiment path
+    if "experiments_path" in d["data"]:
+        experiment_path = Path(d["data"]["experiments_path"]) / model_name
+    else:
+        experiment_path = base_path / "experiments" / model_name
+
     data_processed_path = experiment_path / "data_processed"
     model_path = experiment_path / "model"
     runs_path = experiment_path / "runs"
