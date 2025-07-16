@@ -57,7 +57,7 @@ collator = build_collator(tokenizer)
 
 start = time.time()
 print("[INFO] Loading model...", flush=True)
-model = AutoModelForCausalLM.from_pretrained(cfg.runs_path / "checkpoint-8160")
+model = AutoModelForCausalLM.from_pretrained(cfg.model_path)
 model.to("cuda")
 print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
 
