@@ -127,7 +127,7 @@ trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
 
 val_callback = EvalCallback(
     tokenizer=tokenizer,
-    ref_dir=cfg.data_processed_path / "maestro_train",
+    ref_dir=cfg.data_processed_path / "aria_train",
     gen_dir=cfg.experiment_path / "output" / "validation",
     num_samples=200,
     every_n_steps=2040,
