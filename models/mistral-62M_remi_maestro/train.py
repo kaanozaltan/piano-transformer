@@ -88,8 +88,8 @@ print(
 trainer_cfg = {
     "output_dir": cfg.runs_path,
     "gradient_accumulation_steps": 1,
-    "per_device_train_batch_size": 64,
-    "per_device_eval_batch_size": 64,
+    "per_device_train_batch_size": 128,
+    "per_device_eval_batch_size": 128,
     "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
