@@ -198,7 +198,7 @@ output*
 .envrc
 z.*
 z_*
-core.login*
+core*
 graphics*
 submit_experiment.sh
 submit_evaluation.sh
