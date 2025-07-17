@@ -16,6 +16,11 @@ def build_datasets(
         "bos_token_id": tokenizer["BOS_None"],
         "eos_token_id": tokenizer["EOS_None"],
     }
+    
+    # Add attribute control parameters if tokenizer has attribute controls
+    if tokenizer.attribute_controls:
+        dataset_kwargs["ac_tracks_random_ratio_range"] = (1.0, 1.0)  # Always apply to all tracks
+        
     augmentation_kwargs = aug_cfg
 
     if aug_cfg is not None:

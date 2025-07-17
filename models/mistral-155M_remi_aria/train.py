@@ -25,7 +25,7 @@ cfg = load_config(Path(__file__).resolve().parent / "config.yaml")
 print(f"Model:\n{cfg.model_name}")
 
 load_dotenv()
-os.environ["WANDB_ENTITY"] = "jonathanlehmkuhl-rwth-aachen-university"
+os.environ["WANDB_ENTITY"] = "freddim-rwth-aachen-university"
 os.environ["WANDB_PROJECT"] = "piano-transformer"
 wandb.login()
 
@@ -38,7 +38,7 @@ midi_lists_maestro = get_midi_file_lists_by_csv(
 )
 
 midi_lists = get_midi_file_lists_by_random(
-    cfg.data_raw_path / "aria-midi-v1-deduped-ext", "*.mid", cfg.seed
+    cfg.data_raw_path / "aria-midi-flattened", "*.mid", cfg.seed
 )
 
 rng = np.random.default_rng(cfg.seed)
@@ -59,7 +59,7 @@ tokenization_set = rng.permutation(
     maestro_tokenization_set * 5 + aria_tokenization_set
 ).tolist()
 tokenizer = create_remi_tokenizer(
-    tokenization_set, cfg.experiment_path / "tokenizer.json"
+    tokenization_set, cfg.experiment_path / "tokenizer.json", genre=True
 )
 
 MAX_SEQ_LEN = 1024

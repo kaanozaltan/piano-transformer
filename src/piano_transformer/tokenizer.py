@@ -48,11 +48,16 @@ GENRE_TOKENS = ARIA_GENRE_TOKENS  # Switch to ADL_GENRE_TOKENS if needed
         
 
 
-def create_remi_tokenizer(midi_files: list[Path], tokenizer_path: Path, overwrite: bool = False) -> REMI:
+def create_remi_tokenizer(midi_files: list[Path], tokenizer_path: Path, overwrite: bool = False, genre: bool = False) -> REMI:
     if tokenizer_path.exists() and not overwrite:
         # Load existing tokenizer
         print(f"Skipping creating tokenizer, found existing tokenizer at {tokenizer_path.resolve()}")
         tokenizer = REMI(params=tokenizer_path)
+
+        # Add attribute control back after loading (miditok doesn't save/load attribute controls)
+        if genre:
+            tokenizer.add_attribute_control(AttributeControlGenre())
+            print(f"Loaded existing tokenizer and added AttributeControlGenre")
         return tokenizer
 
     print(f"Creating new tokenizer at {tokenizer_path.resolve()}")
@@ -70,13 +75,21 @@ def create_remi_tokenizer(midi_files: list[Path], tokenizer_path: Path, overwrit
         tempo_range=(40, 250),
     )
     tokenizer = REMI(config)
+    if genre:
+        tokenizer.add_attribute_control(AttributeControlGenre())
+        print(f"Added AttributeControlGenre to tokenizer")
     tokenizer.train(vocab_size=30000, files_paths=midi_files)
     tokenizer.save(tokenizer_path)
     return tokenizer
 
 
-def load_remi_tokenizer(tokenizer_path: Path) -> REMI:
+def load_remi_tokenizer(tokenizer_path: Path, genre: bool = False) -> REMI:
     tokenizer = REMI(params=tokenizer_path)
+    # Add attribute control back after loading (miditok doesn't save/load attribute controls)
+    if genre:
+        tokenizer.add_attribute_control(AttributeControlGenre())
+        print(f"Loaded tokenizer and added AttributeControlGenre")
+
     return tokenizer
 
 class AttributeControlGenre(AttributeControl):
@@ -94,14 +107,14 @@ class AttributeControlGenre(AttributeControl):
             ticks_beats: Sequence[int],
             bars_idx: Sequence[int],
     ) -> list[Event]:
-        print(f"Computing genre for track: {track.name}")
+        print(f"[GENRE DEBUG] Computing genre for track: {track.name}")
 
         for genre in GENRE_TOKENS:
             if genre.lower() in track.name.lower():
-                print(f"Found genre: {genre}")
+                print(f"[GENRE DEBUG] Found genre: {genre} in track name: {track.name}")
                 return [Event("GENRE", genre.upper(), -1)]
         
-        print(f"No genre found in track name: {track.name}")
+        print(f"[GENRE DEBUG] No genre found in track name: {track.name}, defaulting to UNKNOWN")
         return [Event("GENRE", "UNKNOWN", -1)]
 
 
@@ -131,9 +144,9 @@ if __name__ == "__main__":
         tempo_range=(40, 250),
     )
     tokenizer = REMI(config)
-    # tokenizer.add_attribute_control(AttributeControlGenre())
+    tokenizer.add_attribute_control(AttributeControlGenre())
 
-    midi_files = midi_files[:100000]  # Limit to first x files for testing
+    midi_files = midi_files[:1000]  # Limit to first x files for testing
 
     tokenizer.train(vocab_size=30000, files_paths=midi_files)
     tokenizer.save("tokenizer.json")
