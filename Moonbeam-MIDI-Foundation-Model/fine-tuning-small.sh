@@ -4,14 +4,13 @@ export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 
 # Define variables
 PRETRAINED_CKPT="$HPCWORK/moonbeam/checkpoints/pre-trained/moonbeam_309M.pt"
-OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/debug"
+OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/309M"
 MODEL_NAME="maestro"
-DATASET_NAME="maestro_839M"
-# Config path: model_config.json for 839M, model_config_small.json for 309M
+DATASET_NAME="maestro_309M"
 MODEL_CONFIG_PATH="src/llama_recipes/configs/model_config_small.json"
 
 # Run the training script with torchrun
-torchrun --nnodes 1 --nproc_per_node 2 recipes/finetuning/real_finetuning_uncon_gen.py \
+torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_gen.py \
   --lr 3e-4 \
   --val_batch_size 2 \
   --run_validation True \

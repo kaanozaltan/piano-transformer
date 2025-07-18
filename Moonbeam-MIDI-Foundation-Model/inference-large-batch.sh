@@ -7,7 +7,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-gpu=24
 #SBATCH --gres=gpu:1
-#SBATCH --time=00:30:00
+#SBATCH --time=00:10:00
 #SBATCH --partition=c23g
 #SBATCH --account=lect0148
 
@@ -16,18 +16,18 @@ export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 source .venv-moonbeam/bin/activate
 
 # Define variables
-CSV_FILE="preprocessed/309M/train_test_split.csv"
+CSV_FILE="preprocessed/839M/train_test_split.csv"
 TOP_P=0.95
-TEMPERATURE=0.95
-MODEL_CONFIG="src/llama_recipes/configs/model_config_small.json"
-CKPT_DIR="/hpcwork/yh522379/moonbeam/checkpoints/pre-trained/moonbeam_309M.pt"
+TEMPERATURE=1.05
+MODEL_CONFIG="src/llama_recipes/configs/model_config.json"
+CKPT_DIR="/hpcwork/yh522379/moonbeam/checkpoints/pre-trained/moonbeam_839M.pt"
 TOKENIZER_PATH="tokenizer.model"
-PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/309M-50epoch/49-20.safetensors"
+PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/839M-50epoch/49-50.safetensors"
 
 MAX_SEQ_LEN=1024
 MAX_GEN_LEN=1024
 MAX_BATCH_SIZE=4
-NUM_SAMPLES=500
+NUM_SAMPLES=400
 PROMPT_LEN=100
 FROM_SCRATCH=True
 
