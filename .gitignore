@@ -222,3 +222,4 @@ preprocessed/
 *.pyc
 wandb/
 .venv-moonbeam/
+logs/
