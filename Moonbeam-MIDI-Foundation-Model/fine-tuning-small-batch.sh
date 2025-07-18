@@ -7,7 +7,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-gpu=24
 #SBATCH --gres=gpu:1
-#SBATCH --time=01:00:00
+#SBATCH --time=00:15:00
 #SBATCH --partition=c23g
 #SBATCH --account=lect0148
 
@@ -15,19 +15,22 @@ module load GCCcore/13.3.0 Python/3.12.3 CUDA/12.6.3
 export PYTHONPATH=$(pwd)/src:$PYTHONPATH
 source .venv-moonbeam/bin/activate
 
-# Define variables
+# Constant paths
 PRETRAINED_CKPT="$HPCWORK/moonbeam/checkpoints/pre-trained/moonbeam_309M.pt"
-OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/309M"
 MODEL_NAME="maestro"
 DATASET_NAME="maestro_309M"
 MODEL_CONFIG_PATH="src/llama_recipes/configs/model_config_small.json"
+
+# Change between configs
+OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/debug"
+WANDB_NAME="fine-tune_no_validation"
 
 mkdir -p logs
 
 # Run the fine-tuning script
 torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_gen.py \
   --lr 3e-4 \
-  --val_batch_size 32 \
+  --val_batch_size 64 \
   --run_validation True \
   --validation_interval 10 \
   --save_metrics True \
@@ -44,7 +47,8 @@ torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_
   --output_dir "$OUTPUT_DIR" \
   --batch_size_training 32 \
   --context_length 2048 \
-  --num_epochs 50 \
+  --num_epochs 10 \
   --use_wandb True \
   --gamma 0.99 \
-  --model_config_path "$MODEL_CONFIG_PATH"
+  --model_config_path "$MODEL_CONFIG_PATH" \
+  --wandb_name "$WANDB_NAME"

@@ -62,6 +62,11 @@ def setup_wandb(train_config, fsdp_config, llama_config, **kwargs):
     wandb_config = WANDB_CONFIG()
     update_config(wandb_config, **kwargs)
     init_dict = dataclasses.asdict(wandb_config)
+    
+    wandb_name = kwargs.get("wandb_name")
+    if wandb_name:
+        init_dict['name'] = wandb_name
+
     run = wandb.init(**init_dict)
     run.config.update(train_config)
     run.config.update(fsdp_config, allow_val_change=True)

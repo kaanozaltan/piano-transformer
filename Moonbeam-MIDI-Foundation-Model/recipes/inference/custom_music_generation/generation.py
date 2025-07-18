@@ -161,6 +161,13 @@ class MusicLlama:
         past_key_values = None
         for cur_pos in range(min_prompt_len, total_len): #recursively generate new tokens in parallel
             print(f"{cur_pos}/{total_len} generated")
+
+            # GPU memory usage
+            allocated = torch.cuda.memory_allocated() / (1024 ** 2)
+            reserved = torch.cuda.memory_reserved() / (1024 ** 2)
+            print(f"    CUDA Memory - Allocated: {allocated:.2f} MB, Reserved: {reserved:.2f} MB")
+            print("Grad enabled before forward:", torch.is_grad_enabled())
+
             output = self.model.forward(input_ids = tokens[:, prev_pos:cur_pos], past_key_values = past_key_values, use_cache = True, attention_mask = None) #output logtis: (batch, len, dim 
             next_decoder_token = torch.tensor(self.tokenizer.sos_out).to(tokens).expand(tokens.shape[0]*(cur_pos - prev_pos), 1) #batch*len_x, len_y = 1
             next_decoder_token_out = next_decoder_token

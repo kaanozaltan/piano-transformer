@@ -17,17 +17,20 @@ source .venv-moonbeam/bin/activate
 
 # Define variables
 PRETRAINED_CKPT="$HPCWORK/moonbeam/checkpoints/pre-trained/moonbeam_839M.pt"
-OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/839M-10epoch"
+
 MODEL_NAME="maestro"
 DATASET_NAME="maestro_839M"
 MODEL_CONFIG_PATH="src/llama_recipes/configs/model_config.json"
+
+OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/839M"
+WANDB_NAME="fine-tune_839M"
 
 mkdir -p logs
 
 # Run the fine-tuning script
 torchrun --nnodes 1 --nproc_per_node 2 recipes/finetuning/real_finetuning_uncon_gen.py \
   --lr 3e-4 \
-  --val_batch_size 2 \
+  --val_batch_size 16 \
   --run_validation True \
   --validation_interval 10 \
   --save_metrics True \
@@ -42,9 +45,10 @@ torchrun --nnodes 1 --nproc_per_node 2 recipes/finetuning/real_finetuning_uncon_
   --model_name "$MODEL_NAME" \
   --dataset "$DATASET_NAME" \
   --output_dir "$OUTPUT_DIR" \
-  --batch_size_training 2 \
+  --batch_size_training 8 \
   --context_length 2048 \
-  --num_epochs 10 \
+  --num_epochs 30 \
   --use_wandb True \
   --gamma 0.99 \
-  --model_config_path "$MODEL_CONFIG_PATH"
+  --model_config_path "$MODEL_CONFIG_PATH" \
+  --wandb_name "$WANDB_NAME"
