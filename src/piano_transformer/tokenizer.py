@@ -107,14 +107,14 @@ class AttributeControlGenre(AttributeControl):
             ticks_beats: Sequence[int],
             bars_idx: Sequence[int],
     ) -> list[Event]:
-        print(f"[GENRE DEBUG] Computing genre for track: {track.name}")
+        # print(f"[GENRE DEBUG] Computing genre for track: {track.name}")
 
         for genre in GENRE_TOKENS:
             if genre.lower() in track.name.lower():
-                print(f"[GENRE DEBUG] Found genre: {genre} in track name: {track.name}")
+                # print(f"[GENRE DEBUG] Found genre: {genre} in track name: {track.name}")
                 return [Event("GENRE", genre.upper(), -1)]
         
-        print(f"[GENRE DEBUG] No genre found in track name: {track.name}, defaulting to UNKNOWN")
+        # print(f"[GENRE DEBUG] No genre found in track name: {track.name}, defaulting to UNKNOWN")
         return [Event("GENRE", "UNKNOWN", -1)]
 
 

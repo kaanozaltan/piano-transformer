@@ -38,7 +38,7 @@ midi_lists_maestro = get_midi_file_lists_by_csv(
 )
 
 midi_lists = get_midi_file_lists_by_random(
-    cfg.data_raw_path / "aria-midi-flattened", "*.mid", cfg.seed
+    cfg.data_raw_path / "aria-midi-deduped-genre", "*.mid", cfg.seed
 )
 
 rng = np.random.default_rng(cfg.seed)
