@@ -203,10 +203,10 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
 # generate(test_ds, cfg.output_path / "test_jonathan_2")
 # generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
 
-# perplexity = compute_perplexity(model, test_ds, collator, batch_size=256)
-# print(f"Perplexity on test set: {perplexity:.2f}")
+perplexity = compute_perplexity(model, train_ds, collator, batch_size=64)
+print(f"Perplexity on test set: {perplexity:.2f}")
 
-generate_from_scratch(cfg.output_path / "generations_last_1.2", 30)
+# generate_from_scratch(cfg.output_path / "generations_last_1.2", 30)
 
 # generate(test_ds, cfg.output_path / "continuations")
 

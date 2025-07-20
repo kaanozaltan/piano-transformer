@@ -57,7 +57,7 @@ collator = build_collator(tokenizer)
 
 start = time.time()
 print("[INFO] Loading model...", flush=True)
-model = AutoModelForCausalLM.from_pretrained(cfg.model_path)
+model = AutoModelForCausalLM.from_pretrained(cfg.runs_path / "checkpoint-15300")
 model.to("cuda")
 print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
 
@@ -203,11 +203,11 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
 # generate(test_ds, cfg.output_path / "test_jonathan_2")
 # generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
 
-generate_from_scratch(cfg.output_path / "generations", 1000)
+# generate_from_scratch(cfg.output_path / "generations", 1000)
 
-generate(test_ds, cfg.output_path / "continuations")
+# generate(test_ds, cfg.output_path / "continuations")
 
-perplexity = compute_perplexity(model, test_ds, collator, batch_size=256)
+perplexity = compute_perplexity(model, train_ds, collator, batch_size=64)
 print(f"Perplexity on test set: {perplexity:.2f}")
 
 # midi2wav(cfg.output_path / "test_jonathan", cfg.output_path / "test_jonathan_wav", "SalC5Light2.sf2")
