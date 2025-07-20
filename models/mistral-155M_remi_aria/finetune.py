@@ -64,10 +64,10 @@ collator = build_collator(tokenizer)
 
 model = load_model(cfg.model_path)
 
+# TODO: Maybe freezing?
 N_FREEZE = 8
-FREEZE_EMBEDDINGS = True
+FREEZE_EMBEDDINGS = False  # freeze if using only classical music
 KEEP_NORMS_TRAINABLE = True
-
 
 def freeze_layers(model, n_freeze, freeze_embeddings=True, keep_norms_trainable=True):
     if freeze_embeddings:
