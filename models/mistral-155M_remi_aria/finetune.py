@@ -9,7 +9,7 @@ from transformers.trainer_utils import set_seed
 from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_collator, build_datasets
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
-from piano_transformer.model import build_mistral_model
+from piano_transformer.model import build_mistral_model, load_model
 from piano_transformer.tokenizer import create_remi_tokenizer, load_remi_tokenizer
 from piano_transformer.trainer import make_trainer
 from piano_transformer.utils.midi import (
@@ -66,13 +66,16 @@ collator = build_collator(tokenizer)
 
 ## TRAINING
 
-model = build_mistral_model(cfg.model_path)
+model = load_model(cfg.model_path)
+
+# TODO: Maybe freezing?
 
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
 print(
     f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}"
 )
 
+# TODO: avoid overriding pretrained model
 trainer_cfg = {
     "output_dir": cfg.runs_path,
     "gradient_accumulation_steps": 2,
@@ -99,7 +102,7 @@ trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
 
 val_callback = EvalCallback(
     tokenizer=tokenizer,
-    ref_dir=cfg.data_processed_path / "aria_train",
+    ref_dir=cfg.data_processed_path / "maestro_train",
     gen_dir=cfg.experiment_path / "output" / "validation",
     num_samples=200,
     every_n_steps=2040,
