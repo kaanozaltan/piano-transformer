@@ -38,6 +38,37 @@ def create_matched_cont_test_subsets(cont_dir, output_base, subset_size, seed):
         shutil.copy2(gen, cont_out_dir / os.path.basename(gen))
 
 
+def create_cont_test_subsets(cont_dir, output_base, subset_size, seed):
+    prompts = glob.glob(str(cont_dir / "*_prompt.midi"))
+    generations = glob.glob(str(cont_dir / "*_generated.midi"))
+
+    prompt_ids = {Path(p).stem.split("_")[0] for p in prompts}
+    gen_ids = {Path(g).stem.split("_")[0] for g in generations}
+    common_ids = sorted(prompt_ids & gen_ids)
+
+    assert len(common_ids) >= subset_size, f"Not enough matching pairs: {len(common_ids)}"
+    rng = random.Random(seed)
+    test_ids = rng.sample(common_ids, subset_size)
+
+    test_dir = output_base / "test"
+    cont_out_dir = output_base / "continuations"
+    test_dir.mkdir(parents=True, exist_ok=True)
+    cont_out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Copy test prompts
+    for id_ in test_ids:
+        prompt = next(p for p in prompts if Path(p).stem.startswith(id_ + "_"))
+        shutil.copy2(prompt, test_dir / os.path.basename(prompt))
+
+    remaining_ids = sorted(set(common_ids) - set(test_ids))
+    assert len(remaining_ids) >= subset_size, f"Not enough remaining continuations: {len(remaining_ids)}"
+    random_cont_ids = random.sample(remaining_ids, subset_size)
+
+    for id_ in random_cont_ids:
+        gen = next(g for g in generations if Path(g).stem.startswith(id_ + "_"))
+        shutil.copy2(gen, cont_out_dir / os.path.basename(gen))
+
+
 def run_eval_setup(model_name, base_dir="/hpcwork/lect0148/experiments", subset_size=1000):
     model_path = Path(base_dir) / model_name
     assert model_path.exists(), f"Model path not found: {model_path}"
@@ -55,7 +86,7 @@ def run_eval_setup(model_name, base_dir="/hpcwork/lect0148/experiments", subset_
 
     # 3–4. Subsets: matched prompt/continuation pairs
     cont_dir = model_path / "output" / "continuations"
-    create_matched_cont_test_subsets(cont_dir, subset_base, subset_size, seed=789)
+    create_cont_test_subsets(cont_dir, subset_base, subset_size, seed=789)
 
     print(f"Subsets created at: {subset_base}")
 
