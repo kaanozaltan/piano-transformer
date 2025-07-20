@@ -43,12 +43,12 @@ midi_lists = get_midi_file_lists_by_random(
 
 rng = np.random.default_rng(cfg.seed)
 
-# Use 35.000 classical files from aria for moderate-scale pre-training
+# Use 31.000 classical files from aria for moderate-scale pre-training
 for split in ["train", "validation", "test"]:
     if split == "train":
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:35000]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:31000]
     else:
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:4375]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:3875]
     print(f"Number of {split} files: {len(midi_lists[split])}")
 
 # TOKENIZATION
@@ -116,11 +116,11 @@ trainer_cfg = {
     "eval_steps": 68,
     "save_steps": 1020,
     "num_train_epochs": 150,
+    "max_steps": 40800,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
-    "max_steps": 40800,
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
