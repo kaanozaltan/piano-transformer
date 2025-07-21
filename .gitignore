@@ -192,6 +192,7 @@ wandb/
 
 /data
 /experiments
+/experiments_work
 logs/
 
 output*
@@ -202,6 +203,7 @@ core*
 graphics*
 submit_experiment.sh
 submit_evaluation.sh
+submit_evaluation_direct.sh
 samples/
 # For Moonbeam
 src/llama_recipes/datasets/__pycache__/

@@ -12,7 +12,6 @@ from transformers import AutoModelForCausalLM, GenerationConfig
 from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_datasets, build_collator
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
-from piano_transformer.model import load_model
 from piano_transformer.tokenizer import load_remi_tokenizer
 from piano_transformer.utils.midi import get_midi_file_lists_by_random, midi2wav
 
@@ -25,23 +24,23 @@ print(f"Model:\n{cfg.model_name}")
 ## DATASET PREPARATION
 # TODO: most of this is not needed for generate, but right now included for simplicity
 
-midi_lists = get_midi_file_lists_by_random(
-    cfg.data_raw_path / "aria-midi-v1-deduped-ext", "*.mid", cfg.seed
-)
+# midi_lists = get_midi_file_lists_by_random(
+#     cfg.data_raw_path / "aria-midi-v1-deduped-ext", "*.mid", cfg.seed
+# )
 
 tokenizer = load_remi_tokenizer(cfg.experiment_path / "tokenizer.json")
 
 MAX_SEQ_LEN = 1024
 NUM_OVERLAP_BARS = 10
 
-chunks_lists = split_datasets_into_chunks(
-    midi_lists,
-    tokenizer,
-    cfg.data_processed_path,
-    "aria",
-    MAX_SEQ_LEN,
-    NUM_OVERLAP_BARS,
-)
+# chunks_lists = split_datasets_into_chunks(
+#     midi_lists,
+#     tokenizer,
+#     cfg.data_processed_path,
+#     "aria",
+#     MAX_SEQ_LEN,
+#     NUM_OVERLAP_BARS,
+# )
 
 augmentation_cfg = {
     "pitch_offsets": list(range(-6, 6)),
@@ -50,29 +49,33 @@ augmentation_cfg = {
     "tempo_factors": [0.9, 0.925, 0.95, 0.975, 1.0, 1.025, 1.05, 1.075, 1.1],
 }
 
-train_ds, _, test_ds = build_datasets(
-    chunks_lists, tokenizer, MAX_SEQ_LEN, augmentation_cfg
-)
-collator = build_collator(tokenizer)
+# train_ds, _, test_ds = build_datasets(
+#     chunks_lists, tokenizer, MAX_SEQ_LEN, augmentation_cfg
+# )
+# collator = build_collator(tokenizer)
 
-model = load_model(cfg.model_path)
+
+start = time.time()
+print("[INFO] Loading model...", flush=True)
+model = AutoModelForCausalLM.from_pretrained(cfg.runs_path / "checkpoint-40800")
+model.to("cuda")
+print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
 
 generation_config = GenerationConfig(
     max_new_tokens=1024,
     do_sample=True,
-    temperature=0.9,
-    top_k=50,
+    temperature=1.0,
     pad_token_id=tokenizer.pad_token_id,
 )
 
 # Here the sequences are padded to the left, so that the last token along the time dimension
 # is always the last token of each seq, allowing to efficiently generate by batch
-collator.pad_on_left = True
-collator.eos_token = None
+# collator.pad_on_left = True
+# collator.eos_token = None
 
 model.eval()
 
-BATCH_SIZE = 256
+BATCH_SIZE = 64
 
 
 def generate(dataset, output, max_samples=None):
