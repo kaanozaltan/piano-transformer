@@ -51,36 +51,58 @@ def main(
         prompts = [[generator.tokenizer.sos_token_compound] for _ in range(num_samples)]
 
     else:
+        # Orignal code
+        # df = pd.read_csv(csv_file)
+        # split = "test"
+        # test_filenames = df[df['split'] == split]['file_base_name'].tolist()
+        # test_files_sampled = random.sample(test_filenames, num_samples)
+
+        # for filename in test_files_sampled:
+        #     test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
+        #     test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
+        #     prompts.append(test_data_with_sos[:prompt_len])
+
+        # Load chunked test data
         df = pd.read_csv(csv_file)
         split = "test"
-        test_filenames = df[df['split'] == split]['file_base_name'].tolist()
-        test_files_sampled = random.sample(test_filenames, num_samples)
+        test_files = df[df['split'] == split]['file_base_name'].tolist()
 
-        for filename in test_files_sampled:
+        for filename in test_files:
             test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
-            test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
-            prompts.append(test_data_with_sos[:prompt_len])
-    
-    # results = generator.music_completion(
-    #     prompts,
-    #     max_gen_len=max_gen_len,
-    #     temperature=temperature,
-    #     top_p=top_p,
-    # )
-    
-    # if from_scratch:
-    #     save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, "from_scratch", f"temperature_{temperature}_top_p_{top_p}")
-    # else: 
-    #     save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, "continuation", f"temperature_{temperature}_top_p_{top_p}") 
+            test_data_tokenized = generator.tokenizer.encode_series(test_data, if_add_sos = False, if_add_eos = False)
+            
+            # Calculate number of full prompt_len-sized chunks
+            num_chunks = len(test_data_tokenized) // prompt_len
+            for i in range(num_chunks):
+                chunk = test_data_tokenized[i * prompt_len : (i + 1) * prompt_len]
+                # Convert all values to plain Python ints
+                chunk = [[int(value) for value in token] for token in chunk]
+                sos_token = [[int(value) for value in token] for token in [generator.tokenizer.sos_token_compound]]
+                chunk_with_sos = sos_token + chunk
+                prompts.append(chunk_with_sos)
 
-    # os.makedirs(save_folder, exist_ok=True)
 
-    results = generator.music_completion(
-    prompts,
-    max_gen_len=max_gen_len,
-    temperature=temperature,
-    top_p=top_p,
-)
+    if from_scratch:
+        results = generator.music_completion(
+        prompts,
+        max_gen_len=max_gen_len,
+        temperature=temperature,
+        top_p=top_p,
+        )   
+    else:
+        results = []
+        BATCH_SIZE = 1000
+        for i in range(0, len(prompts), BATCH_SIZE):
+            prompt_batch = prompts[i:i + BATCH_SIZE]
+            
+            batch_results = generator.music_completion(
+                prompt_batch,
+                max_gen_len=max_gen_len,
+                temperature=temperature,
+                top_p=top_p,
+            )
+
+            results.extend(batch_results)
 
     # Build generation settings folder name
     gen_settings_folder = f"temperature_{temperature}_top_p_{top_p}_genlen_{max_gen_len}"
@@ -107,17 +129,6 @@ def main(
 
     os.makedirs(save_folder, exist_ok=True)
 
-    # for i, (dialog, result) in enumerate(zip(prompts, results)):
-    #     epoch_step = os.path.splitext(os.path.basename(ckpt_dir))[0]
-    #     save_path = f'{save_folder}/{epoch_step}_{str(i)}.mid'
-    #     try:
-    #         result['generation']['content'].save(save_path)
-    #         print(f"Midi saved to {save_path}")
-    #     except Exception as e:
-    #         print("Error saving MIDI file:", e)
-    #     if not from_scratch: # Do not save prompt if it only contains SOS token
-    #         result['generation']['prompt'].save(save_path.replace(".mid", "_prompt.mid"))
-    #     print("\n==================================\n")
 
     def get_next_start_index(save_folder, epoch_step):
         """Find max index used in existing files and return next starting index."""

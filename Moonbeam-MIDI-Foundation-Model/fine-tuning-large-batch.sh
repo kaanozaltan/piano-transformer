@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-gpu=24
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --time=01:00:00
 #SBATCH --partition=c23g
 #SBATCH --account=lect0148
@@ -22,17 +22,17 @@ MODEL_NAME="maestro"
 DATASET_NAME="maestro_839M"
 MODEL_CONFIG_PATH="src/llama_recipes/configs/model_config.json"
 
-OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/839M"
-WANDB_NAME="fine-tune_839M"
+OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/fine-tune_839M_context_512_batch_16_lr_3e-5_gamma_0.98_epoch_50"
+WANDB_NAME="fine-tune_839M_context_512_batch_16_lr_3e-5_gamma_0.98_epoch_100"
 
 mkdir -p logs
 
 # Run the fine-tuning script
-torchrun --nnodes 1 --nproc_per_node 2 recipes/finetuning/real_finetuning_uncon_gen.py \
-  --lr 3e-4 \
+torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_gen.py \
+  --lr 3e-5 \
   --val_batch_size 16 \
   --run_validation True \
-  --validation_interval 10 \
+  --validation_interval 20 \
   --save_metrics True \
   --dist_checkpoint_root_folder "$OUTPUT_DIR" \
   --dist_checkpoint_folder ddp \
@@ -45,10 +45,10 @@ torchrun --nnodes 1 --nproc_per_node 2 recipes/finetuning/real_finetuning_uncon_
   --model_name "$MODEL_NAME" \
   --dataset "$DATASET_NAME" \
   --output_dir "$OUTPUT_DIR" \
-  --batch_size_training 8 \
-  --context_length 2048 \
-  --num_epochs 30 \
+  --batch_size_training 16 \
+  --context_length 512\
+  --num_epochs 50 \
   --use_wandb True \
-  --gamma 0.99 \
+  --gamma 0.98 \
   --model_config_path "$MODEL_CONFIG_PATH" \
   --wandb_name "$WANDB_NAME"

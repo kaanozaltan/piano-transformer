@@ -1,7 +1,7 @@
 import os
 from mido import MidiFile
 
-FOLDER_PATH = "/path/to/your/midi/folder"
+FOLDER_PATH = "/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/fine-tune_309M_context_256_batch_64_lr_5e-5_gamma_0.98_epoch_100/99-10.safetensors/moonbeam_309M/from_scratch/temperature_1.2_top_p_0.95_genlen_256"
 
 def is_valid_midi(file_path):
     try:
