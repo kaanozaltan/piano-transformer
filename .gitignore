@@ -226,3 +226,4 @@ preprocessed/
 wandb/
 .venv-moonbeam/
 logs/
+scripts/submit_evaluation.sh
