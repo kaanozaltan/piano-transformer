@@ -96,7 +96,7 @@ trainer_cfg = {
     "gradient_accumulation_steps": 2,
     "per_device_train_batch_size": 64,
     "per_device_eval_batch_size": 64,
-    "learning_rate": 1e-5,
+    "learning_rate": 2e-5,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
     "lr_scheduler_type": "cosine_with_min_lr",
@@ -110,7 +110,7 @@ trainer_cfg = {
     "data_seed": cfg.seed,
     "run_name": cfg.model_name + "_finetune_no-freezing",
     "optim": "adamw_torch",
-    "max_steps": 20400,
+    "max_steps": 10200,
 }
 
 print(f"Trainer config: {trainer_cfg}")
