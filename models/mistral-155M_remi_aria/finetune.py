@@ -85,14 +85,13 @@ def freeze_layers(model, n_freeze, freeze_embeddings=True, keep_norms_trainable=
             else:
                 p.requires_grad = True
 
-
 # freeze_layers(model, N_FREEZE, FREEZE_EMBEDDINGS, KEEP_NORMS_TRAINABLE)
 
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
 print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
 
 trainer_cfg = {
-    "output_dir": cfg.runs_path.parent / f"{cfg.runs_path}_finetune_no-freezing",
+    "output_dir": cfg.runs_path.parent / f"{cfg.runs_path}_finetune_no_freeze_new_params",
     "gradient_accumulation_steps": 2,
     "per_device_train_batch_size": 64,
     "per_device_eval_batch_size": 64,
@@ -108,7 +107,7 @@ trainer_cfg = {
     "num_train_epochs": 150,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
-    "run_name": cfg.model_name + "_finetune_no-freezing",
+    "run_name": cfg.model_name + "_finetune_no_freeze_new_params",
     "optim": "adamw_torch",
     "max_steps": 10200,
 }
@@ -127,7 +126,7 @@ val_callback = EvalCallback(
 trainer.add_callback(val_callback)
 
 result = trainer.train()
-trainer.save_model(cfg.model_path.parent / f"{cfg.model_path}_finetune_no-freezing")
+trainer.save_model(cfg.model_path / "_finetune_no_freeze_new_params")
 trainer.log_metrics("train", result.metrics)
 trainer.save_metrics("train", result.metrics)
 trainer.save_state()
