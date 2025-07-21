@@ -4,5 +4,5 @@ model:
   transformer_name: mistral-155M
   tokenizer_name: remi
   dataset_name: aria
-  version: 5
+  version: 6
 seed: 222

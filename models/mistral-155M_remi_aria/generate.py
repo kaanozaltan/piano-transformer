@@ -1,19 +1,16 @@
-import time
+import math
 from copy import deepcopy
 from pathlib import Path
-import math
 
-from torch.utils.data import DataLoader
 import torch
-from tqdm import tqdm
 import torch.nn.functional as F
-from transformers import AutoModelForCausalLM, GenerationConfig
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from transformers import GenerationConfig
 
 from piano_transformer.config import load_config
-from piano_transformer.datasets.dataset import build_datasets, build_collator
-from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
+from piano_transformer.model import load_model
 from piano_transformer.tokenizer import load_remi_tokenizer
-from piano_transformer.utils.midi import get_midi_file_lists_by_random, midi2wav
 
 ## SETUP
 
@@ -55,11 +52,7 @@ augmentation_cfg = {
 # collator = build_collator(tokenizer)
 
 
-start = time.time()
-print("[INFO] Loading model...", flush=True)
-model = AutoModelForCausalLM.from_pretrained(cfg.runs_path / "checkpoint-40800")
-model.to("cuda")
-print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
+model = load_model(cfg.runs_path / "checkpoint-40800")
 
 generation_config = GenerationConfig(
     max_new_tokens=1024,
