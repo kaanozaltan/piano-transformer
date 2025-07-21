@@ -19,12 +19,19 @@ def overlap_area(A, B):
 
 
 # Calculate KL distance between the two PDF
-def kl_dist(A, B, num_sample=1000):
+def kl_dist(A, B, num_sample=1000, epsilon=1e-10):
     pdf_A = stats.gaussian_kde(A)
     pdf_B = stats.gaussian_kde(B)
-    sample_A = np.linspace(np.min(A), np.max(A), num_sample)
-    sample_B = np.linspace(np.min(B), np.max(B), num_sample)
-    return stats.entropy(pdf_A(sample_A), pdf_B(sample_B))
+    sample = np.linspace(min(np.min(A), np.min(B)), max(np.max(A), np.max(B)), num_sample)
+    
+    p = pdf_A(sample)
+    q = pdf_B(sample)
+    
+    # Avoid division by zero
+    p = np.clip(p, epsilon, None)
+    q = np.clip(q, epsilon, None)
+    
+    return stats.entropy(p, q)
 
 
 def c_dist(A, B, mode='None', normalize=0):

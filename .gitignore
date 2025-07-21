@@ -192,6 +192,7 @@ wandb/
 
 /data
 /experiments
+/experiments_work
 logs/
 
 output*
