@@ -38,7 +38,7 @@ midi_lists_maestro = get_midi_file_lists_by_csv(
 )
 
 midi_lists = get_midi_file_lists_by_random(
-    cfg.data_raw_path / "aria-midi-deduped-genre", "*.mid", cfg.seed
+    cfg.data_raw_path / "aria-midi-genre-balanced", "*.mid", cfg.seed
 )
 
 rng = np.random.default_rng(cfg.seed)
@@ -46,9 +46,9 @@ rng = np.random.default_rng(cfg.seed)
 # Use 10.000 files from aria for moderate-scale pre-training
 for split in ["train", "validation", "test"]:
     if split == "train":
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:35000]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:100000]
     else:
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:4375]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:100000]
     print(f"Number of {split} files: {len(midi_lists[split])}")
 
 # TOKENIZATION
