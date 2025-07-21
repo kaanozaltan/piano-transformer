@@ -11,4 +11,4 @@
 #SBATCH --account=lect0148
 
 source .venv/bin/activate
-python scripts/evaluate.py "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v3/output/train" "/hpcwork/lect0148/data/moonbeam/samples/309M" "/hpcwork/lect0148/data/mooonbeam/metrics"
+python scripts/evaluate.py "/hpcwork/lect0148/experiments/mistral-162M_remi_maestro_v3/output/train" "/hpcwork/lect0148/data/moonbeam/generations/from_scratch/309M/temperature_1_top_p_0.95_genlen_256" "/hpcwork/lect0148/data/moonbeam/generations/from_scratch/309M/temperature_1_top_p_0.95_genlen_256/metrics"

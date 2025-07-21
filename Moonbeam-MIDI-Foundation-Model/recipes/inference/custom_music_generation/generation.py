@@ -299,19 +299,38 @@ class MusicLlama:
                     "logprobs": logprobs_i,
                 }
                 for t, logprobs_i in zip(generation_tokens, generation_logprobs)
-        ]
-        return [
-            {
-                "generation": {
-                    "role": "assistant",
-                    "content": self.tokenizer.compound_to_midi(t), 
-                    "prompt": self.tokenizer.compound_to_midi(p),
-                    "prompt_tokens": p,
-                    "tokens": t,
-                },
-            }
-            for t, p in zip(generation_tokens, prompt_tokens) 
-        ]
+            ]
+        # return [
+        #     {
+        #         "generation": {
+        #             "role": "assistant",
+        #             "content": self.tokenizer.compound_to_midi(t), 
+        #             "prompt": self.tokenizer.compound_to_midi(p),
+        #             "prompt_tokens": p,
+        #             "tokens": t,
+        #         },
+        #     }
+        #     for t, p in zip(generation_tokens, prompt_tokens) 
+        # ]
+        results = []
+        for t, p in zip(generation_tokens, prompt_tokens):
+            try:
+                content = self.tokenizer.compound_to_midi(t)
+                prompt = self.tokenizer.compound_to_midi(p)
+                results.append({
+                    "generation": {
+                        "role": "assistant",
+                        "content": content,
+                        "prompt": prompt,
+                        "prompt_tokens": p,
+                        "tokens": t,
+                    },
+                })
+            except Exception as e:
+                print(f"[Warning] Skipped a generation due to error in compound_to_midi: {e}")
+                continue
+
+        return results
 
 def sample_top_p(probs, p):
     """
