@@ -1,19 +1,20 @@
-import time
+from copy import deepcopy
+import math
 from copy import deepcopy
 from pathlib import Path
-import math
 
-from torch.utils.data import DataLoader
 import torch
-from tqdm import tqdm
 import torch.nn.functional as F
-from transformers import AutoModelForCausalLM, GenerationConfig
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from transformers import GenerationConfig
 
 from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_datasets, build_collator
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
+from piano_transformer.model import load_model
 from piano_transformer.tokenizer import load_remi_tokenizer
-from piano_transformer.utils.midi import get_midi_file_lists_by_csv, midi2wav
+from piano_transformer.utils.midi import get_midi_file_lists_by_csv
 
 ## SETUP
 
@@ -55,16 +56,12 @@ train_ds, _, test_ds = build_datasets(
 collator = build_collator(tokenizer)
 
 
-start = time.time()
-print("[INFO] Loading model...", flush=True)
-model = AutoModelForCausalLM.from_pretrained(cfg.model_path)
-model.to("cuda")
-print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
+model = load_model(cfg.runs_path / "checkpoint-15300")
 
 generation_config = GenerationConfig(
     max_new_tokens=1024,
     do_sample=True,
-    temperature=1.2,
+    temperature=1.0,
     pad_token_id=tokenizer.pad_token_id,
 )
 
@@ -200,14 +197,52 @@ def compute_perplexity(model, dataset, collator, batch_size=32):
     return perplexity
 
 
+def compute_perplexity_ignore_padding(model, dataset, collator, batch_size=32):
+    model.eval()
+    dataloader = DataLoader(dataset, batch_size=batch_size, collate_fn=collator)
+
+    total_nll = 0.0
+    total_tokens = 0
+
+    with torch.no_grad():
+        for batch in tqdm(dataloader, desc="Evaluating perplexity"):
+            input_ids      = batch["input_ids"].to(model.device)        # [B, T]
+            attention_mask = batch["attention_mask"].to(model.device)   # [B, T]
+
+            # Build labels
+            labels = input_ids.clone()
+
+            # Ignore pads
+            labels[attention_mask == 0] = -100
+
+            # Ignore first token of each sequence
+            labels[:, 0] = -100
+
+            outputs = model(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                labels=labels,
+            )
+            loss = outputs.loss  # mean over non -100 labels in this batch
+
+            n_tokens = (labels != -100).sum().item()
+            total_nll += loss.item() * n_tokens
+            total_tokens += n_tokens
+
+    avg_nll = total_nll / total_tokens
+    perplexity = math.exp(avg_nll)
+    return perplexity
+
+
 # generate(test_ds, cfg.output_path / "test_jonathan_2")
 # generate_from_scratch(cfg.output_path / "test_jonathan_2_from_scratch", len(train_ds))
 
-# perplexity = compute_perplexity(model, test_ds, collator, batch_size=256)
-# print(f"Perplexity on test set: {perplexity:.2f}")
-
-generate_from_scratch(cfg.output_path / "generations", 30)
+# generate_from_scratch(cfg.output_path / "generations", 1000)
 
 # generate(test_ds, cfg.output_path / "continuations")
+
+eval_collator = build_collator(tokenizer)
+perplexity = compute_perplexity_ignore_padding(model, train_ds, eval_collator, batch_size=32)
+print(f"Perplexity on test set: {perplexity:.2f}")
 
 # midi2wav(cfg.output_path / "test_jonathan", cfg.output_path / "test_jonathan_wav", "SalC5Light2.sf2")

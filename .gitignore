@@ -192,14 +192,39 @@ wandb/
 
 /data
 /experiments
+/experiments_work
 logs/
 
 output*
 .envrc
 z.*
 z_*
-core.login*
+core*
 graphics*
 submit_experiment.sh
 submit_evaluation.sh
+submit_evaluation_direct.sh
 samples/
+# For Moonbeam
+src/llama_recipes/datasets/__pycache__/
+src/llama_recipes/model/modeling_musicllama.py
+src/llama_recipes/transformers_minimal/build/*
+src/llama_recipes/transformers_minimal/src/transformers.egg-info/SOURCES.txt
+src/llama_recipes/transformers_minimal/src/transformers/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/integrations/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/models/llama/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/utils/__pycache__/
+recipes/inference/custom_music_generation/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/generation/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/models/encoder_decoder/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/quantizers/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers/models/auto/__pycache__/
+src/llama_recipes/transformers_minimal/src/transformers.egg-info/
+checkpoints/
+data/
+preprocessed/
+.vscode/
+*.pyc
+wandb/
+.venv-moonbeam/
+logs/
