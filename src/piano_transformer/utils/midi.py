@@ -1,4 +1,5 @@
 import copy
+import json
 import subprocess
 
 import pandas as pd
@@ -18,8 +19,24 @@ def get_midi_file_lists_by_csv(csv_path, midi_dir):
     }
 
     
-def get_midi_file_lists_by_random(midi_dir, pattern, seed):
+def get_midi_file_lists_by_random(midi_dir, pattern, seed, genre_filter=None):
+    metadata_path = midi_dir / "metadata.json"
+    with open(metadata_path, "r") as file:
+        metadata = json.load(file)
+
     all_files = sorted(midi_dir.rglob(pattern))
+
+    if genre_filter:
+        filtered_files = []
+        for file in all_files:
+            # Extract ID from filename (assuming "123.mid" → "123")
+            midi_id = file.stem.split("_")[0].lstrip("0")
+            if midi_id in metadata:
+                file_genre = metadata[midi_id]["metadata"].get("genre", None)
+                if file_genre == genre_filter:
+                    filtered_files.append(file)
+        all_files = filtered_files
+
     rng = np.random.default_rng(seed)
     shuffled = rng.permutation(all_files)
 
