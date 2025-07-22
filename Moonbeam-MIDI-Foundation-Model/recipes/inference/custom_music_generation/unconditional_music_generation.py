@@ -1,0 +1,162 @@
+from typing import List, Optional
+from pathlib import Path
+
+import fire
+import pandas as pd
+import numpy as np
+import os
+import re
+from generation import MusicLlama
+import random
+import ast
+import json
+
+def main(
+    ckpt_dir: str,
+    csv_file: str,
+    tokenizer_path: str,
+    model_config_path: str,
+    temperature: float = 0.6,
+    top_p: float = 0.9,
+    max_seq_len: int = 512,
+    max_batch_size: int = 4,
+    prompt_len: int = 5,
+    num_samples: int = 50,
+    max_gen_len: Optional[int] = None,
+    finetuned_PEFT_weight_path: Optional[str] = None,
+    from_scratch: bool = False,
+    folder: str = "first"
+):
+
+    # Set the random seed for CPU and GPU
+    seed = 42
+    import torch
+    torch.manual_seed(seed)
+    random.seed(seed)  # You can choose any seed value, 42 is commonly used
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.    
+
+    generator = MusicLlama.build(
+        ckpt_dir=ckpt_dir,
+        model_config_path = model_config_path, 
+        tokenizer_path=tokenizer_path,
+        max_seq_len=max_seq_len,
+        max_batch_size=max_batch_size,
+        finetuned_PEFT_weight_path = finetuned_PEFT_weight_path) 
+    
+    prompts = []
+    
+    if from_scratch: # Only use SOS token as prompt
+        prompts = [[generator.tokenizer.sos_token_compound] for _ in range(num_samples)]
+
+    else:
+        df = pd.read_csv(csv_file)
+        split = "test"
+        test_filenames = df[df['split'] == split]['file_base_name'].tolist()
+        test_files_sampled = random.sample(test_filenames, num_samples)
+
+        for filename in test_files_sampled:
+            test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
+            test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
+            prompts.append(test_data_with_sos[:prompt_len])
+    
+    # results = generator.music_completion(
+    #     prompts,
+    #     max_gen_len=max_gen_len,
+    #     temperature=temperature,
+    #     top_p=top_p,
+    # )
+    
+    # if from_scratch:
+    #     save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, "from_scratch", f"temperature_{temperature}_top_p_{top_p}")
+    # else: 
+    #     save_folder = os.path.join(finetuned_PEFT_weight_path, Path(ckpt_dir).stem, "continuation", f"temperature_{temperature}_top_p_{top_p}") 
+
+    # os.makedirs(save_folder, exist_ok=True)
+
+    results = generator.music_completion(
+    prompts,
+    max_gen_len=max_gen_len,
+    temperature=temperature,
+    top_p=top_p,
+)
+
+    # Build generation settings folder name
+    gen_settings_folder = f"temperature_{temperature}_top_p_{top_p}_genlen_{max_gen_len}"
+
+    # Add prompt length for continuation
+    if not from_scratch:
+        gen_settings_folder += f"_promptlen_{prompt_len}"
+
+    # Build final save path
+    if from_scratch:
+        save_folder = os.path.join(
+            finetuned_PEFT_weight_path,
+            Path(ckpt_dir).stem,
+            "from_scratch",
+            gen_settings_folder
+        )
+    else:
+        save_folder = os.path.join(
+            finetuned_PEFT_weight_path,
+            Path(ckpt_dir).stem,
+            "continuation",
+            gen_settings_folder
+        )
+
+    os.makedirs(save_folder, exist_ok=True)
+
+    # for i, (dialog, result) in enumerate(zip(prompts, results)):
+    #     epoch_step = os.path.splitext(os.path.basename(ckpt_dir))[0]
+    #     save_path = f'{save_folder}/{epoch_step}_{str(i)}.mid'
+    #     try:
+    #         result['generation']['content'].save(save_path)
+    #         print(f"Midi saved to {save_path}")
+    #     except Exception as e:
+    #         print("Error saving MIDI file:", e)
+    #     if not from_scratch: # Do not save prompt if it only contains SOS token
+    #         result['generation']['prompt'].save(save_path.replace(".mid", "_prompt.mid"))
+    #     print("\n==================================\n")
+
+    def get_next_start_index(save_folder, epoch_step):
+        """Find max index used in existing files and return next starting index."""
+        if not os.path.exists(save_folder):
+            return 0  # folder doesn't exist yet, start from zero
+
+        existing_files = os.listdir(save_folder)
+        pattern = re.compile(rf"{re.escape(epoch_step)}_(\d+)\.mid$")
+        indices = []
+
+        for filename in existing_files:
+            match = pattern.search(filename)
+            if match:
+                indices.append(int(match.group(1)))
+
+        if not indices:
+            return 0
+        return max(indices) + 1
+    
+    epoch_step = os.path.splitext(os.path.basename(ckpt_dir))[0]
+    start_index = get_next_start_index(save_folder, epoch_step)
+    
+    for i, (dialog, result) in enumerate(zip(prompts, results), start=start_index):
+        save_path = f'{save_folder}/{epoch_step}_{i}.mid'
+        try:
+            result['generation']['content'].save(save_path)
+            print(f"Midi saved to {save_path}")
+        except Exception as e:
+            print("Error saving MIDI file:", e)
+
+        if not from_scratch:  # Save prompt only if not from scratch
+            prompt_save_path = save_path.replace(".mid", "_prompt.mid")
+            try:
+                result['generation']['prompt'].save(prompt_save_path)
+                print(f"Prompt MIDI saved to {prompt_save_path}")
+            except Exception as e:
+                print("Error saving prompt MIDI file:", e)
+
+        print("\n==================================\n")
+
+if __name__ == "__main__":
+    fire.Fire(main)

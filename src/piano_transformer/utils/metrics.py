@@ -279,15 +279,33 @@ def evaluate_mgeval_combined(
     for j in range(len(features)):
         print(f"Extracting {features[j]}")
         for i in tqdm(range(num_samples), desc=f"  Dataset 1"):
-            feature = core.extract_feature(dataset1[i])
-            set1_eval[features[j]][i] = getattr(core.metrics(), features[j])(
-                feature, **kwargs[j]
-            )
+            try:
+                feature = core.extract_feature(dataset1[i])
+                value = getattr(core.metrics(), features[j])(feature, **kwargs[j])
+
+                # check for NaNs in output and skip if found
+                if np.any(np.isnan(value)):
+                    raise ValueError("NaN in extracted feature")
+
+                set1_eval[features[j]][i] = value
+
+            except Exception as e:
+                print(f"[{features[j]}] Skipping {dataset1[i]} (idx={i}): {e}")
+                continue
         for i in tqdm(range(num_samples), desc=f"  Dataset 2"):
-            feature = core.extract_feature(dataset2[i])
-            set2_eval[features[j]][i] = getattr(core.metrics(), features[j])(
-                feature, **kwargs[j]
-            )
+            try:
+                feature = core.extract_feature(dataset2[i])
+                value = getattr(core.metrics(), features[j])(feature, **kwargs[j])
+
+                # check for NaNs in output and skip if found
+                if np.any(np.isnan(value)):
+                    raise ValueError("NaN in extracted feature")
+
+                set2_eval[features[j]][i] = value
+
+            except Exception as e:
+                print(f"[{features[j]}] Skipping {dataset2[i]} (idx={i}): {e}")
+                continue
 
     if output_path is not None:
         os.makedirs(os.path.join(output_path, "graphics"), exist_ok=True)
@@ -546,7 +564,7 @@ def summarize_and_plot_mgeval_results(
     return summary
 
 
-def create_subset(input_dir, subset_size):
+def create_subset_auto_seed(input_dir, subset_size):
     parent_dir = os.path.dirname(os.path.abspath(input_dir))
     base_name = os.path.basename(os.path.normpath(input_dir))
     output_dir = os.path.join(parent_dir, base_name + "_subset_" + str(subset_size))
@@ -574,6 +592,55 @@ def create_subset(input_dir, subset_size):
     print(f"Seed: {hash_seed}")
 
     rng = random.Random(hash_seed)
+    subset = rng.sample(all_files, subset_size)
+
+    os.makedirs(output_dir)
+    for src in subset:
+        dst = os.path.join(output_dir, os.path.basename(src))
+        shutil.copy2(src, dst)
+
+    print(f"Created subset at {output_dir}.")
+    return output_dir
+
+
+def create_subset(input_dir, subset_size, seed=None):
+    parent_dir = os.path.dirname(os.path.abspath(input_dir))
+    base_name = os.path.basename(os.path.normpath(input_dir))
+
+    # Determine effective seed
+    if seed is None:
+        # Use hash-based deterministic seed
+        all_files = sorted(
+            glob.glob(os.path.join(input_dir, "**", "*.mid*"), recursive=True),
+            key=os.path.basename,
+        )
+        relative_names = sorted([os.path.basename(path) for path in all_files])
+        seed_input = "".join(relative_names)
+        seed = int(hashlib.sha256(seed_input.encode()).hexdigest(), 16) % (10**8)
+        print(f"Generated deterministic seed: {seed}")
+    elif seed == -1:
+        # Use true randomness
+        seed = random.randint(0, 10**8)
+        print(f"Using random seed: {seed}")
+    else:
+        print(f"Using provided seed: {seed}")
+
+    output_dir = os.path.join(parent_dir, f"{base_name}_subset_{subset_size}")
+
+    if os.path.exists(output_dir):
+        print("Subset already exists.")
+        return output_dir
+
+    all_files = sorted(
+        glob.glob(os.path.join(input_dir, "**", "*.mid*"), recursive=True),
+        key=os.path.basename,
+    )
+
+    if len(all_files) < subset_size:
+        print("Subset size exceeds available files.")
+        return
+
+    rng = random.Random(seed)
     subset = rng.sample(all_files, subset_size)
 
     os.makedirs(output_dir)

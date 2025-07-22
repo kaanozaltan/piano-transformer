@@ -20,6 +20,8 @@ def analyze_genres(metadata_path: Path):
                 genre_counter.update(genre)
             elif isinstance(genre, str):
                 genre_counter[genre] += 1
+        else:
+            genre_counter["none"] += 1
     
     print(f"Found {len(genre_counter)} unique genres:")
     for genre, count in genre_counter.most_common():
