@@ -1,3 +1,5 @@
+import time
+
 from miditok import MusicTokenizer
 from transformers import AutoModelForCausalLM, MistralConfig
 
@@ -23,4 +25,14 @@ def build_mistral_model(
         attention_dropout=0.1,
     )
     model = AutoModelForCausalLM.from_config(model_config)
+    return model
+
+
+def load_model(path):
+    start = time.time()
+    print("[INFO] Loading model...", flush=True)
+    model = AutoModelForCausalLM.from_pretrained(path)
+    model.to("cuda")
+    print(f"[INFO] Model loaded in {time.time() - start:.2f} seconds.", flush=True)
+
     return model

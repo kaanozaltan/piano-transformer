@@ -1,8 +1,8 @@
 data:
-  base_path: /work/lect0148 # For training on the cluster: /hpcwork/lect0148
+  base_path: /home/ty133885/project/ # For training on the cluster: /hpcwork/lect0148
 model:
   transformer_name: mistral-155M
   tokenizer_name: remi
   dataset_name: aria
-  version: 5
+  version: 6
 seed: 222

@@ -36,7 +36,8 @@ generation_config = GenerationConfig(
 
 model.eval()
 
-BATCH_SIZE = 64
+# Optimized batch size for Apple M2
+BATCH_SIZE = 8  # Good balance for M2 unified memory
 
 
 # possible genres: "ambient", "atonal", "blues", "classical", "folk", "jazz", "pop", "ragtime", "rock", "soundtrack"
@@ -127,7 +128,7 @@ def generate_conditioned_on_genre(output, num_samples, genre: str):
 
 for genre in [
     "ambient",
-    "atonal",
+    "atonal", 
     "blues",
     "classical",
     "folk",
@@ -138,4 +139,4 @@ for genre in [
     "soundtrack",
 ]:
     print(f"Generating {genre} music...")
-    generate_conditioned_on_genre(cfg.output_path / genre, 30, genre)
+    generate_conditioned_on_genre(cfg.output_path / genre, 10, genre)  # Reasonable number for M2

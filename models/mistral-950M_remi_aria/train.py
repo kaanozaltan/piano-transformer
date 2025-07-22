@@ -38,17 +38,17 @@ midi_lists_maestro = get_midi_file_lists_by_csv(
 )
 
 midi_lists = get_midi_file_lists_by_random(
-    cfg.data_raw_path / "aria-midi-v1-deduped-ext", "*.mid", cfg.seed, "classical"
+    cfg.data_raw_path / "aria-midi-deduped-genre", "*.mid", cfg.seed
 )
 
 rng = np.random.default_rng(cfg.seed)
 
-# Use 31.000 classical files from aria for moderate-scale pre-training
+# Use 10.000 files from aria for moderate-scale pre-training
 for split in ["train", "validation", "test"]:
     if split == "train":
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:31000]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:80000]
     else:
-        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:3875]
+        midi_lists[split] = rng.permutation(midi_lists[split]).tolist()[:10000]
     print(f"Number of {split} files: {len(midi_lists[split])}")
 
 # TOKENIZATION
@@ -90,8 +90,8 @@ collator = build_collator(tokenizer)
 ## TRAINING
 
 model_cfg = {
-    "num_hidden_layers": 12,
-    "hidden_size": 768,
+    "num_hidden_layers": 36,
+    "hidden_size": 1280,
 }
 
 model = build_mistral_model(model_cfg, tokenizer, MAX_SEQ_LEN)
@@ -103,9 +103,9 @@ print(
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,
-    "gradient_accumulation_steps": 2,
-    "per_device_train_batch_size": 64,
-    "per_device_eval_batch_size": 64,
+    "gradient_accumulation_steps": 8,
+    "per_device_train_batch_size": 16,
+    "per_device_eval_batch_size": 16,
     "learning_rate": 1e-4,
     "weight_decay": 0.01,
     "max_grad_norm": 3.0,
@@ -116,11 +116,11 @@ trainer_cfg = {
     "eval_steps": 68,
     "save_steps": 1020,
     "num_train_epochs": 150,
-    "max_steps": 40800,
     "seed": cfg.seed,
     "data_seed": cfg.seed,
     "run_name": cfg.model_name,
     "optim": "adamw_torch",
+    "max_steps": 40800,
 }
 
 trainer = make_trainer(trainer_cfg, model, collator, train_ds, valid_ds)
