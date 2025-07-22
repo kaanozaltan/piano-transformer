@@ -1,5 +1,5 @@
 data:
-  base_path: /home/ty133885/project # For training on the cluster: /hpcwork/lect0148
+  base_path: /home/lect0148
 model:
   transformer_name: mistral-950M
   tokenizer_name: remi
