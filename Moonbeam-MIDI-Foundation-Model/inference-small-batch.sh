@@ -22,14 +22,14 @@ TEMPERATURE=1
 MODEL_CONFIG="src/llama_recipes/configs/model_config_small.json"
 CKPT_DIR="/hpcwork/yh522379/moonbeam/checkpoints/pre-trained/moonbeam_309M.pt"
 TOKENIZER_PATH="tokenizer.model"
-PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/fine-tune_309M_context_256_batch_64_lr_5e-5_gamma_0.98_epoch_100/99-10.safetensors"
+PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/309M-50epoch/49-20.safetensors"
 
-MAX_SEQ_LEN=256
+MAX_SEQ_LEN=1024
 MAX_GEN_LEN=256
 MAX_BATCH_SIZE=4
 NUM_SAMPLES=1300
 PROMPT_LEN=100
-FROM_SCRATCH=False
+FROM_SCRATCH=True
 
 # Run the inference script
 torchrun --nproc_per_node=1 recipes/inference/custom_music_generation/unconditional_music_generation.py \
