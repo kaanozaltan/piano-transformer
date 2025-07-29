@@ -283,7 +283,7 @@ class MusicLlama:
             temperature=temperature,
             top_p=top_p,
             logprobs=logprobs,
-            echo = True
+            echo = False,  # Do not echo prompt tokens in the output
         )
 
         prompt_tokens = [t[1:] for t in prompt_tokens] #remove SOS token

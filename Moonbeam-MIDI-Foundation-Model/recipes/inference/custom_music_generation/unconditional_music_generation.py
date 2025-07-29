@@ -52,57 +52,57 @@ def main(
 
     else:
         # Orignal code
-        # df = pd.read_csv(csv_file)
-        # split = "test"
-        # test_filenames = df[df['split'] == split]['file_base_name'].tolist()
-        # test_files_sampled = random.sample(test_filenames, num_samples)
-
-        # for filename in test_files_sampled:
-        #     test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
-        #     test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
-        #     prompts.append(test_data_with_sos[:prompt_len])
-
-        # Load chunked test data
         df = pd.read_csv(csv_file)
         split = "test"
-        test_files = df[df['split'] == split]['file_base_name'].tolist()
+        test_files_sampled = df[df['split'] == split]['file_base_name'].tolist() * 2
+        # test_files_sampled = random.sample(test_filenames, num_samples)
 
-        for filename in test_files:
+        for filename in test_files_sampled:
             test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
-            test_data_tokenized = generator.tokenizer.encode_series(test_data, if_add_sos = False, if_add_eos = False)
+            test_data_with_sos = generator.tokenizer.encode_series(test_data, if_add_sos = True, if_add_eos = False)
+            prompts.append(test_data_with_sos[:prompt_len])
+
+        # # Load chunked test data
+        # df = pd.read_csv(csv_file)
+        # split = "test"
+        # test_files = df[df['split'] == split]['file_base_name'].tolist()
+
+        # for filename in test_files:
+        #     test_data = np.load(os.path.join(os.path.dirname(csv_file), 'processed', filename))
+        #     test_data_tokenized = generator.tokenizer.encode_series(test_data, if_add_sos = False, if_add_eos = False)
             
-            # Calculate number of full prompt_len-sized chunks
-            num_chunks = len(test_data_tokenized) // prompt_len
-            for i in range(num_chunks):
-                chunk = test_data_tokenized[i * prompt_len : (i + 1) * prompt_len]
-                # Convert all values to plain Python ints
-                chunk = [[int(value) for value in token] for token in chunk]
-                sos_token = [[int(value) for value in token] for token in [generator.tokenizer.sos_token_compound]]
-                chunk_with_sos = sos_token + chunk
-                prompts.append(chunk_with_sos)
+        #     # Calculate number of full prompt_len-sized chunks
+        #     num_chunks = len(test_data_tokenized) // prompt_len
+        #     for i in range(num_chunks):
+        #         chunk = test_data_tokenized[i * prompt_len : (i + 1) * prompt_len]
+        #         # Convert all values to plain Python ints
+        #         chunk = [[int(value) for value in token] for token in chunk]
+        #         sos_token = [[int(value) for value in token] for token in [generator.tokenizer.sos_token_compound]]
+        #         chunk_with_sos = sos_token + chunk
+        #         prompts.append(chunk_with_sos)
 
 
-    if from_scratch:
-        results = generator.music_completion(
-        prompts,
-        max_gen_len=max_gen_len,
-        temperature=temperature,
-        top_p=top_p,
-        )   
-    else:
-        results = []
-        BATCH_SIZE = 1000
-        for i in range(0, len(prompts), BATCH_SIZE):
-            prompt_batch = prompts[i:i + BATCH_SIZE]
+    # if from_scratch:
+    results = generator.music_completion(
+    prompts,
+    max_gen_len=max_gen_len,
+    temperature=temperature,
+    top_p=top_p,
+    )   
+    # else:
+    #     results = []
+    #     BATCH_SIZE = 1000
+    #     for i in range(0, len(prompts), BATCH_SIZE):
+    #         prompt_batch = prompts[i:i + BATCH_SIZE]
             
-            batch_results = generator.music_completion(
-                prompt_batch,
-                max_gen_len=max_gen_len,
-                temperature=temperature,
-                top_p=top_p,
-            )
+    #         batch_results = generator.music_completion(
+    #             prompt_batch,
+    #             max_gen_len=max_gen_len,
+    #             temperature=temperature,
+    #             top_p=top_p,
+    #         )
 
-            results.extend(batch_results)
+    #         results.extend(batch_results)
 
     # Build generation settings folder name
     gen_settings_folder = f"temperature_{temperature}_top_p_{top_p}_genlen_{max_gen_len}"
