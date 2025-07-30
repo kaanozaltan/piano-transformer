@@ -203,7 +203,8 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                     #TODO: More frequent evaluation; Remember to switch on model.train again
                     if step%train_config.validation_interval==0 and train_config.run_validation:
                         
-                        eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run)
+                        # eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run)
+                        eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation_custom(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run)
                         if train_config.save_metrics:
                             val_step_loss.extend(temp_val_loss)
                             val_step_perplexity.extend(temp_step_perplexity)
@@ -922,14 +923,28 @@ def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb
                 if not train_config.enable_fsdp or local_rank==0:
                     print("max eval steps reached, stopping evaluation, total_eval_steps: ", total_eval_steps - 1)
                 break
+
+            # for key in batch.keys():
+            #     if train_config.enable_fsdp:
+            #         batch[key] = batch[key].to(local_rank)
+            #     else:
+            #         if is_xpu_available():
+            #             batch[key] = batch[key].to('xpu:0')
+            #         else:
+            #             batch[key] = batch[key].to('cuda:0')
             for key in batch.keys():
+            # Move to correct device
                 if train_config.enable_fsdp:
-                    batch[key] = batch[key].to(local_rank)
+                    if is_xpu_available():
+                        batch[key] = batch[key].to(torch.device(f"xpu:{local_rank}"))
+                    else:
+                        batch[key] = batch[key].to(local_rank)
                 else:
                     if is_xpu_available():
                         batch[key] = batch[key].to('xpu:0')
                     else:
                         batch[key] = batch[key].to('cuda:0')
+
             # Ensure no gradients are computed for this scope to save memory
             with torch.no_grad():
                 # Forward pass and compute loss
@@ -967,6 +982,64 @@ def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb
                     }, commit=False)
 
     return eval_ppl, eval_epoch_loss, val_step_loss, val_step_perplexity
+
+
+def evaluation_custom(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run, generator=None):
+    import torch
+    model.eval()
+    val_step_loss = []
+    val_step_perplexity = []
+    eval_loss = 0.0
+    total_eval_steps = 0
+
+    all_prompts = []
+    all_labels = []
+
+    with MemoryTrace() as memtrace:
+        for step, batch in enumerate(tqdm(eval_dataloader, colour="green", desc="evaluating Epoch", dynamic_ncols=True)):
+            total_eval_steps += 1
+            if train_config.max_eval_step > 0 and total_eval_steps > train_config.max_eval_step:
+                if not train_config.enable_fsdp or local_rank == 0:
+                    print("max eval steps reached, stopping evaluation, total_eval_steps: ", total_eval_steps - 1)
+                break
+
+            for key in batch:
+                if train_config.enable_fsdp:
+                    batch[key] = batch[key].to(torch.device(f"xpu:{local_rank}") if is_xpu_available() else local_rank)
+                else:
+                    batch[key] = batch[key].to('xpu:0' if is_xpu_available() else 'cuda:0')
+
+            with torch.no_grad():
+                outputs = model(**batch)
+                loss = outputs.loss
+                if train_config.save_metrics:
+                    val_step_loss.append(loss.detach().float().item())
+                    val_step_perplexity.append(float(torch.exp(loss.detach().float())))
+                eval_loss += loss.detach().float()
+
+            # === Generation-based evaluation ===
+            if generator is not None:
+                input_tokens = batch["input_ids"].tolist()
+                prompt_tokens = [tokens[:train_config.generation_prompt_len] for tokens in input_tokens]
+
+                # generate music
+                generations = generator.music_completion(
+                    prompt_tokens,
+                    max_gen_len=train_config.max_gen_len,
+                    temperature=train_config.temperature,
+                    top_p=train_config.top_p
+                )
+
+                for i, result in enumerate(generations):
+                    try:
+                        result['generation']['content'].save(f"debug/eval_gen_{step}_{i}.mid")
+                        if "prompt" in result['generation']:
+                            result['generation']['prompt'].save(f"debug/eval_gen_{step}_{i}_prompt.mid")
+                    except Exception as e:
+                        print("Error saving MIDI file:", e)
+
+    return float(eval_loss / total_eval_steps), np.mean(val_step_perplexity)
+
 
 def evaluation_overfit(model,train_config, batch, eval_dataloader, local_rank, tokenizer, wandb_run):
     """
@@ -1092,6 +1165,19 @@ def setup():
     else:
         dist.init_process_group("nccl")
 
+# def setup():
+#     """Initialize the process group for distributed training"""
+#     if "RANK" not in os.environ or "WORLD_SIZE" not in os.environ:
+#         print("[INFO] No distributed environment detected. Skipping dist.init_process_group().")
+#         return
+
+#     if is_ccl_available():
+#         print("[INFO] Initializing distributed training with CCL backend.")
+#         dist.init_process_group("ccl")
+#     else:
+#         print("[INFO] Initializing distributed training with NCCL backend.")
+#         dist.init_process_group("nccl")
+        
 
 def setup_environ_flags(rank):
     """Set environment flags for debugging purposes"""
