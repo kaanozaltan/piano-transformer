@@ -50,6 +50,9 @@ from llama_recipes.utils.train_utils import (
 )
 from accelerate.utils import is_xpu_available
 
+def is_distributed_env():
+    return all(var in os.environ for var in ["RANK", "WORLD_SIZE", "LOCAL_RANK"])
+
 def setup_wandb(train_config, fsdp_config, llama_config, **kwargs):
     try:
         import wandb
@@ -114,12 +117,21 @@ def main(**kwargs):
     torch.manual_seed(train_config.seed)
     random.seed(train_config.seed)
 
+    if (train_config.enable_fsdp or train_config.enable_ddp) and not is_distributed_env():
+        print("[INFO] Distributed environment not detected — disabling FSDP and DDP for debugging.")
+        train_config.enable_fsdp = False
+        train_config.enable_ddp = False
+
     if train_config.enable_fsdp or train_config.enable_ddp:
         setup() #enable nccl / ccl
         # torchrun specific
         local_rank = int(os.environ["LOCAL_RANK"])
         rank = int(os.environ["RANK"])
         world_size = int(os.environ["WORLD_SIZE"])
+    else:
+        local_rank = 0
+        rank = 0
+        world_size = 1
 
     if torch.distributed.is_initialized():
         if is_xpu_available():
