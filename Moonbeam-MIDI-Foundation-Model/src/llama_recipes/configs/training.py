@@ -26,6 +26,7 @@ class train_config:
     lr: float=1e-4
     weight_decay: float=0.0
     gamma: float= 0.85
+    scheduler_type: str = "steplr" # Learning rate scheduler: "steplr" or "cosine"
     seed: int=42
     use_fp16: bool=False
     mixed_precision: bool=True
