@@ -1327,10 +1327,6 @@ def evaluate_against_train_set(generation_results, train_config, local_rank, epo
                 traceback.print_exc()
             
             # Log only the key average metrics to wandb
-            print(f"[DEBUG] wandb_run type: {type(wandb_run)}, wandb_run is None: {wandb_run is None}")
-            print(f"[DEBUG] KLD_average in metrics: {'KLD_average' in metrics}, OA_average in metrics: {'OA_average' in metrics}")
-            print(f"[DEBUG] metrics keys: {list(metrics.keys())}")
-            
             if wandb_run and "KLD_average" in metrics and "OA_average" in metrics:
                 try:
                     # Log only the two key averages
@@ -1338,7 +1334,6 @@ def evaluate_against_train_set(generation_results, train_config, local_rank, epo
                         "custom_eval/KLD_average": float(metrics["KLD_average"]),
                         "custom_eval/OA_average": float(metrics["OA_average"])
                     }
-                    print(f"[DEBUG] About to log to wandb: {wandb_log_data}")
                     
                     # Use commit=False to avoid step conflicts and let wandb handle the step automatically
                     wandb_run.log(wandb_log_data, commit=False)

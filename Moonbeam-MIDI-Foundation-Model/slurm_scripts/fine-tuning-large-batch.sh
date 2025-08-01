@@ -23,13 +23,13 @@ DATASET_NAME="maestro_839M"
 MODEL_CONFIG_PATH="src/llama_recipes/configs/model_config.json"
 
 OUTPUT_DIR="$HPCWORK/moonbeam/checkpoints/fine-tuned/fine-tune_839M_context_512_batch_16_lr_3e-5_gamma_0.98_epoch_50"
-WANDB_NAME="fine-tune_839M_context_512_batch_16_lr_3e-5_gamma_0.98_epoch_100"
+WANDB_NAME="fine-tune_839M_context_1024_batch_16_lr_3e-5_gamma_0.98_epoch_100"
 
 mkdir -p logs
 
 # Run the fine-tuning script
 torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_gen.py \
-  --lr 3e-5 \
+  --lr 3e-4 \
   --val_batch_size 16 \
   --run_validation True \
   --validation_interval 20 \
@@ -46,9 +46,19 @@ torchrun --nnodes 1 --nproc_per_node 1 recipes/finetuning/real_finetuning_uncon_
   --dataset "$DATASET_NAME" \
   --output_dir "$OUTPUT_DIR" \
   --batch_size_training 16 \
-  --context_length 512\
-  --num_epochs 50 \
+  --context_length 1024\
+  --num_epochs 100 \
   --use_wandb True \
-  --gamma 0.98 \
+  --gamma 0.99 \
+  --scheduler_type steplr \
   --model_config_path "$MODEL_CONFIG_PATH" \
+  --enable_generation True \
+  --generation_save_dir "$HPCWORK/moonbeam/generation_results" \
+  --generation_temperature 1.1 \
+  --generation_top_p 0.95 \
+  --generation_max_gen_len 256 \
+  --generation_num_samples 200 \
+  --generation_mode random_files \
+  --enable_evaluation True \
+  --evaluation_ref_dir "$HPCWORK/experiments/mistral-155M_remi_maestro_v8/output/subset/train" \
   --wandb_name "$WANDB_NAME"

@@ -16,7 +16,7 @@ from torch.distributed.fsdp import (
 
 from torch.distributed.fsdp.fully_sharded_data_parallel import CPUOffload
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 from transformers import (
     AutoTokenizer,
     LlamaForCausalLM, 
@@ -324,7 +324,19 @@ def main(**kwargs):
             lr=train_config.lr,
             weight_decay=train_config.weight_decay,
         )
-    scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+    # Create learning rate scheduler based on config
+    if train_config.scheduler_type.lower() == "cosine":
+        scheduler = CosineAnnealingLR(
+            optimizer, 
+            T_max=train_config.num_epochs,
+            eta_min=train_config.lr * 0.01  # End at 1% of initial LR
+        )
+        print(f"Using CosineAnnealingLR scheduler (T_max={train_config.num_epochs}, eta_min={train_config.lr * 0.01:.2e})")
+    elif train_config.scheduler_type.lower() == "steplr":
+        scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+        print(f"Using StepLR scheduler (step_size=1, gamma={train_config.gamma})")
+    else:
+        raise ValueError(f"Unsupported scheduler_type: {train_config.scheduler_type}. Must be 'steplr' or 'cosine'")
 
     # Start the training process
     batch = next(iter(train_dataloader))
