@@ -171,6 +171,12 @@ def main(**kwargs):
         llama_config.use_cache = use_cache
         print(f"model_config:{llama_config}")
         model = LlamaForCausalLM(llama_config)
+        
+        # Debug: Check if model.config has the required attributes
+        print(f"Model config after creation - onset_vocab_size: {getattr(model.config, 'onset_vocab_size', 'MISSING')}")
+        print(f"Model config type: {type(model.config)}")
+        print(f"LlamaConfig type: {type(llama_config)}")
+        print(f"Are they the same object? {model.config is llama_config}")
 
         model_checkpoint = torch.load(train_config.trained_checkpoint_path)    
         checkpoint = model_checkpoint['model_state_dict']
