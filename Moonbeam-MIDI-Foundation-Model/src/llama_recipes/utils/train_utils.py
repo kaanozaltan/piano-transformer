@@ -26,6 +26,38 @@ from llama_recipes.policies import fpSixteen,bfSixteen, get_llama_wrapper
 from llama_recipes.utils.memory_utils import MemoryTrace
 from accelerate.utils import is_xpu_available, is_ccl_available
 from llama_recipes.utils.flop_utils import FlopMeasure
+
+
+# Generation imports
+import sys
+import numpy as np
+import random
+import pickle
+import tempfile
+import subprocess
+from transformers import LlamaConfig
+from llama_recipes.datasets.music_tokenizer import MusicTokenizer
+# Import existing generation functionality
+recipes_path = os.path.join(os.path.dirname(__file__), '../../..', 'recipes/inference/custom_music_generation')
+if recipes_path not in sys.path:
+    sys.path.append(recipes_path)
+from generation import MusicLlama
+
+# Imports for evaluation functionality
+import shutil
+import importlib.util
+from pathlib import Path as PathLib
+
+# Import evaluation functions from local metrics module
+try:
+    from llama_recipes.utils.metrics import create_subset, evaluate_mgeval_combined
+    print("Successfully imported evaluation functions from local metrics")
+    
+except ImportError as e:
+    print(f"Error: {e}")
+    create_subset = None
+    evaluate_mgeval_combined = None
+
 def set_tokenizer_params(tokenizer: LlamaTokenizer):
     tokenizer.pad_token_id = 0
     tokenizer.padding_side = "left"
@@ -203,8 +235,7 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                     #TODO: More frequent evaluation; Remember to switch on model.train again
                     if step%train_config.validation_interval==0 and train_config.run_validation:
                         
-                        # eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run)
-                        eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation_custom(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run)
+                        eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run, epoch=epoch, step=step, music_tokenizer=tokenizer)
                         if train_config.save_metrics:
                             val_step_loss.extend(temp_val_loss)
                             val_step_perplexity.extend(temp_step_perplexity)
@@ -311,6 +342,33 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
         # Saving the results every epoch to plot later
         if train_config.save_metrics:
             save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
+        
+        # Perform music generation after each epoch completes (safe from DataLoader conflicts)
+        if train_config.enable_generation:
+            print(f"\n=== Music Generation for Epoch {epoch} ===")
+            try:
+                generation_results = perform_music_generation(
+                    model, tokenizer, train_config, local_rank, epoch=epoch, step=None
+                )
+                print(f"Generated {len(generation_results)} music sequences for epoch {epoch}")
+                
+                # Evaluate generated music against training set
+                if train_config.enable_evaluation:
+                    print(f"\n=== Evaluation Against Train Set for Epoch {epoch} ===")
+                    try:
+                        eval_metrics = evaluate_against_train_set(
+                            generation_results, train_config, local_rank, epoch=epoch, step=None, wandb_run=wandb_run
+                        )
+                        print(f"Evaluation completed for epoch {epoch}")
+                    except Exception as e:
+                        print(f"Error during evaluation for epoch {epoch}: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        
+            except Exception as e:
+                print(f"Error during music generation for epoch {epoch}: {e}")
+                import traceback
+                traceback.print_exc()
 
     avg_epoch_time = sum(epoch_times)/ len(epoch_times)
     avg_checkpoint_time = sum(checkpoint_times)/ len(checkpoint_times) if len(checkpoint_times) > 0 else 0
@@ -600,6 +658,33 @@ def train_overfit(model, batch, train_dataloader,eval_dataloader, tokenizer, opt
         # Saving the results every epoch to plot later
         if train_config.save_metrics:
             save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
+        
+        # Perform music generation after each epoch completes (safe from DataLoader conflicts)
+        if train_config.enable_generation:
+            print(f"\n=== Music Generation for Epoch {epoch} ===")
+            try:
+                generation_results = perform_music_generation(
+                    model, tokenizer, train_config, local_rank, epoch=epoch, step=None
+                )
+                print(f"Generated {len(generation_results)} music sequences for epoch {epoch}")
+                
+                # Evaluate generated music against training set
+                if train_config.enable_evaluation:
+                    print(f"\n=== Evaluation Against Train Set for Epoch {epoch} ===")
+                    try:
+                        eval_metrics = evaluate_against_train_set(
+                            generation_results, train_config, local_rank, epoch=epoch, step=None, wandb_run=wandb_run
+                        )
+                        print(f"Evaluation completed for epoch {epoch}")
+                    except Exception as e:
+                        print(f"Error during evaluation for epoch {epoch}: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        
+            except Exception as e:
+                print(f"Error during music generation for epoch {epoch}: {e}")
+                import traceback
+                traceback.print_exc()
 
     avg_epoch_time = sum(epoch_times)/ len(epoch_times)
     avg_checkpoint_time = sum(checkpoint_times)/ len(checkpoint_times) if len(checkpoint_times) > 0 else 0
@@ -760,7 +845,7 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
                 
                     #TODO: More frequent evaluation; Remember to switch on model.train again
                     if step%train_config.validation_interval==0:
-                        eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run)
+                        eval_ppl, eval_epoch_loss, temp_val_loss, temp_step_perplexity = evaluation(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run, epoch=epoch, step=step, music_tokenizer=tokenizer)
                         if train_config.save_metrics:
                             val_step_loss.extend(temp_val_loss)
                             val_step_perplexity.extend(temp_step_perplexity)
@@ -868,6 +953,33 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
         # Saving the results every epoch to plot later
         if train_config.save_metrics:
             save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
+        
+        # Perform music generation after each epoch completes (safe from DataLoader conflicts)
+        if train_config.enable_generation:
+            print(f"\n=== Music Generation for Epoch {epoch} ===")
+            try:
+                generation_results = perform_music_generation(
+                    model, tokenizer, train_config, local_rank, epoch=epoch, step=None
+                )
+                print(f"Generated {len(generation_results)} music sequences for epoch {epoch}")
+                
+                # Evaluate generated music against training set
+                if train_config.enable_evaluation:
+                    print(f"\n=== Evaluation Against Train Set for Epoch {epoch} ===")
+                    try:
+                        eval_metrics = evaluate_against_train_set(
+                            generation_results, train_config, local_rank, epoch=epoch, step=None, wandb_run=wandb_run
+                        )
+                        print(f"Evaluation completed for epoch {epoch}")
+                    except Exception as e:
+                        print(f"Error during evaluation for epoch {epoch}: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        
+            except Exception as e:
+                print(f"Error during music generation for epoch {epoch}: {e}")
+                import traceback
+                traceback.print_exc()
 
     avg_epoch_time = sum(epoch_times)/ len(epoch_times)
     avg_checkpoint_time = sum(checkpoint_times)/ len(checkpoint_times) if len(checkpoint_times) > 0 else 0
@@ -895,7 +1007,7 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
     return results
 
 
-def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb_run):
+def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb_run, epoch=None, step=None, music_tokenizer=None):
     """
     Evaluates the model on the given dataloader
 
@@ -904,8 +1016,11 @@ def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb
         eval_dataloader: The dataloader containing the evaluation data
         local_rank: The rank of the current node in a distributed setting
         tokenizer: The tokenizer used to decode predictions
+        epoch: Current training epoch (for logging)
+        step: Current training step (for logging)
+        music_tokenizer: Optional pre-created MusicTokenizer (unused, kept for compatibility)
 
-    Returns: eval_ppl, eval_epoch_loss
+    Returns: eval_ppl, eval_epoch_loss, val_step_loss, val_step_perplexity
     """
     if train_config.enable_fsdp:
         world_size = int(os.environ["WORLD_SIZE"])
@@ -975,70 +1090,20 @@ def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb
     else:
         print(f" {eval_ppl=} {eval_epoch_loss=}")
 
+    # Music generation moved to after epoch completion to avoid DataLoader conflicts
+    generation_results = []
+
     if wandb_run:
-        wandb_run.log({
-                        'eval/perplexity': eval_ppl,
-                        'eval/loss': eval_epoch_loss,
-                    }, commit=False)
+        wandb_log_data = {
+            'eval/perplexity': eval_ppl,
+            'eval/loss': eval_epoch_loss,
+        }
+        # Log generation statistics if available
+        # Generation results logging moved to epoch completion
+        
+        wandb_run.log(wandb_log_data, commit=False)
 
     return eval_ppl, eval_epoch_loss, val_step_loss, val_step_perplexity
-
-
-def evaluation_custom(model, train_config, eval_dataloader, local_rank, tokenizer, wandb_run, generator=None):
-    import torch
-    model.eval()
-    val_step_loss = []
-    val_step_perplexity = []
-    eval_loss = 0.0
-    total_eval_steps = 0
-
-    all_prompts = []
-    all_labels = []
-
-    with MemoryTrace() as memtrace:
-        for step, batch in enumerate(tqdm(eval_dataloader, colour="green", desc="evaluating Epoch", dynamic_ncols=True)):
-            total_eval_steps += 1
-            if train_config.max_eval_step > 0 and total_eval_steps > train_config.max_eval_step:
-                if not train_config.enable_fsdp or local_rank == 0:
-                    print("max eval steps reached, stopping evaluation, total_eval_steps: ", total_eval_steps - 1)
-                break
-
-            for key in batch:
-                if train_config.enable_fsdp:
-                    batch[key] = batch[key].to(torch.device(f"xpu:{local_rank}") if is_xpu_available() else local_rank)
-                else:
-                    batch[key] = batch[key].to('xpu:0' if is_xpu_available() else 'cuda:0')
-
-            with torch.no_grad():
-                outputs = model(**batch)
-                loss = outputs.loss
-                if train_config.save_metrics:
-                    val_step_loss.append(loss.detach().float().item())
-                    val_step_perplexity.append(float(torch.exp(loss.detach().float())))
-                eval_loss += loss.detach().float()
-
-            # === Generation-based evaluation ===
-            if generator is not None:
-                input_tokens = batch["input_ids"].tolist()
-                prompt_tokens = [tokens[:train_config.generation_prompt_len] for tokens in input_tokens]
-
-                # generate music
-                generations = generator.music_completion(
-                    prompt_tokens,
-                    max_gen_len=train_config.max_gen_len,
-                    temperature=train_config.temperature,
-                    top_p=train_config.top_p
-                )
-
-                for i, result in enumerate(generations):
-                    try:
-                        result['generation']['content'].save(f"debug/eval_gen_{step}_{i}.mid")
-                        if "prompt" in result['generation']:
-                            result['generation']['prompt'].save(f"debug/eval_gen_{step}_{i}_prompt.mid")
-                    except Exception as e:
-                        print("Error saving MIDI file:", e)
-
-    return float(eval_loss / total_eval_steps), np.mean(val_step_perplexity)
 
 
 def evaluation_overfit(model,train_config, batch, eval_dataloader, local_rank, tokenizer, wandb_run):
@@ -1155,6 +1220,375 @@ def check_frozen_layers_peft_model(model):
      for i, layer in enumerate(model.base_model.model.model.layers):
             for name, param in layer.named_parameters():
                 print(f"Layer {i}, parameter {name}: requires_grad = {param.requires_grad}")
+
+
+def get_model_config(model):
+    """
+    Safely get model config, handling wrapped models (DDP, FSDP)
+    """
+    if hasattr(model, 'module'):
+        # Model is wrapped (DDP, FSDP, etc.)
+        return getattr(model.module, 'config', None)
+    else:
+        # Model is not wrapped
+        return getattr(model, 'config', None)
+
+
+def evaluate_against_train_set(generation_results, train_config, local_rank, epoch=None, step=None, wandb_run=None):
+    """
+    Evaluate generated music against training set using FMD and mgeval metrics
+    Similar to EvalCallback functionality but integrated into train_utils
+    """
+    if not train_config.enable_evaluation:
+        return {}
+    
+    if create_subset is None or evaluate_mgeval_combined is None:
+        print("Evaluation functions not available, skipping evaluation")
+        return {}
+    
+    if not generation_results:
+        print("No generation results to evaluate")
+        return {}
+    
+    # Only run evaluation on main process
+    if train_config.enable_fsdp and local_rank != 0:
+        return {}
+    
+    try:
+        print(f"[Evaluation] Starting evaluation against train set with {len(generation_results)} generated samples...")
+        
+        # Create temporary directory for generated MIDI files
+        with tempfile.TemporaryDirectory() as temp_gen_dir:
+            temp_gen_path = PathLib(temp_gen_dir)
+            
+            # Convert generation results to MIDI files
+            midi_count = 0
+            for i, result in enumerate(generation_results):
+                try:
+                    if 'generation' in result and 'content' in result['generation']:
+                        # Save generated MIDI
+                        midi_path = temp_gen_path / f'generated_{i}.mid'
+                        result['generation']['content'].save(str(midi_path))
+                        midi_count += 1
+                    else:
+                        print(f"Warning: No MIDI content found in generation result {i}")
+                except Exception as e:
+                    print(f"Error saving MIDI file {i} for evaluation: {e}")
+            
+            if midi_count == 0:
+                print("No valid MIDI files generated for evaluation")
+                return {}
+            
+            print(f"[Evaluation] Saved {midi_count} MIDI files for evaluation")
+            
+            # Create subset of training data
+            ref_dir = PathLib(train_config.evaluation_ref_dir)
+            if not ref_dir.exists():
+                print(f"Warning: Reference directory {ref_dir} does not exist")
+                return {}
+            
+            train_dir_subset = create_subset(ref_dir, train_config.generation_num_samples)
+            print(f"[Evaluation] Created training subset with {train_config.generation_num_samples} files from {ref_dir}")
+            
+            # Compute evaluation metrics
+            metrics = {}
+            
+            # Compute mgeval metrics
+            try:
+                print(f"[Evaluation] Starting mgeval evaluation between {train_dir_subset} and {temp_gen_path}")
+                absolute_summary, relative_summary = evaluate_mgeval_combined(
+                    dataset1_path=train_dir_subset,
+                    dataset2_path=temp_gen_path,
+                )
+                
+                print(f"[Evaluation] Got results: {len(relative_summary)} relative items")
+                
+                # Process only relative summary for averages
+                kld_sum = 0
+                oa_sum = 0
+                for item in relative_summary:
+                    kld_sum += item["KLD"]
+                    oa_sum += item["OA"]
+                
+                if len(relative_summary) > 0:
+                    metrics["KLD_average"] = kld_sum / len(relative_summary)
+                    metrics["OA_average"] = oa_sum / len(relative_summary)
+                    print(f"[Evaluation] Computed averages - KLD: {metrics['KLD_average']:.4f}, OA: {metrics['OA_average']:.4f}")
+                else:
+                    metrics["KLD_average"] = 0.0
+                    metrics["OA_average"] = 0.0
+                    print(f"[Evaluation] No relative summary data, setting averages to 0.0")
+                
+                print(f"[Evaluation] Total metrics computed: {len(metrics)}")
+                
+            except Exception as e:
+                print(f"Error computing mgeval metrics: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            # Log only the key average metrics to wandb
+            print(f"[DEBUG] wandb_run type: {type(wandb_run)}, wandb_run is None: {wandb_run is None}")
+            print(f"[DEBUG] KLD_average in metrics: {'KLD_average' in metrics}, OA_average in metrics: {'OA_average' in metrics}")
+            print(f"[DEBUG] metrics keys: {list(metrics.keys())}")
+            
+            if wandb_run and "KLD_average" in metrics and "OA_average" in metrics:
+                try:
+                    # Log only the two key averages
+                    wandb_log_data = {
+                        "custom_eval/KLD_average": float(metrics["KLD_average"]),
+                        "custom_eval/OA_average": float(metrics["OA_average"])
+                    }
+                    print(f"[DEBUG] About to log to wandb: {wandb_log_data}")
+                    
+                    # Use commit=False to avoid step conflicts and let wandb handle the step automatically
+                    wandb_run.log(wandb_log_data, commit=False)
+                    print(f"[Evaluation] Successfully logged KLD_average={metrics['KLD_average']:.4f}, OA_average={metrics['OA_average']:.4f} to wandb")
+                    
+                except Exception as e:
+                    print(f"Error logging to wandb: {e}")
+                    import traceback
+                    traceback.print_exc()
+            elif wandb_run is None:
+                print("[Evaluation] wandb_run is None - wandb logging disabled")
+            elif not ("KLD_average" in metrics and "OA_average" in metrics):
+                print(f"[Evaluation] Missing required metrics - KLD_average: {'KLD_average' in metrics}, OA_average: {'OA_average' in metrics}")
+            else:
+                print("[Evaluation] Unknown condition preventing wandb logging")
+            
+            print(f"[Evaluation] Evaluation metrics: {metrics}")
+            
+            # Also print the key averages for easy monitoring
+            if "KLD_average" in metrics and "OA_average" in metrics:
+                print(f"[Evaluation] Key metrics - KLD_average: {metrics['KLD_average']:.4f}, OA_average: {metrics['OA_average']:.4f}")
+            return metrics
+            
+    except Exception as e:
+        print(f"Error during evaluation: {e}")
+        import traceback
+        traceback.print_exc()
+        return {}
+
+
+def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=None, step=None):
+    """
+    Perform music generation during evaluation using existing MusicLlama functionality
+    """
+    if not train_config.enable_generation:
+        return []
+    
+    print(f"Starting music generation with {train_config.generation_num_samples} samples...")
+    
+    try:
+        # Get unwrapped model and config safely (handle DDP wrapping)
+        if hasattr(model, 'module'):
+            # Model is wrapped (DDP, FSDP, etc.) - get the underlying model
+            unwrapped_model = model.module
+            model_config = unwrapped_model.config
+        else:
+            # Model is not wrapped
+            unwrapped_model = model
+            model_config = model.config
+        
+        # Ensure model is in eval mode for generation
+        unwrapped_model.eval()
+        
+        # Get model device and dtype
+        model_device = next(unwrapped_model.parameters()).device
+        model_dtype = next(unwrapped_model.parameters()).dtype
+        print(f"Model device: {model_device}, dtype: {model_dtype}")
+        
+        # Generation is now run safely after DataLoader finishes
+        
+        def run_generation_safe():
+            """Run generation safely after DataLoader is finished"""
+            
+            # Save current default tensor type and device
+            original_default_dtype = torch.get_default_dtype()
+            original_cuda_device = torch.cuda.current_device() if model_device.type == 'cuda' else None
+            
+            # Save the actual default tensor type (includes both device and dtype)
+            # This is the key fix - we need to restore the full tensor type, not just dtype
+            try:
+                original_tensor_type = torch.tensor([]).type()  # Get current default type
+                print(f"DEBUG: Original tensor type before generation: {original_tensor_type}")
+            except:
+                original_tensor_type = "torch.FloatTensor"  # Fallback to CPU float tensor
+                print(f"DEBUG: Failed to get original tensor type, using fallback: {original_tensor_type}")
+            
+            try:
+                print(f"Running music generation with {train_config.generation_num_samples} samples...")
+                
+                # Set CUDA context for generation (safe to do now that DataLoader is finished)
+                if model_device.type == 'cuda':
+                    torch.cuda.set_device(model_device)
+                    
+                    # Set appropriate default tensor type
+                    if model_dtype == torch.bfloat16:
+                        torch.set_default_tensor_type(torch.cuda.BFloat16Tensor)
+                    elif model_dtype == torch.float16:
+                        torch.set_default_tensor_type(torch.cuda.HalfTensor)
+                    else:
+                        torch.set_default_tensor_type(torch.cuda.FloatTensor)
+                
+                # Create MusicLlama wrapper using the unwrapped model and tokenizer
+                print(f"DEBUG: Using fine-tuned model with {sum(p.numel() for p in unwrapped_model.parameters())} parameters")
+                print(f"DEBUG: Model is in {'training' if unwrapped_model.training else 'eval'} mode")
+                print(f"DEBUG: Model memory address: {id(unwrapped_model)} (same as training model)")
+                music_llama = MusicLlama(unwrapped_model, tokenizer, model_config)
+                
+                # Create generation prompts based on generation mode
+                prompts = []
+                if train_config.generation_mode == "from_scratch":
+                    prompts = [[tokenizer.sos_token_compound] for _ in range(train_config.generation_num_samples)]
+                elif train_config.generation_mode == "random_files":
+                    prompts = [[tokenizer.sos_token_compound] for _ in range(train_config.generation_num_samples)]
+                elif train_config.generation_mode == "all_test_files":
+                    prompts = [[tokenizer.sos_token_compound] for _ in range(train_config.generation_num_samples)]
+                else:
+                    raise ValueError(f"Invalid generation_mode: {train_config.generation_mode}. Must be one of: 'from_scratch', 'random_files', 'all_test_files'")
+                
+                # Use the existing music_completion method
+                results = music_llama.music_completion(
+                    prompts,
+                    max_gen_len=train_config.generation_max_gen_len,
+                    temperature=train_config.generation_temperature,
+                    top_p=train_config.generation_top_p,
+                )
+                
+                print(f"Generated {len(results)} music sequences successfully!")
+                return results
+                
+            finally:
+                # Always restore original state
+                if model_device.type == 'cuda' and original_cuda_device is not None:
+                    torch.cuda.set_device(original_cuda_device)
+                
+                # Restore the original default tensor type (device + dtype)
+                try:
+                    if original_tensor_type == "torch.FloatTensor":
+                        torch.set_default_tensor_type(torch.FloatTensor)  # CPU Float
+                    elif original_tensor_type == "torch.cuda.FloatTensor":
+                        torch.set_default_tensor_type(torch.cuda.FloatTensor)  # CUDA Float
+                    elif original_tensor_type == "torch.cuda.HalfTensor":
+                        torch.set_default_tensor_type(torch.cuda.HalfTensor)  # CUDA Half
+                    elif original_tensor_type == "torch.cuda.BFloat16Tensor":
+                        torch.set_default_tensor_type(torch.cuda.BFloat16Tensor)  # CUDA BFloat16
+                    else:
+                        # Fallback to CPU float tensor for unknown types
+                        torch.set_default_tensor_type(torch.FloatTensor)
+                        print(f"Warning: Unknown original tensor type {original_tensor_type}, falling back to CPU FloatTensor")
+                    
+                    # Debug: Verify restoration worked
+                    restored_type = torch.tensor([]).type()
+                    print(f"DEBUG: Restored tensor type after generation: {restored_type}")
+                    
+                except Exception as e:
+                    # Fallback to just setting dtype if tensor type fails
+                    torch.set_default_dtype(original_default_dtype)
+                    print(f"Warning: Failed to restore tensor type, restored dtype only: {e}")
+        
+        # Run generation safely after DataLoader is finished  
+        results = run_generation_safe()
+        
+        # Put model back in train mode
+        unwrapped_model.train()
+        
+        # Save generation results
+        if results and (not train_config.enable_fsdp or local_rank == 0):
+            save_generation_results(results, train_config, epoch, step)
+        
+        return results
+        
+    except Exception as e:
+        # Ensure model is back in train mode even on error
+        try:
+            if 'unwrapped_model' in locals():
+                unwrapped_model.train()
+        except:
+            pass  # Ignore errors when setting train mode
+            
+        print(f"Error during music generation: {e}")
+        import traceback
+        traceback.print_exc()
+        return []
+
+
+def save_generation_results(generated_sequences, train_config, epoch=None, step=None):
+    """
+    Save generated music sequences to MIDI files (using existing MusicLlama functionality)
+    """
+    try:
+        # Handle empty results gracefully
+        if not generated_sequences:
+            print("No generation results to save (generation was skipped or failed)")
+            return
+        # Create save directory
+        save_dir = train_config.generation_save_dir
+        if epoch is not None and step is not None:
+            save_dir = os.path.join(save_dir, f"epoch_{epoch}_step_{step}")
+        elif epoch is not None:
+            save_dir = os.path.join(save_dir, f"epoch_{epoch}")
+        
+        os.makedirs(save_dir, exist_ok=True)
+        
+        # Save generation metadata
+        metadata = {
+            'generation_config': {
+                'temperature': train_config.generation_temperature,
+                'top_p': train_config.generation_top_p,
+                'max_gen_len': train_config.generation_max_gen_len,
+                'num_samples': len(generated_sequences),
+                'generation_mode': train_config.generation_mode
+            },
+            'epoch': epoch,
+            'step': step,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        # Save metadata
+        with open(os.path.join(save_dir, 'generation_metadata.json'), 'w') as f:
+            json.dump(metadata, f, indent=2)
+        
+        # Save individual sequences as MIDI files (using existing functionality)
+        for i, result in enumerate(generated_sequences):
+            try:
+                if 'generation' in result and 'content' in result['generation']:
+                    # Save generated MIDI
+                    midi_path = os.path.join(save_dir, f'generated_{i}.mid')
+                    result['generation']['content'].save(midi_path)
+                    print(f"MIDI saved to {midi_path}")
+                    
+                    # Save prompt MIDI only for meaningful prompts (not just SOS token)
+                    print(f"DEBUG: Generation mode = '{train_config.generation_mode}'")
+                    
+                    if (train_config.generation_mode != "from_scratch" and 
+                        'prompt' in result['generation'] and 
+                        'prompt_tokens' in result['generation']):
+                        
+                        # Check if prompt has meaningful content (more than just SOS token)
+                        prompt_tokens = result['generation']['prompt_tokens']
+                        print(f"DEBUG: Prompt has {len(prompt_tokens)} tokens for generated_{i}")
+                        
+                        if len(prompt_tokens) > 0:  # Any meaningful content after SOS removal
+                            prompt_path = os.path.join(save_dir, f'generated_{i}_prompt.mid')
+                            result['generation']['prompt'].save(prompt_path)
+                            print(f"Prompt MIDI saved to {prompt_path}")
+                        else:
+                            print(f"Skipping prompt save for generated_{i} (empty prompt after SOS removal)")
+                    else:
+                        print(f"Skipping prompt save for generated_{i} (from_scratch mode or no prompt data)")
+                        
+            except Exception as e:
+                print(f"Error saving MIDI file {i}: {e}")
+                # Fallback: save as JSON
+                json_path = os.path.join(save_dir, f'generated_{i}.json')
+                with open(json_path, 'w') as f:
+                    json.dump(result, f, indent=2, default=str)
+        
+        print(f"Saved {len(generated_sequences)} generated sequences to {save_dir}")
+        
+    except Exception as e:
+        print(f"Error saving generation results: {e}")
 
 
 def setup():
