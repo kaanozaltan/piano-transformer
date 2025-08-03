@@ -55,7 +55,7 @@ class train_config:
     enable_generation: bool = False # Enable music generation during evaluation
     generation_temperature: float = 1 # Temperature for generation sampling
     generation_top_p: float = 0.95 # Top-p value for nucleus sampling
-    generation_max_gen_len: int = 512 # Maximum generation length
+    generation_max_gen_len: int = 256 # Maximum generation length
     generation_prompt_len: int = 512 # Length of prompt for generation (when using data for prompts)
     generation_num_samples: int = 20 # Number of samples to generate during evaluation
     generation_mode: str = "random_files" # Generation mode: "from_scratch", "random_files", or "all_test_files"
