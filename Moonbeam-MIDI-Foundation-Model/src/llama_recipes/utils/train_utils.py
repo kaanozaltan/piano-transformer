@@ -19,7 +19,7 @@ from torch.distributed.fsdp.sharded_grad_scaler import ShardedGradScaler
 from tqdm import tqdm
 from transformers import LlamaTokenizer
 import json
-
+from mido import MidiFile
 
 from llama_recipes.model_checkpointing import save_model_checkpoint, save_model_and_optimizer_sharded, save_optimizer_checkpoint, save_model_checkpoint_ddp, save_peft_checkpoint
 from llama_recipes.policies import fpSixteen,bfSixteen, get_llama_wrapper
@@ -57,6 +57,14 @@ except ImportError as e:
     print(f"Error: {e}")
     create_subset = None
     evaluate_mgeval_combined = None
+
+def is_valid_midi(file_path):
+    try:
+        MidiFile(file_path)
+        return True
+    except Exception as e:
+        print(f"[INVALID MIDI] {file_path} - {e}")
+        return False
 
 def set_tokenizer_params(tokenizer: LlamaTokenizer):
     tokenizer.pad_token_id = 0
@@ -282,11 +290,16 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                                         print("=====================================================")
                                 elif train_config.enable_ddp: 
                                     if not train_config.use_peft:
-                                        save_model_checkpoint_ddp(
-                                            model, optimizer, rank, train_config, epoch=epoch, step=step
-                                        )
-                                        print(" Saving the DDP model checkpoints and optimizer using FULL_STATE_DICT")
-                                        print("=====================================================")
+                                        # Only save every 10 epochs in non-PEFT mode to save storage
+                                        if epoch % 10 == 0:
+                                            save_model_checkpoint_ddp(
+                                                model, optimizer, rank, train_config, epoch=epoch, step=step
+                                            )
+                                            print(" Saving the DDP model checkpoints and optimizer using FULL_STATE_DICT")
+                                            print("=====================================================")
+                                        else:
+                                            print(f" Skipping checkpoint save (non-PEFT mode, epoch {epoch}, next save at epoch {((epoch // 10) + 1) * 10})")
+                                            print("=====================================================")
                                     else:
                                         print("Warning! Model Checkpoints are not saved properly")
                                         print("=====================================================")
@@ -893,11 +906,16 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
                                         print("=====================================================")
                                 elif train_config.enable_ddp: 
                                     if not train_config.use_peft:
-                                        save_model_checkpoint_ddp(
-                                            model, optimizer, rank, train_config, epoch=epoch, step=step
-                                        )
-                                        print(" Saving the DDP model checkpoints and optimizer using FULL_STATE_DICT")
-                                        print("=====================================================")
+                                        # Only save every 10 epochs in non-PEFT mode to save storage
+                                        if epoch % 10 == 0:
+                                            save_model_checkpoint_ddp(
+                                                model, optimizer, rank, train_config, epoch=epoch, step=step
+                                            )
+                                            print(" Saving the DDP model checkpoints and optimizer using FULL_STATE_DICT")
+                                            print("=====================================================")
+                                        else:
+                                            print(f" Skipping checkpoint save (non-PEFT mode, epoch {epoch}, next save at epoch {((epoch // 10) + 1) * 10})")
+                                            print("=====================================================")
                                     else:
                                         print("Warning! Model Checkpoints are not saved properly")
                                         print("=====================================================")
@@ -1296,7 +1314,7 @@ def evaluate_against_train_set(generation_results, train_config, local_rank, epo
             # Compute mgeval metrics
             try:
                 print(f"[Evaluation] Starting mgeval evaluation between {train_dir_subset} and {temp_gen_path}")
-                absolute_summary, relative_summary = evaluate_mgeval_combined(
+                relative_summary = evaluate_mgeval_combined(
                     dataset1_path=train_dir_subset,
                     dataset2_path=temp_gen_path,
                 )
@@ -1525,33 +1543,29 @@ def save_generation_results(generated_sequences, train_config, epoch=None, step=
             save_dir = os.path.join(save_dir, f"epoch_{epoch}")
         
         os.makedirs(save_dir, exist_ok=True)
-        
-        # Save generation metadata
-        metadata = {
-            'generation_config': {
-                'temperature': train_config.generation_temperature,
-                'top_p': train_config.generation_top_p,
-                'max_gen_len': train_config.generation_max_gen_len,
-                'num_samples': len(generated_sequences),
-                'generation_mode': train_config.generation_mode
-            },
-            'epoch': epoch,
-            'step': step,
-            'timestamp': datetime.now().isoformat()
-        }
-        
-        # Save metadata
-        with open(os.path.join(save_dir, 'generation_metadata.json'), 'w') as f:
-            json.dump(metadata, f, indent=2)
-        
+
+    
         # Save individual sequences as MIDI files (using existing functionality)
+        saved_count = 0
         for i, result in enumerate(generated_sequences):
             try:
                 if 'generation' in result and 'content' in result['generation']:
                     # Save generated MIDI
                     midi_path = os.path.join(save_dir, f'generated_{i}.mid')
                     result['generation']['content'].save(midi_path)
-                    print(f"MIDI saved to {midi_path}")
+                    
+                    # Validate the saved MIDI file
+                    if is_valid_midi(midi_path):
+                        saved_count += 1
+                        print(f"✅ Valid MIDI saved to {midi_path}")
+                    else:
+                        # Delete invalid MIDI file
+                        try:
+                            os.remove(midi_path)
+                            print(f"❌ Invalid MIDI deleted: {midi_path}")
+                        except:
+                            print(f"❌ Invalid MIDI (couldn't delete): {midi_path}")
+                        continue
                     
                     # Save prompt MIDI only for meaningful prompts (not just SOS token)
                     print(f"DEBUG: Generation mode = '{train_config.generation_mode}'")
@@ -1567,20 +1581,27 @@ def save_generation_results(generated_sequences, train_config, epoch=None, step=
                         if len(prompt_tokens) > 0:  # Any meaningful content after SOS removal
                             prompt_path = os.path.join(save_dir, f'generated_{i}_prompt.mid')
                             result['generation']['prompt'].save(prompt_path)
-                            print(f"Prompt MIDI saved to {prompt_path}")
+                            
+                            # Validate prompt MIDI
+                            if is_valid_midi(prompt_path):
+                                print(f"✅ Valid prompt MIDI saved to {prompt_path}")
+                            else:
+                                try:
+                                    os.remove(prompt_path)
+                                    print(f"❌ Invalid prompt MIDI deleted: {prompt_path}")
+                                except:
+                                    print(f"❌ Invalid prompt MIDI (couldn't delete): {prompt_path}")
                         else:
                             print(f"Skipping prompt save for generated_{i} (empty prompt after SOS removal)")
                     else:
                         print(f"Skipping prompt save for generated_{i} (from_scratch mode or no prompt data)")
                         
             except Exception as e:
-                print(f"Error saving MIDI file {i}: {e}")
-                # Fallback: save as JSON
-                json_path = os.path.join(save_dir, f'generated_{i}.json')
-                with open(json_path, 'w') as f:
-                    json.dump(result, f, indent=2, default=str)
+                print(f"Error saving MIDI file {i}: {e} - Skipping this generation")
+                # Skip failed generations - only save valid MIDI files
+                continue
         
-        print(f"Saved {len(generated_sequences)} generated sequences to {save_dir}")
+        print(f"Saved {saved_count}/{len(generated_sequences)} valid MIDI files to {save_dir}")
         
     except Exception as e:
         print(f"Error saving generation results: {e}")
