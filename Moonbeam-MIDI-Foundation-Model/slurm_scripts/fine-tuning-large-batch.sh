@@ -7,7 +7,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-gpu=24
 #SBATCH --gres=gpu:1
-#SBATCH --time=07:00:00
+#SBATCH --time=06:00:00
 #SBATCH --partition=c23g
 #SBATCH --exclude=n23g0001,n23g0002,n23g0003
 #SBATCH --account=lect0148
@@ -26,8 +26,8 @@ DATASET_NAME="maestro_839M"
 MODEL_CONFIG_PATH="Moonbeam-MIDI-Foundation-Model/src/llama_recipes/configs/model_config.json"
 
 # Configuration parameters
-LR="5e-5"
-WEIGHT_DECAY="0.05"
+LR="1e-4"
+WEIGHT_DECAY="0"
 CONTEXT_LENGTH="512"
 BATCH_SIZE="32"
 NUM_EPOCHS="150"
@@ -36,7 +36,7 @@ SCHEDULER_TYPE="cosine"
 GEN_SAMPLES="200"
 USE_PEFT="False"
 PEFT_METHOD="lora"
-GEN_TEMPERATURE="0.9"
+GEN_TEMPERATURE="1.1"
 ENABLE_GENERATION="True"
 ENABLE_EVALUATION="True"
 
