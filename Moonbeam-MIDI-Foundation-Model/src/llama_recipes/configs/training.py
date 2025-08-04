@@ -59,6 +59,7 @@ class train_config:
     generation_prompt_len: int = 512 # Length of prompt for generation (when using data for prompts)
     generation_num_samples: int = 20 # Number of samples to generate during evaluation
     generation_mode: str = "random_files" # Generation mode: "from_scratch", "random_files", or "all_test_files"
+    generation_max_prompt_samples: int = 200 # Max number of prompts to sample for prompt-based generation (will duplicate if fewer test files)
     generation_save_dir: str = "PATH/to/save/generation/results" # Directory to save generated music
     # Evaluation parameters
     enable_evaluation: bool = False # Enable evaluation against training set after generation
