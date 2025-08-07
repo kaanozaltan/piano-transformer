@@ -48,10 +48,10 @@ import shutil
 import importlib.util
 from pathlib import Path as PathLib
 
-# Import evaluation functions from local metrics module
+# Import evaluation functions from piano_transformer metrics module
 try:
     from llama_recipes.utils.metrics import create_subset, evaluate_mgeval_combined
-    print("Successfully imported evaluation functions from local metrics")
+    print("Successfully imported evaluation functions from Moonbeam metrics")
     
 except ImportError as e:
     print(f"Error: {e}")
@@ -232,6 +232,7 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
                                 'train/epoch': epoch + 1,
                                 'train/step': epoch * len(train_dataloader) + step,
                                 'train/loss': loss.detach().float(),
+                                'train/learning_rate': lr_scheduler.get_last_lr()[0],
                             })
 
                     pbar.set_description(f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})")
@@ -346,6 +347,17 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
         # Update the learning rate as needed
         lr_scheduler.step()
 
+        # Log learning rate and epoch metrics to wandb
+        if wandb_run:
+            if not train_config.enable_fsdp or rank==0:
+                wandb_run.log({
+                    'epoch/learning_rate': lr_scheduler.get_last_lr()[0],
+                    'epoch/train_loss': train_epoch_loss,
+                    'epoch/train_perplexity': train_perplexity,
+                    'epoch/epoch_time': epoch_end_time,
+                    'epoch/epoch_number': epoch,
+                })
+
         if train_config.enable_fsdp or train_config.enable_ddp:
             if rank==0:
                 print(f"Epoch {epoch}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epoch time {epoch_end_time}s")
@@ -357,8 +369,10 @@ def train(model, train_dataloader,eval_dataloader, tokenizer, optimizer, lr_sche
             save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
         
         # Perform music generation after each epoch completes (safe from DataLoader conflicts)
-        if train_config.enable_generation:
-            print(f"\n=== Music Generation for Epoch {epoch} ===")
+        # Check evaluation frequency - only run if it's the right epoch
+        should_evaluate = (epoch + 1) % train_config.evaluation_frequency_epochs == 0
+        if train_config.enable_generation and should_evaluate:
+            print(f"\n=== Music Generation for Epoch {epoch} (Frequency: every {train_config.evaluation_frequency_epochs} epochs) ===")
             try:
                 generation_results = perform_music_generation(
                     model, tokenizer, train_config, local_rank, epoch=epoch, step=None
@@ -548,6 +562,7 @@ def train_overfit(model, batch, train_dataloader,eval_dataloader, tokenizer, opt
                                 'train/epoch': epoch + 1,
                                 'train/step': epoch * len(train_dataloader) + step,
                                 'train/loss': loss.detach().float(),
+                                'train/learning_rate': lr_scheduler.get_last_lr()[0],
                             })
 
                     pbar.set_description(f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})")
@@ -662,6 +677,17 @@ def train_overfit(model, batch, train_dataloader,eval_dataloader, tokenizer, opt
         # Update the learning rate as needed
         lr_scheduler.step()
 
+        # Log learning rate and epoch metrics to wandb
+        if wandb_run:
+            if not train_config.enable_fsdp or rank==0:
+                wandb_run.log({
+                    'epoch/learning_rate': lr_scheduler.get_last_lr()[0],
+                    'epoch/train_loss': train_epoch_loss,
+                    'epoch/train_perplexity': train_perplexity,
+                    'epoch/epoch_time': epoch_end_time,
+                    'epoch/epoch_number': epoch,
+                })
+
         if train_config.enable_fsdp or train_config.enable_ddp:
             if rank==0:
                 print(f"Epoch {epoch}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epoch time {epoch_end_time}s")
@@ -673,8 +699,10 @@ def train_overfit(model, batch, train_dataloader,eval_dataloader, tokenizer, opt
             save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
         
         # Perform music generation after each epoch completes (safe from DataLoader conflicts)
-        if train_config.enable_generation:
-            print(f"\n=== Music Generation for Epoch {epoch} ===")
+        # Check evaluation frequency - only run if it's the right epoch
+        should_evaluate = (epoch + 1) % train_config.evaluation_frequency_epochs == 0
+        if train_config.enable_generation and should_evaluate:
+            print(f"\n=== Music Generation for Epoch {epoch} (Frequency: every {train_config.evaluation_frequency_epochs} epochs) ===")
             try:
                 generation_results = perform_music_generation(
                     model, tokenizer, train_config, local_rank, epoch=epoch, step=None
@@ -848,6 +876,7 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
                                 'train/epoch': epoch + 1,
                                 'train/step': epoch * len(train_dataloader) + step,
                                 'train/loss': loss.detach().float(),
+                                'train/learning_rate': lr_scheduler.get_last_lr()[0],
                             })
 
                     pbar.set_description(f"Training Epoch: {epoch}/{train_config.num_epochs}, step {step}/{len(train_dataloader)} completed (loss: {loss.detach().float()})")
@@ -962,6 +991,17 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
         # Update the learning rate as needed
         lr_scheduler.step()
 
+        # Log learning rate and epoch metrics to wandb
+        if wandb_run:
+            if not train_config.enable_fsdp or rank==0:
+                wandb_run.log({
+                    'epoch/learning_rate': lr_scheduler.get_last_lr()[0],
+                    'epoch/train_loss': train_epoch_loss,
+                    'epoch/train_perplexity': train_perplexity,
+                    'epoch/epoch_time': epoch_end_time,
+                    'epoch/epoch_number': epoch,
+                })
+
         if train_config.enable_fsdp or train_config.enable_ddp:
             if rank==0:
                 print(f"Epoch {epoch}: train_perplexity={train_perplexity:.4f}, train_epoch_loss={train_epoch_loss:.4f}, epoch time {epoch_end_time}s")
@@ -973,8 +1013,10 @@ def train_con_gen(model, train_dataloader,eval_dataloader, tokenizer, optimizer,
             save_to_json(metrics_filename, train_step_loss, train_loss, train_step_perplexity, train_prep, val_step_loss, val_loss, val_step_perplexity, val_prep)
         
         # Perform music generation after each epoch completes (safe from DataLoader conflicts)
-        if train_config.enable_generation:
-            print(f"\n=== Music Generation for Epoch {epoch} ===")
+        # Check evaluation frequency - only run if it's the right epoch
+        should_evaluate = (epoch + 1) % train_config.evaluation_frequency_epochs == 0
+        if train_config.enable_generation and should_evaluate:
+            print(f"\n=== Music Generation for Epoch {epoch} (Frequency: every {train_config.evaluation_frequency_epochs} epochs) ===")
             try:
                 generation_results = perform_music_generation(
                     model, tokenizer, train_config, local_rank, epoch=epoch, step=None
@@ -1056,15 +1098,6 @@ def evaluation(model,train_config, eval_dataloader, local_rank, tokenizer, wandb
                 if not train_config.enable_fsdp or local_rank==0:
                     print("max eval steps reached, stopping evaluation, total_eval_steps: ", total_eval_steps - 1)
                 break
-
-            # for key in batch.keys():
-            #     if train_config.enable_fsdp:
-            #         batch[key] = batch[key].to(local_rank)
-            #     else:
-            #         if is_xpu_available():
-            #             batch[key] = batch[key].to('xpu:0')
-            #         else:
-            #             batch[key] = batch[key].to('cuda:0')
             for key in batch.keys():
             # Move to correct device
                 if train_config.enable_fsdp:
@@ -1254,8 +1287,8 @@ def get_model_config(model):
 
 def evaluate_against_train_set(generation_results, train_config, local_rank, epoch=None, step=None, wandb_run=None):
     """
-    Evaluate generated music against training set using FMD and mgeval metrics
-    Similar to EvalCallback functionality but integrated into train_utils
+    Evaluate generated sequences against training set using mgeval metrics
+    Similar to EvalCallback from piano_transformer but without FMD
     """
     if not train_config.enable_evaluation:
         return {}
@@ -1344,18 +1377,17 @@ def evaluate_against_train_set(generation_results, train_config, local_rank, epo
                 import traceback
                 traceback.print_exc()
             
-            # Log only the key average metrics to wandb
+            # Log metrics to wandb
             if wandb_run and "KLD_average" in metrics and "OA_average" in metrics:
                 try:
-                    # Log only the two key averages
+                    # Log metrics if available
                     wandb_log_data = {
                         "custom_eval/KLD_average": float(metrics["KLD_average"]),
                         "custom_eval/OA_average": float(metrics["OA_average"])
                     }
                     
-                    # Use commit=False to avoid step conflicts and let wandb handle the step automatically
-                    wandb_run.log(wandb_log_data, commit=False)
-                    print(f"[Evaluation] Successfully logged KLD_average={metrics['KLD_average']:.4f}, OA_average={metrics['OA_average']:.4f} to wandb")
+                    # Create success message with available metrics
+                    log_message = f"[Evaluation] Successfully logged KLD_average={metrics['KLD_average']:.4f}, OA_average={metrics['OA_average']:.4f}"
                     
                 except Exception as e:
                     print(f"Error logging to wandb: {e}")
@@ -1370,9 +1402,10 @@ def evaluate_against_train_set(generation_results, train_config, local_rank, epo
             
             print(f"[Evaluation] Evaluation metrics: {metrics}")
             
-            # Also print the key averages for easy monitoring
+            # Print the averages
             if "KLD_average" in metrics and "OA_average" in metrics:
-                print(f"[Evaluation] Key metrics - KLD_average: {metrics['KLD_average']:.4f}, OA_average: {metrics['OA_average']:.4f}")
+                key_metrics_msg = f"[Evaluation] Key metrics - KLD_average: {metrics['KLD_average']:.4f}, OA_average: {metrics['OA_average']:.4f}"
+                print(key_metrics_msg)
             return metrics
             
     except Exception as e:
@@ -1384,7 +1417,7 @@ def evaluate_against_train_set(generation_results, train_config, local_rank, epo
 
 def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=None, step=None):
     """
-    Perform music generation during evaluation using existing MusicLlama functionality
+    Perform music generation during evaluation using MusicLlama library
     """
     if not train_config.enable_generation:
         return []
@@ -1392,9 +1425,8 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
     print(f"Starting music generation with {train_config.generation_num_samples} samples...")
     
     try:
-        # Get unwrapped model and config safely (handle DDP wrapping)
+        # Handle DDP wrapping
         if hasattr(model, 'module'):
-            # Model is wrapped (DDP, FSDP, etc.) - get the underlying model
             unwrapped_model = model.module
             model_config = unwrapped_model.config
         else:
@@ -1402,7 +1434,6 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
             unwrapped_model = model
             model_config = model.config
         
-        # Ensure model is in eval mode for generation
         unwrapped_model.eval()
         
         # Get model device and dtype
@@ -1410,19 +1441,17 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
         model_dtype = next(unwrapped_model.parameters()).dtype
         print(f"Model device: {model_device}, dtype: {model_dtype}")
         
-        # Generation is now run safely after DataLoader finishes
         
         def run_generation_safe():
-            """Run generation safely after DataLoader is finished"""
+            """Run generation after DataLoader is finished"""
             
             # Save current default tensor type and device
             original_default_dtype = torch.get_default_dtype()
             original_cuda_device = torch.cuda.current_device() if model_device.type == 'cuda' else None
             
-            # Save the actual default tensor type (includes both device and dtype)
-            # This is the key fix - we need to restore the full tensor type, not just dtype
+            # Save the device or dtype
             try:
-                original_tensor_type = torch.tensor([]).type()  # Get current default type
+                original_tensor_type = torch.tensor([]).type()  # Get default type
                 print(f"DEBUG: Original tensor type before generation: {original_tensor_type}")
             except:
                 original_tensor_type = "torch.FloatTensor"  # Fallback to CPU float tensor
@@ -1431,11 +1460,11 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
             try:
                 print(f"Running music generation with {train_config.generation_num_samples} samples...")
                 
-                # Set CUDA context for generation (safe to do now that DataLoader is finished)
+                # Set CUDA context for generation
                 if model_device.type == 'cuda':
                     torch.cuda.set_device(model_device)
                     
-                    # Set appropriate default tensor type
+                    # Set default tensor type
                     if model_dtype == torch.bfloat16:
                         torch.set_default_tensor_type(torch.cuda.BFloat16Tensor)
                     elif model_dtype == torch.float16:
@@ -1443,13 +1472,13 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
                     else:
                         torch.set_default_tensor_type(torch.cuda.FloatTensor)
                 
-                # Create MusicLlama wrapper using the unwrapped model and tokenizer
+                # Create MusicLlama wrapper
                 print(f"DEBUG: Using fine-tuned model with {sum(p.numel() for p in unwrapped_model.parameters())} parameters")
                 print(f"DEBUG: Model is in {'training' if unwrapped_model.training else 'eval'} mode")
                 print(f"DEBUG: Model memory address: {id(unwrapped_model)} (same as training model)")
                 music_llama = MusicLlama(unwrapped_model, tokenizer, model_config)
                 
-                # Create generation prompts based on generation mode
+                # Create generation prompts based on generation mode, still just dummy for random_files and all_test_files
                 prompts = []
                 if train_config.generation_mode == "from_scratch":
                     prompts = [[tokenizer.sos_token_compound] for _ in range(train_config.generation_num_samples)]
@@ -1460,7 +1489,7 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
                 else:
                     raise ValueError(f"Invalid generation_mode: {train_config.generation_mode}. Must be one of: 'from_scratch', 'random_files', 'all_test_files'")
                 
-                # Use the existing music_completion method
+                # Use existing music_completion
                 results = music_llama.music_completion(
                     prompts,
                     max_gen_len=train_config.generation_max_gen_len,
@@ -1528,10 +1557,9 @@ def perform_music_generation(model, tokenizer, train_config, local_rank, epoch=N
 
 def save_generation_results(generated_sequences, train_config, epoch=None, step=None):
     """
-    Save generated music sequences to MIDI files (using existing MusicLlama functionality)
+    Save generated sequences to MIDI files
     """
     try:
-        # Handle empty results gracefully
         if not generated_sequences:
             print("No generation results to save (generation was skipped or failed)")
             return
@@ -1545,7 +1573,7 @@ def save_generation_results(generated_sequences, train_config, epoch=None, step=
         os.makedirs(save_dir, exist_ok=True)
 
     
-        # Save individual sequences as MIDI files (using existing functionality)
+        # Save individual sequences as MIDI files
         saved_count = 0
         for i, result in enumerate(generated_sequences):
             try:
@@ -1554,43 +1582,42 @@ def save_generation_results(generated_sequences, train_config, epoch=None, step=
                     midi_path = os.path.join(save_dir, f'generated_{i}.mid')
                     result['generation']['content'].save(midi_path)
                     
-                    # Validate the saved MIDI file
+                    # Check if the saved MIDI file is valid
                     if is_valid_midi(midi_path):
                         saved_count += 1
-                        print(f"✅ Valid MIDI saved to {midi_path}")
+                        print(f"Valid MIDI saved to {midi_path}")
                     else:
                         # Delete invalid MIDI file
                         try:
                             os.remove(midi_path)
-                            print(f"❌ Invalid MIDI deleted: {midi_path}")
+                            print(f"Invalid MIDI deleted: {midi_path}")
                         except:
-                            print(f"❌ Invalid MIDI (couldn't delete): {midi_path}")
+                            print(f"Invalid MIDI (couldn't delete): {midi_path}")
                         continue
                     
-                    # Save prompt MIDI only for meaningful prompts (not just SOS token)
+                    # Save prompt MIDI only for prompts longer than 1 token
                     print(f"DEBUG: Generation mode = '{train_config.generation_mode}'")
                     
                     if (train_config.generation_mode != "from_scratch" and 
                         'prompt' in result['generation'] and 
                         'prompt_tokens' in result['generation']):
                         
-                        # Check if prompt has meaningful content (more than just SOS token)
                         prompt_tokens = result['generation']['prompt_tokens']
                         print(f"DEBUG: Prompt has {len(prompt_tokens)} tokens for generated_{i}")
                         
-                        if len(prompt_tokens) > 0:  # Any meaningful content after SOS removal
+                        if len(prompt_tokens) > 0:
                             prompt_path = os.path.join(save_dir, f'generated_{i}_prompt.mid')
                             result['generation']['prompt'].save(prompt_path)
                             
-                            # Validate prompt MIDI
+                            # Validate MIDI prompt
                             if is_valid_midi(prompt_path):
-                                print(f"✅ Valid prompt MIDI saved to {prompt_path}")
+                                print(f"Valid prompt MIDI saved to {prompt_path}")
                             else:
                                 try:
                                     os.remove(prompt_path)
-                                    print(f"❌ Invalid prompt MIDI deleted: {prompt_path}")
+                                    print(f"Invalid prompt MIDI deleted: {prompt_path}")
                                 except:
-                                    print(f"❌ Invalid prompt MIDI (couldn't delete): {prompt_path}")
+                                    print(f"Invalid prompt MIDI (couldn't delete): {prompt_path}")
                         else:
                             print(f"Skipping prompt save for generated_{i} (empty prompt after SOS removal)")
                     else:
@@ -1598,7 +1625,7 @@ def save_generation_results(generated_sequences, train_config, epoch=None, step=
                         
             except Exception as e:
                 print(f"Error saving MIDI file {i}: {e} - Skipping this generation")
-                # Skip failed generations - only save valid MIDI files
+                # Skip failed generations
                 continue
         
         print(f"Saved {saved_count}/{len(generated_sequences)} valid MIDI files to {save_dir}")
@@ -1613,21 +1640,8 @@ def setup():
         # distributed training on xpus
         dist.init_process_group("ccl")
     else:
-        dist.init_process_group("nccl")
+        dist.init_process_group("nccl")        
 
-# def setup():
-#     """Initialize the process group for distributed training"""
-#     if "RANK" not in os.environ or "WORLD_SIZE" not in os.environ:
-#         print("[INFO] No distributed environment detected. Skipping dist.init_process_group().")
-#         return
-
-#     if is_ccl_available():
-#         print("[INFO] Initializing distributed training with CCL backend.")
-#         dist.init_process_group("ccl")
-#     else:
-#         print("[INFO] Initializing distributed training with NCCL backend.")
-#         dist.init_process_group("nccl")
-        
 
 def setup_environ_flags(rank):
     """Set environment flags for debugging purposes"""

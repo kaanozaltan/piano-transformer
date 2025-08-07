@@ -4,7 +4,7 @@ import json
 import numpy as np
 from collections import defaultdict
 
-# === PART 1: Count lengths of npy files in 309M and 839M ===
+# Count lengths of npy files in 309M and 839M
 def collect_npy_lengths(base_dir):
     lengths_by_year = defaultdict(dict)
     for file in os.listdir(base_dir):
@@ -29,7 +29,7 @@ def collect_npy_lengths(base_dir):
 lengths_309M = collect_npy_lengths("preprocessed/309M/processed")
 lengths_839M = collect_npy_lengths("preprocessed/839M/processed")
 
-# === PART 2: Count MIDI chunks per base file across train/val/test ===
+# Count MIDI chunks per base file across train/val/test
 midi_dirs = [
     "/hpcwork/lect0148/experiments/mistral-155M_remi_maestro_v8/data_processed/maestro_train",
     "/hpcwork/lect0148/experiments/mistral-155M_remi_maestro_v8/data_processed/maestro_validation",
@@ -54,7 +54,7 @@ for year in midi_chunks:
         midi_chunks[year][base_name] *= 1024
 
 
-# === PART 3: Compute averages per year ===
+# Compute averages per year
 def average_dicts(dict_of_dicts):
     averages = {}
     for year, files in dict_of_dicts.items():
@@ -66,7 +66,7 @@ avg_309M = average_dicts(lengths_309M)
 avg_839M = average_dicts(lengths_839M)
 avg_midi_chunks = average_dicts(midi_chunks)
 
-# === PART 4: Calculate scaling factors ===
+# Calculate scaling factors
 scaling_factors_309M = {}
 scaling_factors_839M = {}
 
@@ -76,7 +76,7 @@ for year in avg_midi_chunks:
     if year in avg_839M:
         scaling_factors_839M[year] = avg_midi_chunks[year] / avg_839M[year]
 
-# === PART 5: Save to JSON ===
+# Save to JSON
 output = {
     "npy_lengths": {
         "309M": lengths_309M,
