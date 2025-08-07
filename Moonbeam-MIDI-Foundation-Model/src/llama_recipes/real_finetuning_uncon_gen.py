@@ -345,7 +345,7 @@ def main(**kwargs):
         scheduler = CosineAnnealingLR(
             optimizer, 
             T_max=train_config.num_epochs,
-            eta_min=train_config.lr * 0.01  # End at 1% of initial LR
+            eta_min=1e-5
         )
         print(f"Using CosineAnnealingLR scheduler (T_max={train_config.num_epochs}, eta_min={train_config.lr * 0.01:.2e})")
     elif train_config.scheduler_type.lower() == "steplr":
