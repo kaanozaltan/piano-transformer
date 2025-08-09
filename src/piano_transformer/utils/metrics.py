@@ -401,6 +401,19 @@ def evaluate_mgeval_combined(
         print(f"{features[i]}:")
         print("Kullback-Leibler divergence:", kld)
         print("Overlap area:", oa)
+        
+    kld_values = [item["KLD"] for item in relative_summary if not np.isnan(item["KLD"])]
+    oa_values = [item["OA"] for item in relative_summary if not np.isnan(item["OA"])]
+
+    avg_kld = np.mean(kld_values) if kld_values else np.nan
+    avg_oa = np.mean(oa_values) if oa_values else np.nan
+
+    print("========================")
+    print("AVERAGES:")
+    print(f"Average Kullback-Leibler divergence: {avg_kld}")
+    print(f"Average Overlap area: {avg_oa}")
+    print("========================")
+    print("========================")
 
     return absolute_summary, relative_summary
 
