@@ -1,23 +1,24 @@
 #!/bin/bash
 
 module load GCCcore/13.3.0 Python/3.12.3 CUDA/12.6.3
-export PYTHONPATH=$(pwd)/src:$PYTHONPATH
+export PYTHONPATH=$(pwd)/src:$(pwd)/Moonbeam-MIDI-Foundation-Model/src:$PYTHONPATH
 source .venv-moonbeam/bin/activate
 
-# Define variables
+# Configurable variables for comparison experiments
 CSV_FILE="preprocessed/839M/train_test_split.csv"
 TOP_P=0.95
-TEMPERATURE=0.95
+TEMPERATURE=1.1
 MODEL_CONFIG="src/llama_recipes/configs/model_config.json"
 CKPT_DIR="/hpcwork/yh522379/moonbeam/checkpoints/pre-trained/moonbeam_839M.pt"
 TOKENIZER_PATH="tokenizer.model"
-PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/839M-50epoch/49-50.safetensors"
+PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/ft_839M_peft_ctx1024_bs16_gradacc4_clipTrue_clipthresh1.0_lr1e-4_cosine_gamma0.99_temp1.1_ep100_20250807_113308/18-20.safetensors"
 
 MAX_SEQ_LEN=1024
-MAX_GEN_LEN=1024
+MAX_GEN_LEN=512
 MAX_BATCH_SIZE=4
-NUM_SAMPLES=500
-PROMPT_LEN=100
+NUM_SAMPLES=20  # Increased for high-fidelity comparison
+PROMPT_LEN=512
+GENERATION_MODE="random_files"  # "from_scratch", "random_files", or "all_test_files"
 
 # Run the inference script
 torchrun --nproc_per_node=1 recipes/inference/custom_music_generation/unconditional_music_generation.py \
@@ -33,5 +34,4 @@ torchrun --nproc_per_node=1 recipes/inference/custom_music_generation/unconditio
   --max_batch_size "$MAX_BATCH_SIZE" \
   --num_samples "$NUM_SAMPLES" \
   --prompt_len "$PROMPT_LEN" \
-  --from-scratch "$FROM_SCRATCH" \
-  --folder "$FOLDER"
+  --generation_mode "$GENERATION_MODE"

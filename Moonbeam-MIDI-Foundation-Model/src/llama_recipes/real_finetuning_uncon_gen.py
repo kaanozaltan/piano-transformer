@@ -13,7 +13,7 @@ from torch.distributed.fsdp import (
 
 from torch.distributed.fsdp.fully_sharded_data_parallel import CPUOffload
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.optim.lr_scheduler import StepLR
+from torch.optim.lr_scheduler import StepLR, CosineAnnealingLR
 from transformers import (
     AutoTokenizer,
     LlamaForCausalLM,
@@ -49,6 +49,9 @@ from llama_recipes.utils.train_utils import (
     get_policies,
 )
 from accelerate.utils import is_xpu_available
+
+def is_distributed_env():
+    return all(var in os.environ for var in ["RANK", "WORLD_SIZE", "LOCAL_RANK"])
 
 def setup_wandb(train_config, fsdp_config, llama_config, **kwargs):
     try:
@@ -102,7 +105,7 @@ def print_mem(stage):
 
 def main(**kwargs):
     # Extract model config path
-    model_config_path = kwargs.pop("model_config_path", "src/llama_recipes/configs/model_config.json")
+    model_config_path = kwargs.pop("model_config_path", "Moonbeam-MIDI-Foundation-Model/src/llama_recipes/configs/model_config.json")
     # Update the configuration for the training and sharding process
     train_config, fsdp_config, ddp_config = TRAIN_CONFIG(), FSDP_CONFIG(), DDP_CONFIG()
     # model_config_path = "src/llama_recipes/configs/model_config.json"
@@ -114,12 +117,21 @@ def main(**kwargs):
     torch.manual_seed(train_config.seed)
     random.seed(train_config.seed)
 
+    if (train_config.enable_fsdp or train_config.enable_ddp) and not is_distributed_env():
+        print("[INFO] Distributed environment not detected — disabling FSDP and DDP for debugging.")
+        train_config.enable_fsdp = False
+        train_config.enable_ddp = False
+
     if train_config.enable_fsdp or train_config.enable_ddp:
         setup() #enable nccl / ccl
         # torchrun specific
         local_rank = int(os.environ["LOCAL_RANK"])
         rank = int(os.environ["RANK"])
         world_size = int(os.environ["WORLD_SIZE"])
+    else:
+        local_rank = 0
+        rank = 0
+        world_size = 1
 
     if torch.distributed.is_initialized():
         if is_xpu_available():
@@ -159,6 +171,12 @@ def main(**kwargs):
         llama_config.use_cache = use_cache
         print(f"model_config:{llama_config}")
         model = LlamaForCausalLM(llama_config)
+        
+        # Debug: Check if model.config has the required attributes
+        print(f"Model config after creation - onset_vocab_size: {getattr(model.config, 'onset_vocab_size', 'MISSING')}")
+        print(f"Model config type: {type(model.config)}")
+        print(f"LlamaConfig type: {type(llama_config)}")
+        print(f"Are they the same object? {model.config is llama_config}")
 
         model_checkpoint = torch.load(train_config.trained_checkpoint_path)    
         checkpoint = model_checkpoint['model_state_dict']
@@ -322,7 +340,19 @@ def main(**kwargs):
 
     starting_epoch, starting_step = 0, 0
 
-    scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+    # Create learning rate scheduler based on config
+    if train_config.scheduler_type.lower() == "cosine":
+        scheduler = CosineAnnealingLR(
+            optimizer, 
+            T_max=train_config.num_epochs,
+            eta_min=1e-5
+        )
+        print(f"Using CosineAnnealingLR scheduler (T_max={train_config.num_epochs}, eta_min={train_config.lr * 0.01:.2e})")
+    elif train_config.scheduler_type.lower() == "steplr":
+        scheduler = StepLR(optimizer, step_size=1, gamma=train_config.gamma)
+        print(f"Using StepLR scheduler (step_size=1, gamma={train_config.gamma})")
+    else:
+        raise ValueError(f"Unsupported scheduler_type: {train_config.scheduler_type}. Must be 'steplr' or 'cosine'")
     print("check model trainable parameters")
     total_trainable = 0
     for name, param in model.named_parameters():
