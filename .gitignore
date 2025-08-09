@@ -228,3 +228,7 @@ preprocessed/
 wandb/
 .venv-moonbeam/
 logs/
+scripts/submit_evaluation.sh
+generation_results_debug/
+requirements-backup-31.07.2025.txt
+requirements-backup-06.08.2025.txt

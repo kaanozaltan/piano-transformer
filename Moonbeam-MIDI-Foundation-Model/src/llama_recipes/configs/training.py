@@ -26,6 +26,7 @@ class train_config:
     lr: float=1e-4
     weight_decay: float=0.0
     gamma: float= 0.85
+    scheduler_type: str = "steplr" # Learning rate scheduler: "steplr" or "cosine"
     seed: int=42
     use_fp16: bool=False
     mixed_precision: bool=True
@@ -50,3 +51,19 @@ class train_config:
     flop_counter_start: int = 3 # The step to start profiling, default is 3, which means after 3 steps of warmup stage, the profiler will start to count flops.
     use_profiler: bool = False # Enable pytorch profiler, can not be used with flop counter at the same time.
     profiler_dir: str = "PATH/to/save/profiler/results" # will be used if using profiler
+
+    # Generation parameters
+    enable_generation: bool = False # Enable music generation during evaluation
+    generation_temperature: float = 1 # Temperature for generation sampling
+    generation_top_p: float = 0.95 # Top-p value for nucleus sampling
+    generation_max_gen_len: int = 256 # Maximum generation length
+    generation_prompt_len: int = 512 # Length of prompt for generation (when using data for prompts)
+    generation_num_samples: int = 20 # Number of samples to generate during evaluation
+    generation_mode: str = "random_files" # Generation mode: "from_scratch", "random_files", or "all_test_files"
+    generation_max_prompt_samples: int = 200 # Max number of prompts to sample for prompt-based generation (will duplicate if fewer test files)
+    generation_save_dir: str = "PATH/to/save/generation/results" # Directory to save generated music
+    
+    # Evaluation parameters
+    enable_evaluation: bool = False # Enable evaluation against training set after generation
+    evaluation_frequency_epochs: int = 5 # Frequency of evaluation in epochs (1 = every epoch, 5 = every 5 epochs)
+    evaluation_ref_dir: str = "PATH/to/training/data" # Reference directory containing training MIDI files

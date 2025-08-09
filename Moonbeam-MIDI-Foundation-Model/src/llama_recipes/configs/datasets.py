@@ -38,24 +38,24 @@ class lakhmidi_dataset:
     dataset: str = "maestro"
     train_split: str = "train"
     test_split: str = "test"
-    data_dir: str = "preprocessed/maestro/"
-    csv_file: str = "preprocessed/maestro/train_test_split.csv"
+    data_dir: str = "Moonbeam-MIDI-Foundation-Model/preprocessed/maestro/"
+    csv_file: str = "Moonbeam-MIDI-Foundation-Model/preprocessed/maestro/train_test_split.csv"
 
 @dataclass
 class maestro_309M:
     dataset: str = "maestro_309M"
     train_split: str = "train"
     test_split: str = "test"
-    data_dir: str = "preprocessed/309M/"
-    csv_file: str = "preprocessed/309M/train_test_split.csv"
+    data_dir: str = "Moonbeam-MIDI-Foundation-Model/preprocessed/309M/"
+    csv_file: str = "Moonbeam-MIDI-Foundation-Model/preprocessed/309M/train_test_split.csv"
 
 @dataclass
 class maestro_839M:
     dataset: str = "maestro_839M"
     train_split: str = "train"
     test_split: str = "test"
-    data_dir: str = "preprocessed/839M/"
-    csv_file: str = "preprocessed/839M/train_test_split.csv"
+    data_dir: str = "Moonbeam-MIDI-Foundation-Model/preprocessed/839M/"
+    csv_file: str = "Moonbeam-MIDI-Foundation-Model/preprocessed/839M/train_test_split.csv"
 
 @dataclass
 class merge_dataset:

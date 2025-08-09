@@ -18,16 +18,16 @@ source .venv-moonbeam/bin/activate
 # Define variables
 CSV_FILE="preprocessed/309M/train_test_split.csv"
 TOP_P=0.95
-TEMPERATURE=0.95
+TEMPERATURE=1
 MODEL_CONFIG="src/llama_recipes/configs/model_config_small.json"
 CKPT_DIR="/hpcwork/yh522379/moonbeam/checkpoints/pre-trained/moonbeam_309M.pt"
 TOKENIZER_PATH="tokenizer.model"
 PEFT_WEIGHT="/hpcwork/yh522379/moonbeam/checkpoints/fine-tuned/309M-50epoch/49-20.safetensors"
 
 MAX_SEQ_LEN=1024
-MAX_GEN_LEN=1024
+MAX_GEN_LEN=256
 MAX_BATCH_SIZE=4
-NUM_SAMPLES=500
+NUM_SAMPLES=1300
 PROMPT_LEN=100
 FROM_SCRATCH=True
 
