@@ -1,7 +1,6 @@
 # Piano Transformer
 
-## Check out the music samples used in our Turing-like test here:
-https://drive.google.com/drive/folders/1F_HzY3lxXqOzP_PXCYyZM_5SipklndYb
+## [Check out the music samples used in our Turing-like test here!](https://drive.google.com/drive/folders/1F_HzY3lxXqOzP_PXCYyZM_5SipklndYb)
 
 ## Environment Setup
 Install uv:
