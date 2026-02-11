@@ -18,10 +18,7 @@ if __name__ == "__main__":
     # Example:
     #   python scripts/evaluate_direct.py /path/real /path/gen /path/out
     if len(sys.argv) != 4:
-        print(
-            "Usage: python scripts/evaluate_direct.py "
-            "<dir1> <dir2> <out_dir>"
-        )
+        print("Usage: python scripts/evaluate_direct.py <dir1> <dir2> <out_dir>")
         sys.exit(1)
 
     dir1 = Path(sys.argv[1]).resolve()

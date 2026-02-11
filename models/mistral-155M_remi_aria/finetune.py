@@ -69,6 +69,7 @@ N_FREEZE = 8
 FREEZE_EMBEDDINGS = False  # freeze if using only classical music
 KEEP_NORMS_TRAINABLE = True
 
+
 def freeze_layers(model, n_freeze, freeze_embeddings=True, keep_norms_trainable=True):
     if freeze_embeddings:
         if hasattr(model, "model") and hasattr(model.model, "embed_tokens"):
@@ -78,20 +79,26 @@ def freeze_layers(model, n_freeze, freeze_embeddings=True, keep_norms_trainable=
     for i, layer in enumerate(layers):
         for name, p in layer.named_parameters():
             if i < n_freeze:
-                if keep_norms_trainable and ("norm" in name.lower() or "ln" in name.lower()):
+                if keep_norms_trainable and (
+                    "norm" in name.lower() or "ln" in name.lower()
+                ):
                     p.requires_grad = True
                 else:
                     p.requires_grad = False
             else:
                 p.requires_grad = True
 
+
 # freeze_layers(model, N_FREEZE, FREEZE_EMBEDDINGS, KEEP_NORMS_TRAINABLE)
 
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
-print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
+print(
+    f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}"
+)
 
 trainer_cfg = {
-    "output_dir": cfg.runs_path.parent / f"{cfg.runs_path}_finetune_no_freeze_new_params",
+    "output_dir": cfg.runs_path.parent
+    / f"{cfg.runs_path}_finetune_no_freeze_new_params",
     "gradient_accumulation_steps": 2,
     "per_device_train_batch_size": 64,
     "per_device_eval_batch_size": 64,

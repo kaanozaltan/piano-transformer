@@ -70,9 +70,9 @@ def generate_from_scratch(output, num_samples):
             midi_generated = tokenizer.decode([deepcopy(tokens)])
 
             if midi_generated.tracks:
-                midi_generated.tracks[0].name = (
-                    f"Generated from scratch ({len(tokens)} tokens)"
-                )
+                midi_generated.tracks[
+                    0
+                ].name = f"Generated from scratch ({len(tokens)} tokens)"
 
             midi_generated.dump_midi(output_path / f"{count}_generated.midi")
             tokenizer.save_tokens([tokens], output_path / f"{count}.json")
@@ -115,9 +115,9 @@ def generate_conditioned_on_genre(output, num_samples, genre: str):
 
             midi_generated = tokenizer.decode([deepcopy(tokens)])
             if midi_generated.tracks:
-                midi_generated.tracks[0].name = (
-                    f"Generated {genre.capitalize()} ({len(tokens)} tokens)"
-                )
+                midi_generated.tracks[
+                    0
+                ].name = f"Generated {genre.capitalize()} ({len(tokens)} tokens)"
 
             midi_generated.dump_midi(output_path / f"{count}_generated.midi")
             tokenizer.save_tokens([tokens], output_path / f"{count}.json")

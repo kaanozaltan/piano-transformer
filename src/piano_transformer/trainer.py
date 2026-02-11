@@ -1,12 +1,9 @@
-import os
-
 from miditok.pytorch_data import DataCollator
 from torch.cuda import is_available as cuda_available
 from torch.cuda import is_bf16_supported
 from torch.utils.data import Dataset
 from transformers import (
     AutoModelForCausalLM,
-    EarlyStoppingCallback,
     Trainer,
     TrainingArguments,
 )

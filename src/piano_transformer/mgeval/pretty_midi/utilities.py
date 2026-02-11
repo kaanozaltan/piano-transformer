@@ -28,13 +28,12 @@ def key_number_to_key_name(key_number):
     """
 
     if not isinstance(key_number, int):
-        raise ValueError('`key_number` is not int!')
+        raise ValueError("`key_number` is not int!")
     if not ((key_number >= 0) and (key_number < 24)):
-        raise ValueError('`key_number` is larger than 24')
+        raise ValueError("`key_number` is larger than 24")
 
     # preference to keys with flats
-    keys = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb',
-            'G', 'Ab', 'A', 'Bb', 'B']
+    keys = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"]
 
     # circle around 12 pitch classes
     key_idx = key_number % 12
@@ -42,13 +41,13 @@ def key_number_to_key_name(key_number):
 
     # check if mode is major or minor
     if mode == 0:
-        return keys[key_idx] + ' Major'
+        return keys[key_idx] + " Major"
     elif mode == 1:
         # preference to C#, F# and G# minor
         if key_idx in [1, 6, 8]:
-            return keys[key_idx-1] + '# minor'
+            return keys[key_idx - 1] + "# minor"
         else:
-            return keys[key_idx] + ' minor'
+            return keys[key_idx] + " minor"
 
 
 def key_name_to_key_number(key_string):
@@ -76,41 +75,45 @@ def key_name_to_key_number(key_string):
         to B.
     """
     # Create lists of possible mode names (major or minor)
-    major_strs = ['M', 'Maj', 'Major', 'maj', 'major']
-    minor_strs = ['m', 'Min', 'Minor', 'min', 'minor']
+    major_strs = ["M", "Maj", "Major", "maj", "major"]
+    minor_strs = ["m", "Min", "Minor", "min", "minor"]
     # Construct regular expression for matching key
     pattern = re.compile(
         # Start with any of A-G, a-g
-        '^(?P<key>[ABCDEFGabcdefg])'
+        "^(?P<key>[ABCDEFGabcdefg])"
         # Next, look for #, b, or nothing
-        '(?P<flatsharp>[#b]?)'
+        "(?P<flatsharp>[#b]?)"
         # Allow for a space between key and mode
-        ' ?'
+        " ?"
         # Next, look for any of the mode strings
-        '(?P<mode>(?:(?:' +
+        "(?P<mode>(?:(?:" +
         # Next, look for any of the major or minor mode strings
-        ')|(?:'.join(major_strs + minor_strs) + '))?)$')
+        ")|(?:".join(major_strs + minor_strs)
+        + "))?)$"
+    )
     # Match provided key string
     result = re.match(pattern, key_string)
     if result is None:
-        raise ValueError('Supplied key {} is not valid.'.format(key_string))
+        raise ValueError("Supplied key {} is not valid.".format(key_string))
     # Convert result to dictionary
     result = result.groupdict()
 
     # Map from key string to pitch class number
-    key_number = {'c': 0, 'd': 2, 'e': 4, 'f': 5,
-                  'g': 7, 'a': 9, 'b': 11}[result['key'].lower()]
+    key_number = {"c": 0, "d": 2, "e": 4, "f": 5, "g": 7, "a": 9, "b": 11}[
+        result["key"].lower()
+    ]
     # Increment or decrement pitch class if a flat or sharp was specified
-    if result['flatsharp']:
-        if result['flatsharp'] == '#':
+    if result["flatsharp"]:
+        if result["flatsharp"] == "#":
             key_number += 1
-        elif result['flatsharp'] == 'b':
+        elif result["flatsharp"] == "b":
             key_number -= 1
     # Circle around 12 pitch classes
     key_number = key_number % 12
     # Offset if mode is minor, or the key name is lowercase
-    if result['mode'] in minor_strs or (result['key'].islower() and
-                                        result['mode'] not in major_strs):
+    if result["mode"] in minor_strs or (
+        result["key"].islower() and result["mode"] not in major_strs
+    ):
         key_number += 12
 
     return key_number
@@ -132,30 +135,32 @@ def mode_accidentals_to_key_number(mode, num_accidentals):
         Integer representing the key and its mode.
     """
 
-    if not (isinstance(num_accidentals, int) and
-            num_accidentals > -8 and
-            num_accidentals < 8):
-        raise ValueError('Number of accidentals {} is not valid'.format(
-            num_accidentals))
+    if not (
+        isinstance(num_accidentals, int)
+        and num_accidentals > -8
+        and num_accidentals < 8
+    ):
+        raise ValueError(
+            "Number of accidentals {} is not valid".format(num_accidentals)
+        )
     if mode not in (0, 1):
-        raise ValueError('Mode {} is not recognizable, must be 0 or 1'.format(
-            mode))
+        raise ValueError("Mode {} is not recognizable, must be 0 or 1".format(mode))
 
-    sharp_keys = 'CGDAEBF'
-    flat_keys = 'FBEADGC'
+    sharp_keys = "CGDAEBF"
+    flat_keys = "FBEADGC"
 
     # check if key signature has sharps or flats
     if num_accidentals >= 0:
         num_sharps = num_accidentals // 6
-        key = sharp_keys[num_accidentals % 7] + '#' * int(num_sharps)
+        key = sharp_keys[num_accidentals % 7] + "#" * int(num_sharps)
     else:
         if num_accidentals == -1:
-            key = 'F'
+            key = "F"
         else:
-            key = flat_keys[(-1 * num_accidentals - 1) % 7] + 'b'
+            key = flat_keys[(-1 * num_accidentals - 1) % 7] + "b"
 
     # find major key number
-    key += ' Major'
+    key += " Major"
 
     # use routine to convert from string notation to number notation
     key_number = key_name_to_key_number(key)
@@ -184,14 +189,25 @@ def key_number_to_mode_accidentals(key_number):
         Positive is for sharps and negative is for flats.
     """
 
-    if not ((isinstance(key_number, int) and
-             key_number >= 0 and
-             key_number < 24)):
-        raise ValueError('Key number {} is not a must be an int between 0 and '
-                         '24'.format(key_number))
+    if not (isinstance(key_number, int) and key_number >= 0 and key_number < 24):
+        raise ValueError(
+            "Key number {} is not a must be an int between 0 and 24".format(key_number)
+        )
 
-    pc_to_num_accidentals_major = {0: 0, 1: -5, 2: 2, 3: -3, 4: 4, 5: -1, 6: 6,
-                                   7: 1, 8: -4, 9: 3, 10: -2, 11: 5}
+    pc_to_num_accidentals_major = {
+        0: 0,
+        1: -5,
+        2: 2,
+        3: -3,
+        4: 4,
+        5: -1,
+        6: 6,
+        7: 1,
+        8: -4,
+        9: 3,
+        10: -2,
+        11: 5,
+    }
     mode = key_number // 12
 
     if mode == 0:
@@ -223,19 +239,21 @@ def qpm_to_bpm(quarter_note_tempo, numerator, denominator):
         Tempo in beats per minute.
     """
 
-    if not (isinstance(quarter_note_tempo, (int, float)) and
-            quarter_note_tempo > 0):
+    if not (isinstance(quarter_note_tempo, (int, float)) and quarter_note_tempo > 0):
         raise ValueError(
-            'Quarter notes per minute must be an int or float '
-            'greater than 0, but {} was supplied'.format(quarter_note_tempo))
+            "Quarter notes per minute must be an int or float "
+            "greater than 0, but {} was supplied".format(quarter_note_tempo)
+        )
     if not (isinstance(numerator, int) and numerator > 0):
         raise ValueError(
-            'Time signature numerator must be an int greater than 0, but {} '
-            'was supplied.'.format(numerator))
+            "Time signature numerator must be an int greater than 0, but {} "
+            "was supplied.".format(numerator)
+        )
     if not (isinstance(denominator, int) and denominator > 0):
         raise ValueError(
-            'Time signature denominator must be an int greater than 0, but {} '
-            'was supplied.'.format(denominator))
+            "Time signature denominator must be an int greater than 0, but {} "
+            "was supplied.".format(denominator)
+        )
 
     # denominator is whole, half, quarter, eighth, sixteenth or 32nd note
     if denominator in [1, 2, 4, 8, 16, 32]:
@@ -268,7 +286,7 @@ def note_number_to_hz(note_number):
     """
     # MIDI note numbers are defined as the number of semitones relative to C0
     # in a 440 Hz tuning
-    return 440.0*(2.0**((note_number - 69)/12.0))
+    return 440.0 * (2.0 ** ((note_number - 69) / 12.0))
 
 
 def hz_to_note_number(frequency):
@@ -287,7 +305,7 @@ def hz_to_note_number(frequency):
     """
     # MIDI note numbers are defined as the number of semitones relative to C0
     # in a 440 Hz tuning
-    return 12*(np.log2(frequency) - np.log2(440.0)) + 69
+    return 12 * (np.log2(frequency) - np.log2(440.0)) + 69
 
 
 def note_name_to_number(note_name):
@@ -319,24 +337,25 @@ def note_name_to_number(note_name):
     """
 
     # Map note name to the semitone
-    pitch_map = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
+    pitch_map = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
     # Relative change in semitone denoted by each accidental
-    acc_map = {'#': 1, '': 0, 'b': -1, '!': -1}
+    acc_map = {"#": 1, "": 0, "b": -1, "!": -1}
 
     # Reg exp will raise an error when the note name is not valid
     try:
         # Extract pitch, octave, and accidental from the supplied note name
-        match = re.match(r'^(?P<n>[A-Ga-g])(?P<off>[#b!]?)(?P<oct>[+-]?\d+)$',
-                         note_name)
+        match = re.match(
+            r"^(?P<n>[A-Ga-g])(?P<off>[#b!]?)(?P<oct>[+-]?\d+)$", note_name
+        )
 
-        pitch = match.group('n').upper()
-        offset = acc_map[match.group('off')]
-        octave = int(match.group('oct'))
+        pitch = match.group("n").upper()
+        offset = acc_map[match.group("off")]
+        octave = int(match.group("oct"))
     except:
-        raise ValueError('Improper note format: {}'.format(note_name))
+        raise ValueError("Improper note format: {}".format(note_name))
 
     # Convert from the extrated ints to a full note number
-    return 12*(octave + 1) + pitch_map[pitch] + offset
+    return 12 * (octave + 1) + pitch_map[pitch] + offset
 
 
 def note_number_to_name(note_number):
@@ -360,13 +379,13 @@ def note_number_to_name(note_number):
     """
 
     # Note names within one octave
-    semis = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+    semis = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
     # Ensure the note is an int
     note_number = int(np.round(note_number))
 
     # Get the semitone and the octave, and concatenate to create the name
-    return semis[note_number % 12] + str(note_number//12 - 1)
+    return semis[note_number % 12] + str(note_number // 12 - 1)
 
 
 def note_number_to_drum_name(note_number):
@@ -396,7 +415,7 @@ def note_number_to_drum_name(note_number):
     note_number = int(np.round(note_number))
     # General MIDI only defines drum names for notes 35-81
     if note_number < 35 or note_number > 81:
-        return ''
+        return ""
     else:
         # Our DRUM_MAP starts from index 0; drum names start from 35
         return DRUM_MAP[note_number - 35]
@@ -407,7 +426,7 @@ def __normalize_str(name):
     it to lowercase.
 
     """
-    return ''.join(ch for ch in name if ch.isalnum()).lower()
+    return "".join(ch for ch in name if ch.isalnum()).lower()
 
 
 def drum_name_to_note_number(drum_name):
@@ -440,8 +459,7 @@ def drum_name_to_note_number(drum_name):
     try:
         note_index = normalized_drum_names.index(normalized_drum_name)
     except:
-        raise ValueError('{} is not a valid General MIDI drum '
-                         'name.'.format(drum_name))
+        raise ValueError("{} is not a valid General MIDI drum name.".format(drum_name))
 
     # If an index was found, it will be 0-based; add 35 to get the note number
     return note_index + 35
@@ -469,8 +487,11 @@ def program_to_instrument_name(program_number):
 
     # Check that the supplied program is in the valid range
     if program_number < 0 or program_number > 127:
-        raise ValueError('Invalid program number {}, should be between 0 and'
-                         ' 127'.format(program_number))
+        raise ValueError(
+            "Invalid program number {}, should be between 0 and 127".format(
+                program_number
+            )
+        )
     # Just grab the name from the instrument mapping list
     return INSTRUMENT_MAP[program_number]
 
@@ -499,15 +520,15 @@ def instrument_name_to_program(instrument_name):
 
     normalized_inst_name = __normalize_str(instrument_name)
     # Create a list of the entries INSTRUMENT_MAP, normalized, to search over
-    normalized_inst_names = [__normalize_str(name) for name in
-                             INSTRUMENT_MAP]
+    normalized_inst_names = [__normalize_str(name) for name in INSTRUMENT_MAP]
 
     # If the normalized drum name is not found, complain
     try:
         program_number = normalized_inst_names.index(normalized_inst_name)
     except:
-        raise ValueError('{} is not a valid General MIDI instrument '
-                         'name.'.format(instrument_name))
+        raise ValueError(
+            "{} is not a valid General MIDI instrument name.".format(instrument_name)
+        )
 
     # Return the index (program number) if a match was found
     return program_number
@@ -535,13 +556,16 @@ def program_to_instrument_class(program_number):
 
     # Check that the supplied program is in the valid range
     if program_number < 0 or program_number > 127:
-        raise ValueError('Invalid program number {}, should be between 0 and'
-                         ' 127'.format(program_number))
+        raise ValueError(
+            "Invalid program number {}, should be between 0 and 127".format(
+                program_number
+            )
+        )
     # Just grab the name from the instrument mapping list
-    return INSTRUMENT_CLASSES[int(program_number)//8]
+    return INSTRUMENT_CLASSES[int(program_number) // 8]
 
 
-def pitch_bend_to_semitones(pitch_bend, semitone_range=2.):
+def pitch_bend_to_semitones(pitch_bend, semitone_range=2.0):
     """Convert a MIDI pitch bend value (in the range ``[-8192, 8191]``) to the
     bend amount in semitones.
 
@@ -560,10 +584,10 @@ def pitch_bend_to_semitones(pitch_bend, semitone_range=2.):
 
     """
 
-    return semitone_range*pitch_bend/8192.0
+    return semitone_range * pitch_bend / 8192.0
 
 
-def semitones_to_pitch_bend(semitones, semitone_range=2.):
+def semitones_to_pitch_bend(semitones, semitone_range=2.0):
     """Convert a semitone value to the corresponding MIDI pitch bend integer.
 
     Parameters
@@ -580,4 +604,4 @@ def semitones_to_pitch_bend(semitones, semitone_range=2.):
         MIDI pitch bend amount, in ``[-8192, 8191]``.
 
     """
-    return int(8192*(semitones/semitone_range))
+    return int(8192 * (semitones / semitone_range))

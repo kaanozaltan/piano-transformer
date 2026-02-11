@@ -16,18 +16,27 @@ def build_datasets(
         "bos_token_id": tokenizer["BOS_None"],
         "eos_token_id": tokenizer["EOS_None"],
     }
-    
+
     # Add attribute control parameters if tokenizer has attribute controls
     if tokenizer.attribute_controls:
-        dataset_kwargs["ac_tracks_random_ratio_range"] = (1.0, 1.0)  # Always apply to all tracks
-        
+        dataset_kwargs["ac_tracks_random_ratio_range"] = (
+            1.0,
+            1.0,
+        )  # Always apply to all tracks
+
     augmentation_kwargs = aug_cfg
 
     if aug_cfg is not None:
-        train_ds = AugmentedDatasetMIDI(chunks_lists["train"], **augmentation_kwargs, **dataset_kwargs)
+        train_ds = AugmentedDatasetMIDI(
+            chunks_lists["train"], **augmentation_kwargs, **dataset_kwargs
+        )
     else:
-        train_ds = DatasetMIDI(chunks_lists["train"], pre_tokenize=True, **dataset_kwargs)
-    valid_ds = DatasetMIDI(chunks_lists["validation"], pre_tokenize=True, **dataset_kwargs)
+        train_ds = DatasetMIDI(
+            chunks_lists["train"], pre_tokenize=True, **dataset_kwargs
+        )
+    valid_ds = DatasetMIDI(
+        chunks_lists["validation"], pre_tokenize=True, **dataset_kwargs
+    )
     test_ds = DatasetMIDI(chunks_lists["test"], pre_tokenize=True, **dataset_kwargs)
 
     return train_ds, valid_ds, test_ds

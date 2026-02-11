@@ -9,10 +9,11 @@ from piano_transformer.utils.metrics import (
 
 BASE_DIR = Path("/hpcwork/lect0148/experiments")
 
+
 def evaluate(dir1, dir2, out_dir):
     out_dir.mkdir(parents=True, exist_ok=True)
     evaluate_mgeval_combined(dir1, dir2, out_dir)
-    print(f"\nFMD:", fmd(dir1, dir2))
+    print("\nFMD:", fmd(dir1, dir2))
 
 
 if __name__ == "__main__":

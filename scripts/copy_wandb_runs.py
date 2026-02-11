@@ -8,12 +8,22 @@ def main(args):
 
     if args.names is not None:
         if args.runs is None:
-            raise Exception("Renaming copied runs not supported when copying whole project.")
-        assert len(args.names) == len(args.runs), "Number of new names must equal number of run IDs"
+            raise Exception(
+                "Renaming copied runs not supported when copying whole project."
+            )
+        assert len(args.names) == len(args.runs), (
+            "Number of new names must equal number of run IDs"
+        )
 
-    args.dst_entity = args.dst_entity if args.dst_entity is not None else args.src_entity
-    args.dst_project = args.dst_project if args.dst_project is not None else args.src_project
-    same_project = args.src_entity == args.dst_entity and args.src_project == args.dst_project
+    args.dst_entity = (
+        args.dst_entity if args.dst_entity is not None else args.src_entity
+    )
+    args.dst_project = (
+        args.dst_project if args.dst_project is not None else args.src_project
+    )
+    same_project = (
+        args.src_entity == args.dst_entity and args.src_project == args.dst_project
+    )
     if same_project and args.names is None:
         name_append = "-copy"
     else:
@@ -47,10 +57,16 @@ def main(args):
             entity=args.dst_entity,
             config=run.config,
             name=name + name_append,
-            resume="allow"
+            resume="allow",
         )
         for index, row in history.iterrows():
-            new_run.log({(k if k != "train/step" else "train/global_step"): v for k, v in row.to_dict().items() if v is None or not (v == "NaN" or np.isnan(v))})
+            new_run.log(
+                {
+                    (k if k != "train/step" else "train/global_step"): v
+                    for k, v in row.to_dict().items()
+                    if v is None or not (v == "NaN" or np.isnan(v))
+                }
+            )
 
         # Upload the files to the new run
         for file in files:
@@ -62,12 +78,48 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description="Copies one or all of the runs in a wandb project to another.")
-    parser.add_argument("-se", "--src-entity", type=str, default="indezera", help="Source wandb entity name.")
-    parser.add_argument("-sp", "--src-project", type=str, help="Name of the wandb projecet.")
-    parser.add_argument("-de", "--dst-entity", type=str, default=None, help="Destination wandb entity name.")
-    parser.add_argument("-dp", "--dst-project", type=str, default=None, help="Name of destination wandb project.")
-    parser.add_argument("-r", "--runs", nargs="*", type=str, default=None, help="List of run IDs to copy. If None will copy all in project.")
-    parser.add_argument("-n", "--names", nargs="*", type=str, default=None, help="List of new names for copied runs (optional).")
+    parser = ArgumentParser(
+        description="Copies one or all of the runs in a wandb project to another."
+    )
+    parser.add_argument(
+        "-se",
+        "--src-entity",
+        type=str,
+        default="indezera",
+        help="Source wandb entity name.",
+    )
+    parser.add_argument(
+        "-sp", "--src-project", type=str, help="Name of the wandb projecet."
+    )
+    parser.add_argument(
+        "-de",
+        "--dst-entity",
+        type=str,
+        default=None,
+        help="Destination wandb entity name.",
+    )
+    parser.add_argument(
+        "-dp",
+        "--dst-project",
+        type=str,
+        default=None,
+        help="Name of destination wandb project.",
+    )
+    parser.add_argument(
+        "-r",
+        "--runs",
+        nargs="*",
+        type=str,
+        default=None,
+        help="List of run IDs to copy. If None will copy all in project.",
+    )
+    parser.add_argument(
+        "-n",
+        "--names",
+        nargs="*",
+        type=str,
+        default=None,
+        help="List of new names for copied runs (optional).",
+    )
 
     main(parser.parse_args())

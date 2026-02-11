@@ -1,8 +1,4 @@
-from piano_transformer.utils import metrics
-
 import shutil
-import glob
-import os
 
 from pathlib import Path
 from tqdm import tqdm
@@ -112,9 +108,9 @@ def generate_from_scratch(
             midi_generated = tokenizer.decode([deepcopy(tokens)])
 
             if midi_generated.tracks:
-                midi_generated.tracks[0].name = (
-                    f"Generated from scratch ({len(tokens)} tokens)"
-                )
+                midi_generated.tracks[
+                    0
+                ].name = f"Generated from scratch ({len(tokens)} tokens)"
 
             midi_generated.dump_midi(output_path / f"{count}_generated.midi")
             tokenizer.save_tokens([tokens], output_path / f"{count}.json")

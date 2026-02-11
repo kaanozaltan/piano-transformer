@@ -33,7 +33,9 @@ def load_yaml_config(yaml_path):
     return {}
 
 
-def submit_experiment(slurm_path, model_name, script_name, script_path, log_path, gpus, time, email):
+def submit_experiment(
+    slurm_path, model_name, script_name, script_path, log_path, gpus, time, email
+):
     slurm_content = slurm_template.format(
         model_name=model_name,
         log_path=str(log_path.resolve()),
@@ -84,7 +86,9 @@ def main():
     time = args.time or yaml_config.get("time", "00:20:00")
 
     if not model_name or not script_name:
-        print("Error: 'model' and 'script' must be specified via CLI or submit_config.yaml")
+        print(
+            "Error: 'model' and 'script' must be specified via CLI or submit_config.yaml"
+        )
         sys.exit(1)
 
     slurm_path = file_path / "submit_experiment.sh"

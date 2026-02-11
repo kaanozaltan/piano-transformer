@@ -23,7 +23,9 @@ def create_matched_cont_test_subsets(cont_dir, output_base, subset_size, seed):
     gen_ids = {Path(g).stem.split("_")[0] for g in generations}
     common_ids = sorted(prompt_ids & gen_ids)
 
-    assert len(common_ids) >= subset_size, f"Not enough matching prompt-generation pairs: {len(common_ids)}"
+    assert len(common_ids) >= subset_size, (
+        f"Not enough matching prompt-generation pairs: {len(common_ids)}"
+    )
     chosen_ids = random.Random(seed).sample(common_ids, subset_size)
 
     test_dir = output_base / "test"
@@ -46,7 +48,9 @@ def create_cont_test_subsets(cont_dir, output_base, subset_size, seed):
     gen_ids = {Path(g).stem.split("_")[0] for g in generations}
     common_ids = sorted(prompt_ids & gen_ids)
 
-    assert len(common_ids) >= subset_size, f"Not enough matching pairs: {len(common_ids)}"
+    assert len(common_ids) >= subset_size, (
+        f"Not enough matching pairs: {len(common_ids)}"
+    )
     rng = random.Random(seed)
     test_ids = rng.sample(common_ids, subset_size)
 
@@ -61,7 +65,9 @@ def create_cont_test_subsets(cont_dir, output_base, subset_size, seed):
         shutil.copy2(prompt, test_dir / os.path.basename(prompt))
 
     remaining_ids = sorted(set(common_ids) - set(test_ids))
-    assert len(remaining_ids) >= subset_size, f"Not enough remaining continuations: {len(remaining_ids)}"
+    assert len(remaining_ids) >= subset_size, (
+        f"Not enough remaining continuations: {len(remaining_ids)}"
+    )
     random_cont_ids = random.sample(remaining_ids, subset_size)
 
     for id_ in random_cont_ids:
@@ -69,7 +75,9 @@ def create_cont_test_subsets(cont_dir, output_base, subset_size, seed):
         shutil.copy2(gen, cont_out_dir / os.path.basename(gen))
 
 
-def run_eval_setup(model_name, base_dir="/hpcwork/lect0148/experiments", subset_size=1000):
+def run_eval_setup(
+    model_name, base_dir="/hpcwork/lect0148/experiments", subset_size=1000
+):
     model_path = Path(base_dir) / model_name
     assert model_path.exists(), f"Model path not found: {model_path}"
 
@@ -77,7 +85,10 @@ def run_eval_setup(model_name, base_dir="/hpcwork/lect0148/experiments", subset_
     subset_base.mkdir(parents=True, exist_ok=True)
 
     # 1. Subset: train
-    train_files = glob.glob(str(model_path / "data_processed" / "maestro_train" / "**" / "*.midi"), recursive=True)
+    train_files = glob.glob(
+        str(model_path / "data_processed" / "maestro_train" / "**" / "*.midi"),
+        recursive=True,
+    )
     create_basic_subset(train_files, subset_base / "train", subset_size, seed=123)
 
     # 2. Subset: unconditional generations
@@ -94,7 +105,9 @@ def run_eval_setup(model_name, base_dir="/hpcwork/lect0148/experiments", subset_
 if __name__ == "__main__":
     # Example: python scripts/eval_setup.py mistral-950M_remi_maestro
     parser = argparse.ArgumentParser()
-    parser.add_argument("experiment_name", help="Model directory name under experiments/")
+    parser.add_argument(
+        "experiment_name", help="Model directory name under experiments/"
+    )
     args = parser.parse_args()
 
     run_eval_setup(args.experiment_name)

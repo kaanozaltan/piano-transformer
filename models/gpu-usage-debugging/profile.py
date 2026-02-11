@@ -59,7 +59,9 @@ collator = build_collator(tokenizer)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-loader = DataLoader(valid_ds, batch_size=128, num_workers=0, pin_memory=False, collate_fn=collator)
+loader = DataLoader(
+    valid_ds, batch_size=128, num_workers=0, pin_memory=False, collate_fn=collator
+)
 
 start = time.time()
 for epoch in range(3):

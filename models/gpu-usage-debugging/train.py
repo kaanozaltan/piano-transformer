@@ -63,7 +63,9 @@ augmentation_cfg = {
 }
 
 
-train_ds, valid_ds, test_ds = build_datasets(chunks_lists, tokenizer, MAX_SEQ_LEN, augmentation_cfg)
+train_ds, valid_ds, test_ds = build_datasets(
+    chunks_lists, tokenizer, MAX_SEQ_LEN, augmentation_cfg
+)
 collator = build_collator(tokenizer)
 
 ## TRAINING
@@ -80,7 +82,9 @@ model_cfg = {
 model = build_mistral_model(model_cfg, tokenizer, MAX_SEQ_LEN)
 
 print(f"Total parameters: {sum(p.numel() for p in model.parameters()):,}")
-print(f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}")
+print(
+    f"Trainable parameters: {sum(p.numel() for p in model.parameters() if p.requires_grad):,}"
+)
 
 trainer_cfg = {
     "output_dir": cfg.runs_path,

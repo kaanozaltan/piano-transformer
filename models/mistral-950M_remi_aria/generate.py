@@ -13,7 +13,7 @@ from piano_transformer.config import load_config
 from piano_transformer.datasets.dataset import build_datasets, build_collator
 from piano_transformer.datasets.preprocessing import split_datasets_into_chunks
 from piano_transformer.tokenizer import load_remi_tokenizer
-from piano_transformer.utils.midi import get_midi_file_lists_by_random, midi2wav
+from piano_transformer.utils.midi import get_midi_file_lists_by_random
 
 ## SETUP
 
@@ -106,13 +106,13 @@ def generate(dataset, output, max_samples=None):
 
             # Name the tracks
             if midi_generated.tracks:
-                midi_generated.tracks[0].name = (
-                    f"Generated continuation ({len(tokens[0])} tokens)"
-                )
+                midi_generated.tracks[
+                    0
+                ].name = f"Generated continuation ({len(tokens[0])} tokens)"
             if midi_prompt.tracks:
-                midi_prompt.tracks[0].name = (
-                    f"Original prompt ({len(tokens[1])} tokens)"
-                )
+                midi_prompt.tracks[
+                    0
+                ].name = f"Original prompt ({len(tokens[1])} tokens)"
             if midi_full.tracks:
                 midi_full.tracks[0].name = f"Full sequence ({len(tokens[2])} tokens)"
 
@@ -155,9 +155,9 @@ def generate_from_scratch(output, num_samples):
             midi_generated = tokenizer.decode([deepcopy(tokens)])
 
             if midi_generated.tracks:
-                midi_generated.tracks[0].name = (
-                    f"Generated from scratch ({len(tokens)} tokens)"
-                )
+                midi_generated.tracks[
+                    0
+                ].name = f"Generated from scratch ({len(tokens)} tokens)"
 
             midi_generated.dump_midi(output_path / f"{count}_generated.midi")
             tokenizer.save_tokens([tokens], output_path / f"{count}.json")
@@ -207,5 +207,3 @@ generate_from_scratch(cfg.output_path / "generations", 1000)
 
 # perplexity = compute_perplexity(model, test_ds, collator, batch_size=128)
 # print(f"Perplexity on test set: {perplexity:.2f}")
-
-# midi2wav(cfg.output_path / "test_jonathan", cfg.output_path / "test_jonathan_wav", "SalC5Light2.sf2")

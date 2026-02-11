@@ -1,6 +1,5 @@
-"""These classes simply hold MIDI data in a convenient form.
+"""These classes simply hold MIDI data in a convenient form."""
 
-"""
 from __future__ import print_function
 
 from .utilities import key_number_to_key_name
@@ -37,8 +36,9 @@ class Note(object):
         return self.get_duration()
 
     def __repr__(self):
-        return 'Note(start={:f}, end={:f}, pitch={}, velocity={})'.format(
-            self.start, self.end, self.pitch, self.velocity)
+        return "Note(start={:f}, end={:f}, pitch={}, velocity={})".format(
+            self.start, self.end, self.pitch, self.velocity
+        )
 
 
 class PitchBend(object):
@@ -58,7 +58,7 @@ class PitchBend(object):
         self.time = time
 
     def __repr__(self):
-        return 'PitchBend(pitch={:d}, time={:f})'.format(self.pitch, self.time)
+        return "PitchBend(pitch={:d}, time={:f})".format(self.pitch, self.time)
 
 
 class ControlChange(object):
@@ -81,8 +81,9 @@ class ControlChange(object):
         self.time = time
 
     def __repr__(self):
-        return ('ControlChange(number={:d}, value={:d}, '
-                'time={:f})'.format(self.number, self.value, self.time))
+        return "ControlChange(number={:d}, value={:d}, time={:f})".format(
+            self.number, self.value, self.time
+        )
 
 
 class TimeSignature(object):
@@ -111,15 +112,14 @@ class TimeSignature(object):
     def __init__(self, numerator, denominator, time):
         if not (isinstance(numerator, int) and numerator > 0):
             raise ValueError(
-                '{} is not a valid `numerator` type or value'.format(
-                    numerator))
+                "{} is not a valid `numerator` type or value".format(numerator)
+            )
         if not (isinstance(denominator, int) and denominator > 0):
             raise ValueError(
-                '{} is not a valid `denominator` type or value'.format(
-                    denominator))
+                "{} is not a valid `denominator` type or value".format(denominator)
+            )
         if not (isinstance(time, (int, float)) and time >= 0):
-            raise ValueError(
-                '{} is not a valid `time` type or value'.format(time))
+            raise ValueError("{} is not a valid `time` type or value".format(time))
 
         self.numerator = numerator
         self.denominator = denominator
@@ -127,11 +127,13 @@ class TimeSignature(object):
 
     def __repr__(self):
         return "TimeSignature(numerator={}, denominator={}, time={})".format(
-            self.numerator, self.denominator, self.time)
+            self.numerator, self.denominator, self.time
+        )
 
     def __str__(self):
-        return '{}/{} at {:.2f} seconds'.format(
-            self.numerator, self.denominator, self.time)
+        return "{}/{} at {:.2f} seconds".format(
+            self.numerator, self.denominator, self.time
+        )
 
 
 class KeySignature(object):
@@ -156,26 +158,23 @@ class KeySignature(object):
     """
 
     def __init__(self, key_number, time):
-        if not all((isinstance(key_number, int),
-                    key_number >= 0,
-                    key_number < 24)):
+        if not all((isinstance(key_number, int), key_number >= 0, key_number < 24)):
             raise ValueError(
-                '{} is not a valid `key_number` type or value'.format(
-                    key_number))
+                "{} is not a valid `key_number` type or value".format(key_number)
+            )
         if not (isinstance(time, (int, float)) and time >= 0):
-            raise ValueError(
-                '{} is not a valid `time` type or value'.format(time))
+            raise ValueError("{} is not a valid `time` type or value".format(time))
 
         self.key_number = key_number
         self.time = time
 
     def __repr__(self):
-        return "KeySignature(key_number={}, time={})".format(
-            self.key_number, self.time)
+        return "KeySignature(key_number={}, time={})".format(self.key_number, self.time)
 
     def __str__(self):
-        return '{} at {:.2f} seconds'.format(
-            key_number_to_key_name(self.key_number), self.time)
+        return "{} at {:.2f} seconds".format(
+            key_number_to_key_name(self.key_number), self.time
+        )
 
 
 class Lyric(object):
@@ -195,10 +194,12 @@ class Lyric(object):
 
     def __repr__(self):
         return 'Lyric(text="{}", time={})'.format(
-            self.text.replace('"', r'\"'), self.time)
+            self.text.replace('"', r"\""), self.time
+        )
 
     def __str__(self):
         return '"{}" at {:.2f} seconds'.format(self.text, self.time)
+
 
 class Text(object):
     """Timestamped text event.
@@ -217,7 +218,8 @@ class Text(object):
 
     def __repr__(self):
         return 'Text(text="{}", time={})'.format(
-            self.text.replace('"', r'\"'), self.time)
+            self.text.replace('"', r"\""), self.time
+        )
 
     def __str__(self):
         return '"{}" at {:.2f} seconds'.format(self.text, self.time)

@@ -1,28 +1,12 @@
 import os
-import subprocess
-from copy import deepcopy
-from datetime import datetime
 from pathlib import Path
 
 import wandb
-from evaluate import load as load_metric
 from miditok import REMI, TokenizerConfig
 from miditok.data_augmentation import augment_dataset
 from miditok.pytorch_data import DataCollator, DatasetMIDI
 from miditok.utils import split_files_for_training
 from sklearn.model_selection import train_test_split
-from torch import argmax
-from torch.cuda import is_available as cuda_available
-from torch.cuda import is_bf16_supported
-from torch.utils.data import DataLoader
-from tqdm import tqdm
-from transformers import (
-    AutoModelForCausalLM,
-    GenerationConfig,
-    MistralConfig,
-    Trainer,
-    TrainingArguments,
-)
 from transformers.trainer_utils import set_seed
 
 TRANSFORMER_NAME = "mistral-309M"

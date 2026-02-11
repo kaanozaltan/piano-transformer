@@ -1,12 +1,7 @@
 import os
 import glob
 import numpy as np
-import traceback
-from scipy.special import rel_entr
-from scipy.stats import gaussian_kde
-from miditok import REMI
 from frechet_music_distance import FrechetMusicDistance
-from symusic import Score
 from piano_transformer.mgeval import core, utils
 from tqdm import tqdm
 from sklearn.model_selection import LeaveOneOut
@@ -15,7 +10,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import pretty_midi
-import pickle
 import shutil
 import hashlib
 import random
@@ -278,7 +272,7 @@ def evaluate_mgeval_combined(
 
     for j in range(len(features)):
         print(f"Extracting {features[j]}")
-        for i in tqdm(range(num_samples), desc=f"  Dataset 1"):
+        for i in tqdm(range(num_samples), desc="  Dataset 1"):
             try:
                 feature = core.extract_feature(dataset1[i])
                 value = getattr(core.metrics(), features[j])(feature, **kwargs[j])
@@ -292,7 +286,7 @@ def evaluate_mgeval_combined(
             except Exception as e:
                 print(f"[{features[j]}] Skipping {dataset1[i]} (idx={i}): {e}")
                 continue
-        for i in tqdm(range(num_samples), desc=f"  Dataset 2"):
+        for i in tqdm(range(num_samples), desc="  Dataset 2"):
             try:
                 feature = core.extract_feature(dataset2[i])
                 value = getattr(core.metrics(), features[j])(feature, **kwargs[j])
@@ -401,7 +395,7 @@ def evaluate_mgeval_combined(
         print(f"{features[i]}:")
         print("Kullback-Leibler divergence:", kld)
         print("Overlap area:", oa)
-        
+
     kld_values = [item["KLD"] for item in relative_summary if not np.isnan(item["KLD"])]
     oa_values = [item["OA"] for item in relative_summary if not np.isnan(item["OA"])]
 
@@ -572,7 +566,7 @@ def summarize_and_plot_mgeval_results(
             output_path, f"absolute_eval_summary_{dataset_name}.pkl"
         )
         pd.to_pickle(summary, summary_path)
-        print(f"\nSaved full summary.")
+        print("\nSaved full summary.")
 
     return summary
 

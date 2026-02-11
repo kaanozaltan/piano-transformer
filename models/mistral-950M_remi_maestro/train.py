@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 from dotenv import load_dotenv
 from transformers.trainer_utils import set_seed

@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from collections import Counter, defaultdict
 import symusic as sm
-from typing import Dict, List
 from tqdm import tqdm
 import random
 

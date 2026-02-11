@@ -2,10 +2,7 @@
 """utils.py
 Include distance calculation for evaluation metrics
 """
-import sys
-import os
-import glob
-import math
+
 import sklearn
 import numpy as np
 from scipy import stats, integrate
@@ -15,44 +12,50 @@ from scipy import stats, integrate
 def overlap_area(A, B):
     pdf_A = stats.gaussian_kde(A)
     pdf_B = stats.gaussian_kde(B)
-    return integrate.quad(lambda x: min(pdf_A(x), pdf_B(x)), np.min((np.min(A), np.min(B))), np.max((np.max(A), np.max(B))))[0]
+    return integrate.quad(
+        lambda x: min(pdf_A(x), pdf_B(x)),
+        np.min((np.min(A), np.min(B))),
+        np.max((np.max(A), np.max(B))),
+    )[0]
 
 
 # Calculate KL distance between the two PDF
 def kl_dist(A, B, num_sample=1000, epsilon=1e-10):
     pdf_A = stats.gaussian_kde(A)
     pdf_B = stats.gaussian_kde(B)
-    sample = np.linspace(min(np.min(A), np.min(B)), max(np.max(A), np.max(B)), num_sample)
-    
+    sample = np.linspace(
+        min(np.min(A), np.min(B)), max(np.max(A), np.max(B)), num_sample
+    )
+
     p = pdf_A(sample)
     q = pdf_B(sample)
-    
+
     # Avoid division by zero
     p = np.clip(p, epsilon, None)
     q = np.clip(q, epsilon, None)
-    
+
     return stats.entropy(p, q)
 
 
-def c_dist(A, B, mode='None', normalize=0):
+def c_dist(A, B, mode="None", normalize=0):
     c_dist = np.zeros(len(B))
     for i in range(0, len(B)):
-        if mode == 'None':
+        if mode == "None":
             c_dist[i] = np.linalg.norm(A - B[i])
-        elif mode == 'EMD':
+        elif mode == "EMD":
             if normalize == 1:
-                A_ = sklearn.preprocessing.normalize(A.reshape(1, -1), norm='l1')[0]
-                B_ = sklearn.preprocessing.normalize(B[i].reshape(1, -1), norm='l1')[0]
+                A_ = sklearn.preprocessing.normalize(A.reshape(1, -1), norm="l1")[0]
+                B_ = sklearn.preprocessing.normalize(B[i].reshape(1, -1), norm="l1")[0]
             else:
                 A_ = A.reshape(1, -1)[0]
                 B_ = B[i].reshape(1, -1)[0]
 
             c_dist[i] = stats.wasserstein_distance(A_, B_)
 
-        elif mode == 'KL':
+        elif mode == "KL":
             if normalize == 1:
-                A_ = sklearn.preprocessing.normalize(A.reshape(1, -1), norm='l1')[0]
-                B_ = sklearn.preprocessing.normalize(B[i].reshape(1, -1), norm='l1')[0]
+                A_ = sklearn.preprocessing.normalize(A.reshape(1, -1), norm="l1")[0]
+                B_ = sklearn.preprocessing.normalize(B[i].reshape(1, -1), norm="l1")[0]
             else:
                 A_ = A.reshape(1, -1)[0]
                 B_ = B[i].reshape(1, -1)[0]

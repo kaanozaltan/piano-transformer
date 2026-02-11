@@ -18,7 +18,7 @@ def get_midi_file_lists_by_csv(csv_path, midi_dir):
         for split in ("train", "validation", "test")
     }
 
-    
+
 def get_midi_file_lists_by_random(midi_dir, pattern, seed, genre_filter=None):
     metadata_path = midi_dir / "metadata.json"
     with open(metadata_path, "r") as file:
@@ -43,7 +43,7 @@ def get_midi_file_lists_by_random(midi_dir, pattern, seed, genre_filter=None):
     n = len(shuffled)
     n_train = int(n * 0.8)
     n_val = int(n * 0.1)
-    
+
     train_files = shuffled[:n_train]
     val_files = shuffled[n_train : n_train + n_val]
     test_files = shuffled[n_train + n_val :]
@@ -83,8 +83,10 @@ def midi2wav(input_path, output_path, soundfont, quiet=True):
             *(["-q"] if quiet else []),
             str(soundfont_path),
             str(midi_file),
-            "-F", str(wav_path),
-            "-r", "44100"
+            "-F",
+            str(wav_path),
+            "-r",
+            "44100",
         ]
 
         subprocess.run(command, check=True)
@@ -96,4 +98,6 @@ def midi2wav(input_path, output_path, soundfont, quiet=True):
     elif input_path.is_file() and input_path.suffix.lower() == ".midi":
         convert_file(input_path)
     else:
-        raise ValueError("Input path must be a .midi file or a directory containing .midi files")
+        raise ValueError(
+            "Input path must be a .midi file or a directory containing .midi files"
+        )

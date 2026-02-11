@@ -1,6 +1,7 @@
 import os
 import argparse
 
+
 def check_duplicate_filenames(dir1, dir2):
     files1 = set(os.listdir(dir1))
     files2 = set(os.listdir(dir2))
@@ -12,6 +13,7 @@ def check_duplicate_filenames(dir1, dir2):
             print(f"  {f}")
     else:
         print("No duplicate filenames found.")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

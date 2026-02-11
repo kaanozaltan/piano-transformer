@@ -142,10 +142,11 @@ Utility functions
 .. autofunction:: pitch_bend_to_semitones
 .. autofunction:: semitones_to_pitch_bend
 """
+
 from .pretty_midi import *
 from .instrument import *
 from .containers import *
 from .utilities import *
 from .constants import *
 
-__version__ = '0.2.10'
+__version__ = "0.2.10"

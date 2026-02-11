@@ -48,7 +48,6 @@ class AugmentedDatasetMIDI(DatasetMIDI):
             except SCORE_LOADING_EXCEPTION:
                 self._scores.append(None)  # keep indices aligned
 
-
     def __getitem__(self, idx: int) -> dict[str, LongTensor]:
         """
         Return the ``idx`` elements of the dataset.
@@ -75,7 +74,9 @@ class AugmentedDatasetMIDI(DatasetMIDI):
         duration_offset = random.choice(self.duration_offsets)
         tempo_factor = random.choice(self.tempo_factors)
 
-        augmented_score = augment_score(score, pitch_offset, velocity_offset, duration_offset)
+        augmented_score = augment_score(
+            score, pitch_offset, velocity_offset, duration_offset
+        )
         augmented_score = scale_tempo(augmented_score, tempo_factor)
 
         tseq = self._tokenize_score(augmented_score)
@@ -84,7 +85,9 @@ class AugmentedDatasetMIDI(DatasetMIDI):
 
         if self.func_to_get_labels is not None:
             # tokseq can be given as a list of TokSequence to get the labels
-            labels = self.func_to_get_labels(augmented_score, tseq, self.files_paths[idx])
+            labels = self.func_to_get_labels(
+                augmented_score, tseq, self.files_paths[idx]
+            )
             if not isinstance(labels, LongTensor):
                 labels = LongTensor([labels] if isinstance(labels, int) else labels)
 

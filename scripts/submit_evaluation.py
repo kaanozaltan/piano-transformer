@@ -37,7 +37,9 @@ def submit_evaluation(experiment, email):
     with open(slurm_script_path, "w") as f:
         f.write(slurm_content)
 
-    result = subprocess.run(["sbatch", str(slurm_script_path)], capture_output=True, check=True)
+    result = subprocess.run(
+        ["sbatch", str(slurm_script_path)], capture_output=True, check=True
+    )
     output = result.stdout.decode().strip()
     job_id = output.split()[-1]
 
