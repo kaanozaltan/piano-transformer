@@ -152,9 +152,8 @@ logs/
 samples/
 checkpoints/
 preprocessed/
+graphics/
 
 .envrc
-output*
-core*
-graphics*
+core.*
 submit*.sh
