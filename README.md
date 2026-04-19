@@ -1,14 +1,7 @@
 # Piano Transformer
+This project investigates the effect of model architecture, size, and data scale on symbolic piano music generation.
 
-## [Check out the music samples used in our Turing-like test here!](https://drive.google.com/drive/folders/1F_HzY3lxXqOzP_PXCYyZM_5SipklndYb)
-## [Find the model checkpoints and tokenizer here!](https://drive.google.com/drive/folders/1P3VWqbTEViw9urefBGQ0fmwCriJu1zl6)
-
-## Environment Setup
-Install uv:
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
+## Installation
 Create environment:
 ```bash
 uv venv --python 3.11
@@ -17,15 +10,10 @@ source .venv/bin/activate
 
 Install dependencies:
 ```bash
-uv pip install torch --index-url https://download.pytorch.org/whl/cu128
-uv pip install -r requirements.txt
-uv pip install -e .
+uv sync
 ```
 
-Set environment variables:
-```bash
-export CXX=g++
-export CC=gcc
-export FORCE_CUDA=1
-export PYTHONPATH=$PWD/src
-```
+## Links
+- [Paper](https://doi.org/10.48550/arXiv.2511.07268)
+- [Music samples from the Turing-like test](https://drive.google.com/drive/folders/1F_HzY3lxXqOzP_PXCYyZM_5SipklndYb)
+- [Model checkpoints and tokenizers](https://drive.google.com/drive/folders/1P3VWqbTEViw9urefBGQ0fmwCriJu1zl6)

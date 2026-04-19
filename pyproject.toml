@@ -1,10 +1,46 @@
 [project]
 name = "piano-transformer"
 version = "0.1.0"
-description = "A transformer-based model for piano music generation"
+description = "Transformer-based models for symbolic piano music generation"
 authors = [{name = "Jonathan Lehmkuhl"}, {name = "Nico Bremes"}, {name = "Kaan Özaltan"}, {name = "Abel Ilyes-Kun"}, {name = "Frederik Muthers"}]
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = "==3.11.*"
+
+dependencies = [
+    "evaluate",
+    "fastprogress",
+    "frechet-music-distance",
+    "ipykernel",
+    "ipywidgets",
+    "miditok",
+    "miditoolkit",
+    "mido",
+    "numpy",
+    "pandas",
+    "pretty_midi",
+    "python-dotenv",
+    "PyYAML",
+    "scikit-learn",
+    "scipy",
+    "setuptools",
+    "symusic",
+    "torch",
+    "torchaudio",
+    "torchvision",
+    "transformers[torch]",
+    "wandb",
+    "seaborn",
+]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+torchaudio = [{ index = "pytorch-cu128" }]
+torchvision = [{ index = "pytorch-cu128" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
 
 [build-system]
 requires = ["setuptools"]
