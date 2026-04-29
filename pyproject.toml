@@ -2,7 +2,6 @@
 name = "piano-transformer"
 version = "0.1.0"
 description = "Transformer-based models for symbolic piano music generation"
-authors = [{name = "Jonathan Lehmkuhl"}, {name = "Nico Bremes"}, {name = "Kaan Özaltan"}, {name = "Abel Ilyes-Kun"}, {name = "Frederik Muthers"}]
 readme = "README.md"
 requires-python = "==3.11.*"
 
