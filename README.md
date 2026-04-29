@@ -4,12 +4,6 @@ This project investigates the effect of model architecture, size, and data scale
 ## Installation
 Create environment:
 ```bash
-uv venv --python 3.11
-source .venv/bin/activate
-```
-
-Install dependencies:
-```bash
 uv sync
 ```
 
