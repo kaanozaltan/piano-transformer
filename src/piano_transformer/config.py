@@ -32,7 +32,7 @@ def load_config(path: str | Path) -> Config:
     model_version = str(d["model"]["version"])
     model_name = f"{transformer_name}_{tokenizer_name}_{dataset_name}_v{model_version}"
 
-    # allow explicity setting the experiment path
+    # Allow explicity setting the experiment path
     if "experiments_path" in d["data"]:
         experiment_path = Path(d["data"]["experiments_path"]) / model_name
     else:
